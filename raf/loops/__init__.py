@@ -9,9 +9,9 @@ acceleration loops identified in the RAF:
 3. CalibrationControlLoop - Operating at the hardware/physics level
 """
 
-from raf.loops.error_mitigation import ErrorMitigationLoop
 from raf.loops.ansatz_design import AnsatzDesignLoop
 from raf.loops.calibration_control import CalibrationControlLoop
+from raf.loops.error_mitigation import ErrorMitigationLoop
 
 __all__ = [
     "ErrorMitigationLoop",

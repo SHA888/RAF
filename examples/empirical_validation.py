@@ -19,14 +19,14 @@ Usage:
     python examples/empirical_validation.py
 """
 
-import sys
 import os
+import sys
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from raf.backends import DeviceNoiseProfile
 from raf.experiments import ErrorMitigationExperiment
-from raf.backends import DeviceNoiseProfile, create_backend
 
 
 def run_quick_demo():
@@ -35,15 +35,15 @@ def run_quick_demo():
     print("RAF Error Mitigation Loop - Quick Demo")
     print("=" * 70)
     print()
-    
+
     # Create experiment with IBM Manila-like noise
     experiment = ErrorMitigationExperiment(noise_profile_name="manila")
-    
+
     print("Configuration:")
     print(f"  Noise profile: {experiment.noise_profile_name}")
     print(f"  Backend: {experiment.backend.name}")
     print()
-    
+
     # Run acceleration study
     results = experiment.run_acceleration_study(
         num_iterations=3,
@@ -51,13 +51,13 @@ def run_quick_demo():
         depths=[3, 5, 7],
         shots=512,
     )
-    
+
     print()
     print("=" * 70)
     print("Results Summary")
     print("=" * 70)
     print(results["summary"])
-    
+
     return experiment, results
 
 
@@ -67,49 +67,52 @@ def run_full_study():
     print("RAF Error Mitigation Loop - Full Study")
     print("=" * 70)
     print()
-    
+
     # Compare different noise profiles
     profiles = ["manila", "kolkata", "ionq"]
     all_results = {}
-    
+
     for profile_name in profiles:
         print(f"\n{'='*50}")
         print(f"Testing with {profile_name} noise profile")
         print(f"{'='*50}\n")
-        
+
         experiment = ErrorMitigationExperiment(noise_profile_name=profile_name)
-        
+
         results = experiment.run_acceleration_study(
             num_iterations=5,
             circuits_per_iteration=8,
             depths=[3, 5, 7, 10],
             shots=1024,
         )
-        
+
         all_results[profile_name] = {
             "experiment": experiment,
             "results": results,
         }
-        
+
         # Save results
         experiment.save_results(f"results_{profile_name}.json")
         print(f"Results saved to results_{profile_name}.json")
-    
+
     # Summary comparison
     print("\n" + "=" * 70)
     print("Cross-Profile Comparison")
     print("=" * 70)
-    
+
     for profile_name, data in all_results.items():
         metrics = data["results"]["acceleration_metrics"]
         print(f"\n{profile_name}:")
         print(f"  Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}")
-        print(f"  Final error reduction: {metrics.get('final_error_reduction', 0):.1%}" 
-              if metrics.get('final_error_reduction') else "  Final error reduction: N/A")
-        
+        print(
+            f"  Final error reduction: {metrics.get('final_error_reduction', 0):.1%}"
+            if metrics.get("final_error_reduction")
+            else "  Final error reduction: N/A"
+        )
+
         bottlenecks = data["results"]["bottleneck_indicators"]
         print(f"  Bottlenecks: {bottlenecks.get('num_bottlenecks', 0)}")
-    
+
     return all_results
 
 
@@ -119,7 +122,7 @@ def demonstrate_noise_profiles():
     print("Available Noise Profiles")
     print("=" * 70)
     print()
-    
+
     profiles = [
         ("ideal", "Ideal (noiseless) simulation"),
         ("manila", "IBM Manila-like (5 qubits, superconducting)"),
@@ -127,14 +130,14 @@ def demonstrate_noise_profiles():
         ("ionq", "IonQ Harmony-like (11 qubits, trapped ion)"),
         ("sycamore", "Google Sycamore-like (53 qubits, superconducting)"),
     ]
-    
+
     for name, description in profiles:
         print(f"\n{name}: {description}")
-        
+
         if name == "ideal":
             print("  No noise model")
             continue
-        
+
         if name == "manila":
             profile = DeviceNoiseProfile.ibm_manila_like()
         elif name == "kolkata":
@@ -143,7 +146,7 @@ def demonstrate_noise_profiles():
             profile = DeviceNoiseProfile.ionq_harmony_like()
         elif name == "sycamore":
             profile = DeviceNoiseProfile.google_sycamore_like()
-        
+
         print(f"  Qubits: {profile.num_qubits}")
         print(f"  T1: {profile.t1_us:.1f} μs")
         print(f"  T2: {profile.t2_us:.1f} μs")
@@ -155,29 +158,25 @@ def demonstrate_noise_profiles():
 def main():
     """Main entry point."""
     import argparse
-    
-    parser = argparse.ArgumentParser(
-        description="RAF Empirical Validation Example"
-    )
+
+    parser = argparse.ArgumentParser(description="RAF Empirical Validation Example")
     parser.add_argument(
         "--mode",
         choices=["quick", "full", "profiles"],
         default="quick",
-        help="Run mode: quick (2-3 min), full (10-15 min), or profiles (info only)"
+        help="Run mode: quick (2-3 min), full (10-15 min), or profiles (info only)",
     )
     parser.add_argument(
-        "--save-plots",
-        action="store_true",
-        help="Save plots to files instead of displaying"
+        "--save-plots", action="store_true", help="Save plots to files instead of displaying"
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.mode == "profiles":
         demonstrate_noise_profiles()
     elif args.mode == "quick":
         experiment, results = run_quick_demo()
-        
+
         if args.save_plots:
             try:
                 experiment.plot_results(save_path="em_loop_results.png")
@@ -185,16 +184,14 @@ def main():
                 print(f"Could not save plots: {e}")
     elif args.mode == "full":
         all_results = run_full_study()
-        
+
         if args.save_plots:
             for profile_name, data in all_results.items():
                 try:
-                    data["experiment"].plot_results(
-                        save_path=f"em_loop_{profile_name}.png"
-                    )
+                    data["experiment"].plot_results(save_path=f"em_loop_{profile_name}.png")
                 except Exception as e:
                     print(f"Could not save plots for {profile_name}: {e}")
-    
+
     print("\n" + "=" * 70)
     print("Empirical validation complete!")
     print("=" * 70)

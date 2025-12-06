@@ -3,12 +3,8 @@ Core components of the Reciprocal Acceleration Framework.
 """
 
 from raf.core.framework import ReciprocalAccelerationFramework
-from raf.core.loop import AccelerationLoop, LoopState, LoopMetrics
-from raf.core.metrics import (
-    AccelerationMetric,
-    BottleneckIndicator,
-    CrossLoopCoupling,
-)
+from raf.core.loop import AccelerationLoop, LoopMetrics, LoopState
+from raf.core.metrics import AccelerationMetric, BottleneckIndicator, CrossLoopCoupling
 
 __all__ = [
     "ReciprocalAccelerationFramework",

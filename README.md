@@ -11,7 +11,7 @@ A systematic framework for understanding and accelerating co-evolutionary dynami
 The Reciprocal Acceleration Framework formalizes the bidirectional synergy between quantum computing and machine learning, identifying three primary acceleration loops:
 
 1. **Error Mitigation Loop** - Operating at the output/application level
-2. **Ansatz Design Loop** - Operating at the algorithm/circuit level  
+2. **Ansatz Design Loop** - Operating at the algorithm/circuit level
 3. **Calibration-Control Loop** - Operating at the hardware/physics level
 
 This implementation provides tools for:
@@ -60,17 +60,56 @@ raf.visualize()
 
 ## Empirical Validation
 
-RAF includes tools for empirical validation using realistic quantum simulation:
+RAF includes tools for empirical validation using realistic quantum simulation and real hardware:
 
 ```bash
-# Install quantum dependencies
-pip install qiskit qiskit-aer
+# Install core quantum simulation (recommended)
+pip install raf[quantum]
 
 # Run empirical validation demo
 python examples/empirical_validation.py --mode quick
 ```
 
-### Supported Noise Profiles
+### Supported Quantum Backends
+
+RAF supports multiple quantum hardware vendors through a unified interface:
+
+| Backend | Provider | Install | Devices |
+|---------|----------|---------|---------|
+| `AerBackend` | Local | `pip install raf[quantum]` | Simulators with realistic noise |
+| `IBMQuantumBackend` | IBM Quantum | `pip install raf[ibm]` | Brisbane, Kyoto, Osaka, etc. |
+| `BraketBackend` | AWS Braket | `pip install raf[braket]` | IonQ, Rigetti, OQC, QuEra |
+| `AzureQuantumBackend` | Azure Quantum | `pip install raf[azure]` | IonQ, Quantinuum, Rigetti, PASQAL |
+| `IQMBackend` | IQM | `pip install raf[iqm]` | Garnet (European) |
+
+Install all backends: `pip install raf[all-backends]`
+
+### Backend Usage Examples
+
+```python
+from raf.backends import list_available_backends
+
+# Check which backends are installed
+print(list_available_backends())
+
+# Local simulation with realistic noise (always available)
+from raf.backends import create_backend
+backend = create_backend("manila")  # IBM Manila-like noise
+
+# AWS Braket (IonQ trapped ion)
+from raf.backends import BraketBackend
+backend = BraketBackend("ionq_harmony")
+
+# Azure Quantum (Quantinuum)
+from raf.backends import AzureQuantumBackend
+backend = AzureQuantumBackend("quantinuum.qpu.h1-1")
+
+# IQM European hardware
+from raf.backends import IQMBackend
+backend = IQMBackend("resonance")
+```
+
+### Supported Noise Profiles (Simulation)
 
 | Profile | Device Type | Qubits | Description |
 |---------|-------------|--------|-------------|

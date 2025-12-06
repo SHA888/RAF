@@ -10,10 +10,13 @@
 
 ### 1.1 Qiskit Integration
 - [x] Create `raf/backends/` module for quantum hardware abstraction
-- [ ] Implement `QiskitBackend` class wrapping IBM Quantum access
+- [x] Implement `IBMQuantumBackend` class wrapping IBM Quantum access
 - [x] Implement `AerBackend` class for realistic noise simulation
 - [x] Add device-calibrated noise models (FakeManilaV2, FakeKolkataV2, etc.)
 - [x] Create unified `QuantumExecutor` interface
+- [x] Add `BraketBackend` for AWS (IonQ, Rigetti, OQC, QuEra)
+- [x] Add `AzureQuantumBackend` for Azure (IonQ, Quantinuum, Rigetti, PASQAL)
+- [x] Add `IQMBackend` for IQM European hardware
 
 ### 1.2 PennyLane Integration (Optional, if time permits)
 - [ ] Implement `PennyLaneBackend` for gradient-based optimization

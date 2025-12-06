@@ -11,12 +11,8 @@ The framework identifies three primary acceleration loops:
 """
 
 from raf.core.framework import ReciprocalAccelerationFramework
-from raf.core.loop import AccelerationLoop, LoopState, LoopMetrics
-from raf.core.metrics import (
-    AccelerationMetric,
-    BottleneckIndicator,
-    CrossLoopCoupling,
-)
+from raf.core.loop import AccelerationLoop, LoopMetrics, LoopState
+from raf.core.metrics import AccelerationMetric, BottleneckIndicator, CrossLoopCoupling
 
 __version__ = "0.1.0"
 __author__ = "RAF Contributors"
