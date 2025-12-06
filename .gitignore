@@ -140,10 +140,8 @@ cython_debug/
 Thumbs.db
 
 # Project specific
-results_*.json
-*.png
-*.pdf
-!docs/*.png
-!docs/*.pdf
-data/
 *.log
+
+# Keep figures/ and results/ in repo for reproducibility
+# But ignore temporary outputs
+/tmp_results/

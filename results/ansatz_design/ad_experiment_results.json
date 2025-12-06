@@ -1,0 +1,28 @@
+{
+  "experiment": "ansatz_design",
+  "noise_profile": "manila",
+  "num_qubits": 4,
+  "search_history": [
+    {
+      "random_search": {
+        "best_performance": 0.7238492566391976,
+        "evaluations": 50
+      },
+      "surrogate_guided": {
+        "best_performance": 0.8250798846937993,
+        "evaluations": 50,
+        "surrogate_r2": 0.1979711101807955
+      },
+      "comparison": {
+        "performance_improvement": 0.139850427594015,
+        "evaluations_to_threshold": {
+          "random": 50,
+          "surrogate": 14
+        },
+        "acceleration": 3.5714285714285716
+      },
+      "summary": "\n============================================================\nANSATZ DESIGN LOOP - RESULTS SUMMARY\n============================================================\n\nRandom Search:\n  Best Performance: 0.7238\n  Evaluations: 50\n\nSurrogate-Guided Search:\n  Best Performance: 0.8251\n  Surrogate R\u00b2: 0.198\n  Evaluations: 50\n\nAcceleration: 3.57x\nSurrogate improves search efficiency by 257%\n\n============================================================"
+    }
+  ],
+  "total_candidates": 100
+}
