@@ -81,6 +81,7 @@ RAF supports multiple quantum hardware vendors through a unified interface:
 | `BraketBackend` | AWS Braket | `pip install raf[braket]` | IonQ, Rigetti, OQC, QuEra |
 | `AzureQuantumBackend` | Azure Quantum | `pip install raf[azure]` | IonQ, Quantinuum, Rigetti, PASQAL |
 | `IQMBackend` | IQM | `pip install raf[iqm]` | Garnet (European) |
+| `PennyLaneBackend` | PennyLane | `pip install raf[pennylane]` | Gradient-based VQA optimization |
 
 Install all backends: `pip install raf[all-backends]`
 
@@ -107,6 +108,10 @@ backend = AzureQuantumBackend("quantinuum.qpu.h1-1")
 # IQM European hardware
 from raf.backends import IQMBackend
 backend = IQMBackend("resonance")
+
+# PennyLane for gradient-based optimization
+from raf.backends import PennyLaneBackend
+backend = PennyLaneBackend("default.qubit", wires=4)
 ```
 
 ### Supported Noise Profiles (Simulation)

@@ -19,8 +19,8 @@
 - [x] Add `IQMBackend` for IQM European hardware
 
 ### 1.2 PennyLane Integration (Optional, if time permits)
-- [ ] Implement `PennyLaneBackend` for gradient-based optimization
-- [ ] Support for `default.qubit`, `lightning.qubit`, and `qiskit.ibmq`
+- [x] Implement `PennyLaneBackend` for gradient-based optimization
+- [x] Support for `default.qubit`, `lightning.qubit`, and `qiskit.ibmq`
 
 ### 1.3 Dependencies Update
 - [x] Add `qiskit`, `qiskit-aer`, `qiskit-ibm-runtime` to requirements

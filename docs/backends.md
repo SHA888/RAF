@@ -11,6 +11,7 @@ RAF provides a unified interface for multiple quantum hardware vendors and simul
 | `BraketBackend` | AWS Braket | Hardware/Simulator | `pip install raf[braket]` |
 | `AzureQuantumBackend` | Azure Quantum | Hardware/Simulator | `pip install raf[azure]` |
 | `IQMBackend` | IQM | Hardware | `pip install raf[iqm]` |
+| `PennyLaneBackend` | PennyLane | Simulator/Hardware | `pip install raf[pennylane]` |
 
 Install all backends: `pip install raf[all-backends]`
 
@@ -318,6 +319,89 @@ result = backend.execute(circuit, shots=1024)
 
 ---
 
+## PennyLaneBackend
+
+PennyLane backend for gradient-based quantum optimization and variational algorithms.
+
+### Installation
+
+```bash
+pip install raf[pennylane]
+
+# Optional: High-performance simulators
+pip install pennylane-lightning  # For lightning.qubit
+```
+
+### Usage
+
+```python
+from raf.backends import PennyLaneBackend, PENNYLANE_DEVICES
+import pennylane as qml
+from pennylane import numpy as np
+
+# List available devices
+print(PENNYLANE_DEVICES)
+
+# Create backend
+backend = PennyLaneBackend("default.qubit", wires=4)
+
+# Create a QNode for gradient computation
+@qml.qnode(backend.device)
+def circuit(params):
+    qml.RY(params[0], wires=0)
+    qml.RY(params[1], wires=1)
+    qml.CNOT(wires=[0, 1])
+    return qml.expval(qml.PauliZ(0))
+
+# Compute gradient
+params = np.array([0.5, 0.3])
+grad_fn = qml.grad(circuit)
+gradient = grad_fn(params)
+```
+
+### VQE Optimization
+
+```python
+# Define ansatz
+def ansatz(params):
+    qml.RY(params[0], wires=0)
+    qml.RY(params[1], wires=1)
+    qml.CNOT(wires=[0, 1])
+    qml.RY(params[2], wires=0)
+    qml.RY(params[3], wires=1)
+
+# Define Hamiltonian
+hamiltonian = qml.Hamiltonian(
+    [1.0, 0.5, 0.5],
+    [qml.PauliZ(0) @ qml.PauliZ(1), qml.PauliX(0), qml.PauliX(1)]
+)
+
+# Run VQE
+initial_params = np.random.uniform(0, np.pi, 4)
+optimal_params, final_energy, history = backend.optimize_vqe(
+    ansatz,
+    hamiltonian,
+    initial_params,
+    optimizer='adam',
+    max_iterations=100,
+)
+```
+
+### Available Devices
+
+| Device | Type | Gradients | Notes |
+|--------|------|-----------|-------|
+| `default.qubit` | Simulator | ✓ | Default, up to 26 qubits |
+| `default.mixed` | Simulator | ✓ | Density matrix, 14 qubits |
+| `lightning.qubit` | Simulator | ✓ | High-performance C++ |
+| `lightning.gpu` | Simulator | ✓ | CUDA GPU acceleration |
+| `qiskit.aer` | Simulator | ✗ | Via pennylane-qiskit |
+| `qiskit.ibmq` | Hardware | ✗ | IBM Quantum via PennyLane |
+| `braket.aws.qubit` | Hardware | ✗ | AWS Braket via PennyLane |
+| `braket.local.qubit` | Simulator | ✓ | Local Braket simulator |
+
+---
+
 ## Unified Interface
 
 All backends implement the same interface:
@@ -376,4 +460,6 @@ class ExecutionResult:
 | Many qubits | Rigetti, IBM, or QuEra |
 | European data residency | IQM |
 | Cost-sensitive | AWS Braket simulators (free tier) |
-| Gradient-based optimization | Local Aer or IonQ |
+| Gradient-based optimization | `PennyLaneBackend` with `default.qubit` |
+| VQE/VQA algorithms | `PennyLaneBackend` |
+| Hybrid quantum-classical | `PennyLaneBackend` |

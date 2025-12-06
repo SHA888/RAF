@@ -60,6 +60,18 @@ try:
 except ImportError:
     pass  # qiskit-iqm not installed
 
+# PennyLane (gradient-based optimization)
+try:
+    from .pennylane import (  # noqa: F401
+        PENNYLANE_DEVICES,
+        PennyLaneBackend,
+        create_pennylane_backend,
+    )
+
+    __all__.extend(["PennyLaneBackend", "create_pennylane_backend", "PENNYLANE_DEVICES"])
+except ImportError:
+    pass  # pennylane not installed
+
 
 def list_available_backends() -> dict:
     """
@@ -74,6 +86,10 @@ def list_available_backends() -> dict:
         "braket": {"available": False, "description": "AWS Braket (IonQ, Rigetti, OQC, QuEra)"},
         "azure": {"available": False, "description": "Azure Quantum (IonQ, Quantinuum, Rigetti)"},
         "iqm": {"available": False, "description": "IQM European hardware"},
+        "pennylane": {
+            "available": False,
+            "description": "PennyLane (gradient-based optimization)",
+        },
     }
 
     if "IBMQuantumBackend" in __all__:
@@ -84,5 +100,7 @@ def list_available_backends() -> dict:
         backends["azure"]["available"] = True
     if "IQMBackend" in __all__:
         backends["iqm"]["available"] = True
+    if "PennyLaneBackend" in __all__:
+        backends["pennylane"]["available"] = True
 
     return backends
