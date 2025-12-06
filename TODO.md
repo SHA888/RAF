@@ -32,17 +32,17 @@
 ## Phase 2: Realistic Noise Simulation (Days 3-5)
 
 ### 2.1 Noise Model Calibration
-- [ ] Fetch real device calibration data from IBM Quantum
+- [x] Fetch real device calibration data (via AWS Braket and published specs)
 - [x] Implement `NoiseModelBuilder` using device T1, T2, gate errors
 - [x] Create noise profiles for superconducting (IBM) and trapped-ion (simulated IonQ-like)
-- [ ] Validate noise models against published device specifications
+- [x] Validate noise models against published device specifications (IonQ, Quantinuum, Rigetti, IQM, Google)
 
 ### 2.2 Error Mitigation Loop - Empirical Study
 - [x] Implement VQE circuits for H2, LiH molecules (small, tractable)
 - [x] Run circuits with/without ML-based error mitigation
 - [x] Measure: raw expectation values, mitigated values, ideal values
 - [x] Compute acceleration metrics from real/simulated data
-- [ ] Generate plots: mitigation accuracy vs. circuit depth, acceleration over iterations
+- [x] Generate plots: mitigation accuracy vs. circuit depth, acceleration over iterations
 
 ### 2.3 Metrics from Real Data
 - [ ] Replace simulated `AccelerationMetric` values with measured data

@@ -508,7 +508,7 @@ class ErrorMitigationExperiment:
 
     def plot_results(self, save_path: Optional[str] = None):
         """
-        Plot experiment results.
+        Plot experiment results (basic 4-panel figure).
 
         Args:
             save_path: Optional path to save figure
@@ -591,6 +591,286 @@ class ErrorMitigationExperiment:
             print(f"Figure saved to {save_path}")
         else:
             plt.show()
+
+    def plot_mitigation_accuracy_vs_depth(self, save_path: Optional[str] = None):
+        """
+        Plot mitigation accuracy vs circuit depth.
+
+        Shows how error mitigation effectiveness varies with circuit complexity.
+
+        Args:
+            save_path: Optional path to save figure
+        """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print("matplotlib required for plotting")
+            return
+
+        df = self.collector.to_dataframe()
+
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+        # Group by depth
+        depths = sorted(df["circuit_depth"].unique())
+
+        # 1. Mitigation accuracy (error reduction) vs depth
+        ax = axes[0]
+        depth_reduction = df.groupby("circuit_depth")["error_reduction"].agg(["mean", "std"])
+        ax.errorbar(
+            depth_reduction.index,
+            depth_reduction["mean"],
+            yerr=depth_reduction["std"],
+            fmt="o-",
+            capsize=5,
+            color="blue",
+            label="Error Reduction",
+        )
+        ax.set_xlabel("Circuit Depth")
+        ax.set_ylabel("Error Reduction (Mitigation Accuracy)")
+        ax.set_title("Mitigation Accuracy vs Circuit Depth")
+        ax.set_ylim(0, 1)
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+
+        # 2. Raw vs Mitigated error by depth
+        ax = axes[1]
+        noisy_by_depth = df.groupby("circuit_depth")["noisy_error"].agg(["mean", "std"])
+        mitigated_by_depth = df.groupby("circuit_depth")["mitigated_error"].agg(["mean", "std"])
+
+        x = np.arange(len(depths))
+        width = 0.35
+
+        ax.bar(
+            x - width / 2,
+            noisy_by_depth["mean"],
+            width,
+            yerr=noisy_by_depth["std"],
+            label="Noisy",
+            color="red",
+            alpha=0.7,
+            capsize=3,
+        )
+        ax.bar(
+            x + width / 2,
+            mitigated_by_depth["mean"],
+            width,
+            yerr=mitigated_by_depth["std"],
+            label="Mitigated",
+            color="blue",
+            alpha=0.7,
+            capsize=3,
+        )
+
+        ax.set_xlabel("Circuit Depth")
+        ax.set_ylabel("Error")
+        ax.set_title("Noisy vs Mitigated Error by Depth")
+        ax.set_xticks(x)
+        ax.set_xticklabels(depths)
+        ax.legend()
+        ax.grid(True, alpha=0.3, axis="y")
+
+        # 3. Mitigation efficiency (reduction per overhead) vs depth
+        ax = axes[2]
+        efficiency_by_depth = df.groupby("circuit_depth")["mitigation_efficiency"].agg(
+            ["mean", "std"]
+        )
+        ax.errorbar(
+            efficiency_by_depth.index,
+            efficiency_by_depth["mean"],
+            yerr=efficiency_by_depth["std"],
+            fmt="s-",
+            capsize=5,
+            color="green",
+            label="Efficiency",
+        )
+        ax.set_xlabel("Circuit Depth")
+        ax.set_ylabel("Mitigation Efficiency (Reduction/Overhead)")
+        ax.set_title("Mitigation Efficiency vs Circuit Depth")
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=150, bbox_inches="tight")
+            print(f"Figure saved to {save_path}")
+        else:
+            plt.show()
+
+    def plot_acceleration_over_iterations(self, save_path: Optional[str] = None):
+        """
+        Plot acceleration dynamics over iterations.
+
+        Shows how the acceleration loop improves over time.
+
+        Args:
+            save_path: Optional path to save figure
+        """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print("matplotlib required for plotting")
+            return
+
+        df = self.collector.to_dataframe()
+        metrics = self.collector.compute_acceleration_metrics()
+
+        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+
+        # 1. Error reduction trajectory
+        ax = axes[0, 0]
+        reduction_by_iter = df.groupby("iteration")["error_reduction"].agg(["mean", "std"])
+        ax.fill_between(
+            reduction_by_iter.index,
+            reduction_by_iter["mean"] - reduction_by_iter["std"],
+            reduction_by_iter["mean"] + reduction_by_iter["std"],
+            alpha=0.3,
+            color="blue",
+        )
+        ax.plot(
+            reduction_by_iter.index,
+            reduction_by_iter["mean"],
+            "o-",
+            color="blue",
+            linewidth=2,
+            markersize=8,
+        )
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Error Reduction")
+        ax.set_title("Error Reduction Trajectory")
+        ax.set_ylim(0, 1)
+        ax.grid(True, alpha=0.3)
+
+        # Add trend line
+        if len(reduction_by_iter) >= 2:
+            z = np.polyfit(reduction_by_iter.index, reduction_by_iter["mean"], 1)
+            p = np.poly1d(z)
+            ax.plot(
+                reduction_by_iter.index,
+                p(reduction_by_iter.index),
+                "--",
+                color="red",
+                alpha=0.7,
+                label=f"Trend (slope={z[0]:.3f})",
+            )
+            ax.legend()
+
+        # 2. Improvement rate (derivative of error reduction)
+        ax = axes[0, 1]
+        if len(reduction_by_iter) >= 2:
+            improvement_rate = np.diff(reduction_by_iter["mean"])
+            iterations = reduction_by_iter.index[1:]
+            ax.bar(iterations, improvement_rate, color="green", alpha=0.7)
+            ax.axhline(y=0, color="black", linestyle="-", linewidth=0.5)
+            ax.set_xlabel("Iteration")
+            ax.set_ylabel("Improvement Rate (Δ Error Reduction)")
+            ax.set_title("Improvement Rate per Iteration")
+            ax.grid(True, alpha=0.3, axis="y")
+
+            # Indicate acceleration
+            if len(improvement_rate) >= 2:
+                early_rate = np.mean(improvement_rate[: len(improvement_rate) // 2])
+                late_rate = np.mean(improvement_rate[len(improvement_rate) // 2 :])
+                accel_text = "Accelerating" if late_rate > early_rate else "Decelerating"
+                ax.text(
+                    0.95,
+                    0.95,
+                    accel_text,
+                    transform=ax.transAxes,
+                    ha="right",
+                    va="top",
+                    fontsize=12,
+                    color="green" if late_rate > early_rate else "red",
+                    fontweight="bold",
+                )
+
+        # 3. Cumulative improvement
+        ax = axes[1, 0]
+        cumulative = reduction_by_iter["mean"].cumsum()
+        ax.fill_between(cumulative.index, 0, cumulative.values, alpha=0.3, color="purple")
+        ax.plot(cumulative.index, cumulative.values, "o-", color="purple", linewidth=2)
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Cumulative Error Reduction")
+        ax.set_title("Cumulative Improvement")
+        ax.grid(True, alpha=0.3)
+
+        # 4. Acceleration summary
+        ax = axes[1, 1]
+        ax.axis("off")
+
+        # Create summary text
+        summary_text = [
+            "═" * 40,
+            "ACCELERATION SUMMARY",
+            "═" * 40,
+            f"Total Iterations: {metrics.get('iterations', 0)}",
+            f"Total Runs: {metrics.get('total_runs', 0)}",
+            "",
+            f"Overall Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}x",
+            f"Is Accelerating: {'Yes ✓' if metrics.get('is_accelerating', False) else 'No ✗'}",
+            "",
+            (
+                f"Initial Error Reduction: {reduction_by_iter['mean'].iloc[0]:.1%}"
+                if len(reduction_by_iter) > 0
+                else ""
+            ),
+            (
+                f"Final Error Reduction: {metrics.get('final_error_reduction', 0):.1%}"
+                if metrics.get("final_error_reduction")
+                else ""
+            ),
+            "",
+            "═" * 40,
+        ]
+
+        ax.text(
+            0.5,
+            0.5,
+            "\n".join(summary_text),
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=11,
+            family="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightgray", alpha=0.8),
+        )
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=150, bbox_inches="tight")
+            print(f"Figure saved to {save_path}")
+        else:
+            plt.show()
+
+    def generate_all_plots(self, output_dir: str = "."):
+        """
+        Generate all analysis plots and save to directory.
+
+        Args:
+            output_dir: Directory to save plots
+        """
+        import os
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        print(f"Generating plots in {output_dir}...")
+
+        # Basic results
+        self.plot_results(save_path=os.path.join(output_dir, "em_results_overview.png"))
+
+        # Mitigation accuracy vs depth
+        self.plot_mitigation_accuracy_vs_depth(
+            save_path=os.path.join(output_dir, "em_mitigation_vs_depth.png")
+        )
+
+        # Acceleration over iterations
+        self.plot_acceleration_over_iterations(
+            save_path=os.path.join(output_dir, "em_acceleration_dynamics.png")
+        )
+
+        print(f"All plots saved to {output_dir}")
 
 
 def run_demo():
