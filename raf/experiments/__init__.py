@@ -5,6 +5,13 @@ Provides empirical validation experiments for the three acceleration loops.
 """
 
 from .ansatz_design import AnsatzDesignExperiment, HardwareHeterogeneityStudy, NeuralSurrogate
+from .bottleneck_validation import (
+    BottleneckEffect,
+    BottleneckScenario,
+    BottleneckType,
+    BottleneckValidationExperiment,
+    ValidationResult,
+)
 from .control_optimization import (
     ControlOptimizationExperiment,
     ControlOptimizationMetrics,
@@ -36,4 +43,9 @@ __all__ = [
     "CrossLoopValidationExperiment",
     "CrossLoopEffect",
     "IntegratedExperimentResult",
+    "BottleneckValidationExperiment",
+    "BottleneckScenario",
+    "BottleneckType",
+    "BottleneckEffect",
+    "ValidationResult",
 ]

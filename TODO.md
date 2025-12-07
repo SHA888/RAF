@@ -98,9 +98,9 @@
 - [x] Validate: improvements in one loop benefit others
 
 ### 5.2 Bottleneck Validation
-- [ ] Artificially introduce bottlenecks (e.g., limit calibration data)
-- [ ] Measure impact on loop acceleration
-- [ ] Compare predicted vs. observed bottleneck effects
+- [x] Artificially introduce bottlenecks (e.g., limit calibration data)
+- [x] Measure impact on loop acceleration
+- [x] Compare predicted vs. observed bottleneck effects
 
 ---
 
