@@ -1,0 +1,99 @@
+{
+  "profile_results": {
+    "manila": {
+      "best_performance": 0.8232236934492174,
+      "best_candidate": {
+        "circuit_id": 423240,
+        "num_qubits": 4,
+        "depth": 2,
+        "gate_sequence": [
+          "cx",
+          "ry",
+          "cx",
+          "cx"
+        ],
+        "entanglement": "linear",
+        "performance": 0.8232236934492174,
+        "fidelity": 0.9296875,
+        "evaluation_time_ms": 155.26127815246582,
+        "generation": 0
+      },
+      "surrogate_r2": 0.4186410829306776
+    },
+    "kolkata": {
+      "best_performance": 0.8166270938685434,
+      "best_candidate": {
+        "circuit_id": 170733,
+        "num_qubits": 4,
+        "depth": 2,
+        "gate_sequence": [
+          "rz",
+          "rz",
+          "rz",
+          "h"
+        ],
+        "entanglement": "circular",
+        "performance": 0.8166270938685434,
+        "fidelity": 0.916015625,
+        "evaluation_time_ms": 301.77807807922363,
+        "generation": 0
+      },
+      "surrogate_r2": 0.7487950948573949
+    },
+    "ionq": {
+      "best_performance": 0.9231300787916759,
+      "best_candidate": {
+        "circuit_id": 621747,
+        "num_qubits": 4,
+        "depth": 2,
+        "gate_sequence": [
+          "cx",
+          "h",
+          "cx",
+          "rz"
+        ],
+        "entanglement": "linear",
+        "performance": 0.9231300787916759,
+        "fidelity": 0.974609375,
+        "evaluation_time_ms": 148.66924285888672,
+        "generation": 0
+      },
+      "surrogate_r2": 0.3554034133470442
+    }
+  },
+  "transfer_matrix": [
+    [
+      0.7647080543984044,
+      0.8721545153175357,
+      0.8895482834902433
+    ],
+    [
+      0.7935900126681994,
+      0.8308421674214376,
+      0.9132406834285596
+    ],
+    [
+      0.8109841445359308,
+      0.8545808997041024,
+      0.9019584700503861
+    ]
+  ],
+  "transfer_metrics": {
+    "avg_native_performance": 0.832502897290076,
+    "avg_transfer_performance": 0.8556830898574286,
+    "avg_degradation": -0.03411769793752171,
+    "transferability_score": 1.0278439782525775,
+    "heterogeneity_impact": -0.02784397825257745,
+    "native_performances": [
+      0.7647080543984044,
+      0.8308421674214376,
+      0.9019584700503861
+    ]
+  },
+  "noise_profiles": [
+    "manila",
+    "kolkata",
+    "ionq"
+  ],
+  "summary": "\n============================================================\nHARDWARE HETEROGENEITY STUDY - RESULTS\n============================================================\n\nNative Performance (optimized on same device):\n  manila: 0.8232\n  kolkata: 0.8166\n  ionq: 0.9231\n\nTransfer Metrics:\n  Avg Native Performance: 0.8325\n  Avg Transfer Performance: 0.8557\n  Avg Degradation: -3.4%\n\n  Transferability Score: 1.03\n  Heterogeneity Impact: -2.8%\n\nBottleneck Validated: NO - Circuits transfer well across devices\n\n============================================================"
+}

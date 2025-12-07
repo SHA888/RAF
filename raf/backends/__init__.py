@@ -14,7 +14,13 @@ Supported backends:
 
 from .aer import AerBackend, create_backend
 from .base import BackendType, ExecutionResult, QuantumBackend
-from .noise_models import DeviceNoiseProfile, NoiseModelBuilder
+from .noise_models import (
+    DeviceNoiseProfile,
+    DriftConfig,
+    DriftingNoiseModel,
+    DriftType,
+    NoiseModelBuilder,
+)
 
 __all__ = [
     "QuantumBackend",
@@ -24,6 +30,9 @@ __all__ = [
     "create_backend",
     "NoiseModelBuilder",
     "DeviceNoiseProfile",
+    "DriftingNoiseModel",
+    "DriftConfig",
+    "DriftType",
 ]
 
 # Optional imports for real hardware vendors

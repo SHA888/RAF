@@ -558,6 +558,250 @@ class NoiseModelBuilder:
         return NoiseModelBuilder(profile)
 
 
+class DriftType(Enum):
+    """Types of noise drift patterns."""
+
+    LINEAR = "linear"  # Constant drift rate
+    EXPONENTIAL = "exponential"  # Accelerating drift
+    SINUSOIDAL = "sinusoidal"  # Periodic fluctuations (e.g., temperature cycles)
+    RANDOM_WALK = "random_walk"  # Stochastic drift
+    TELEGRAPH = "telegraph"  # Sudden jumps (two-level fluctuators)
+
+
+@dataclass
+class DriftConfig:
+    """Configuration for noise drift simulation."""
+
+    drift_type: DriftType = DriftType.LINEAR
+    drift_rate: float = 0.1  # Base drift rate (per hour)
+    amplitude: float = 0.5  # Maximum relative change from baseline
+    period_hours: float = 24.0  # Period for sinusoidal drift
+    jump_probability: float = 0.1  # Probability of jump per hour (telegraph)
+    random_seed: Optional[int] = None  # For reproducibility
+
+    def __post_init__(self):
+        if self.random_seed is not None:
+            import random
+
+            random.seed(self.random_seed)
+
+
+class DriftingNoiseModel:
+    """
+    Time-varying noise model that simulates realistic device drift.
+
+    Quantum devices experience parameter drift due to:
+    - Temperature fluctuations
+    - Two-level system (TLS) fluctuators
+    - Charge noise
+    - Magnetic field variations
+    - Aging effects
+
+    This class provides configurable drift patterns for simulation studies
+    of calibration-control loops.
+
+    Example:
+        >>> profile = DeviceNoiseProfile.ibm_manila_like()
+        >>> drift_config = DriftConfig(drift_type=DriftType.LINEAR, drift_rate=0.2)
+        >>> drifting = DriftingNoiseModel(profile, drift_config)
+        >>> noise_model_t0 = drifting.get_noise_model(time_hours=0.0)
+        >>> noise_model_t1 = drifting.get_noise_model(time_hours=1.0)
+    """
+
+    def __init__(
+        self,
+        base_profile: DeviceNoiseProfile,
+        drift_config: Optional[DriftConfig] = None,
+    ):
+        """
+        Initialize drifting noise model.
+
+        Args:
+            base_profile: Baseline noise profile (at t=0)
+            drift_config: Configuration for drift behavior
+        """
+        self.base_profile = base_profile
+        self.drift_config = drift_config or DriftConfig()
+        self._rng = None
+        self._telegraph_state = 0  # For telegraph noise
+
+        if self.drift_config.random_seed is not None:
+            import random
+
+            self._rng = random.Random(self.drift_config.random_seed)
+        else:
+            import random
+
+            self._rng = random.Random()
+
+    def _compute_drift_factor(self, time_hours: float) -> float:
+        """
+        Compute the drift multiplier at a given time.
+
+        Args:
+            time_hours: Time elapsed since calibration (hours)
+
+        Returns:
+            Drift factor (1.0 = no drift, >1.0 = degraded)
+        """
+        cfg = self.drift_config
+
+        if cfg.drift_type == DriftType.LINEAR:
+            # Linear drift: factor = 1 + rate * time
+            factor = 1.0 + cfg.drift_rate * time_hours
+            return min(1.0 + cfg.amplitude, factor)
+
+        elif cfg.drift_type == DriftType.EXPONENTIAL:
+            # Exponential drift: factor = exp(rate * time)
+            factor = math.exp(cfg.drift_rate * time_hours / 10.0)
+            return min(1.0 + cfg.amplitude, factor)
+
+        elif cfg.drift_type == DriftType.SINUSOIDAL:
+            # Sinusoidal drift: simulates daily temperature cycles
+            phase = 2 * math.pi * time_hours / cfg.period_hours
+            factor = 1.0 + cfg.amplitude * 0.5 * (1 + math.sin(phase))
+            return factor
+
+        elif cfg.drift_type == DriftType.RANDOM_WALK:
+            # Random walk: cumulative random steps
+            # Use time to seed consistent behavior
+            steps = int(time_hours * 10)  # 10 steps per hour
+            walk = 0.0
+            rng = self._rng.__class__(self.drift_config.random_seed or 42)
+            for _ in range(steps):
+                walk += rng.gauss(0, cfg.drift_rate * 0.1)
+            factor = 1.0 + max(-cfg.amplitude, min(cfg.amplitude, walk))
+            return max(0.5, factor)  # Don't let it go below 0.5
+
+        elif cfg.drift_type == DriftType.TELEGRAPH:
+            # Telegraph noise: sudden jumps between states
+            # Simulate Poisson process for jumps
+            rng = self._rng.__class__(self.drift_config.random_seed or 42)
+            state = 0
+            t = 0.0
+            while t < time_hours:
+                # Time to next jump (exponential distribution)
+                dt = -math.log(1 - rng.random()) / cfg.jump_probability
+                t += dt
+                if t < time_hours:
+                    state = 1 - state  # Toggle state
+            factor = 1.0 + state * cfg.amplitude
+            return factor
+
+        return 1.0
+
+    def get_drifted_profile(self, time_hours: float) -> DeviceNoiseProfile:
+        """
+        Get noise profile at a specific time point.
+
+        Args:
+            time_hours: Time elapsed since last calibration
+
+        Returns:
+            DeviceNoiseProfile with drifted parameters
+        """
+        drift_factor = self._compute_drift_factor(time_hours)
+
+        return DeviceNoiseProfile(
+            name=f"{self.base_profile.name}_t{time_hours:.1f}h",
+            device_type=self.base_profile.device_type,
+            num_qubits=self.base_profile.num_qubits,
+            # Coherence times decrease with drift
+            t1_us=self.base_profile.t1_us / drift_factor,
+            t2_us=self.base_profile.t2_us / drift_factor,
+            # Error rates increase with drift
+            single_qubit_error=min(0.5, self.base_profile.single_qubit_error * drift_factor),
+            two_qubit_error=min(0.5, self.base_profile.two_qubit_error * drift_factor),
+            readout_error=min(0.5, self.base_profile.readout_error * drift_factor),
+            single_qubit_gate_time_us=self.base_profile.single_qubit_gate_time_us,
+            two_qubit_gate_time_us=self.base_profile.two_qubit_gate_time_us,
+            readout_time_us=self.base_profile.readout_time_us,
+            coupling_map=self.base_profile.coupling_map,
+            crosstalk_strength=self.base_profile.crosstalk_strength * drift_factor,
+            leakage_rate=self.base_profile.leakage_rate * drift_factor,
+            metadata={
+                **self.base_profile.metadata,
+                "drift_time_hours": time_hours,
+                "drift_factor": drift_factor,
+                "drift_type": self.drift_config.drift_type.value,
+            },
+        )
+
+    def get_noise_model(self, time_hours: float) -> Any:
+        """
+        Get Qiskit noise model at a specific time point.
+
+        Args:
+            time_hours: Time elapsed since last calibration
+
+        Returns:
+            qiskit_aer.noise.NoiseModel with drifted parameters
+        """
+        drifted_profile = self.get_drifted_profile(time_hours)
+        builder = NoiseModelBuilder(drifted_profile)
+        return builder.build()
+
+    def generate_drift_trajectory(
+        self,
+        duration_hours: float,
+        sample_interval_hours: float = 0.5,
+    ) -> List[Tuple[float, DeviceNoiseProfile]]:
+        """
+        Generate a trajectory of noise profiles over time.
+
+        Useful for training ML models on drift patterns.
+
+        Args:
+            duration_hours: Total simulation duration
+            sample_interval_hours: Time between samples
+
+        Returns:
+            List of (time, profile) tuples
+        """
+        trajectory = []
+        t = 0.0
+        while t <= duration_hours:
+            profile = self.get_drifted_profile(t)
+            trajectory.append((t, profile))
+            t += sample_interval_hours
+        return trajectory
+
+    def get_drift_metrics(self, time_hours: float) -> Dict[str, float]:
+        """
+        Get drift metrics at a specific time.
+
+        Args:
+            time_hours: Time elapsed since calibration
+
+        Returns:
+            Dictionary of drift metrics
+        """
+        base = self.base_profile
+        drifted = self.get_drifted_profile(time_hours)
+        drift_factor = self._compute_drift_factor(time_hours)
+
+        return {
+            "time_hours": time_hours,
+            "drift_factor": drift_factor,
+            "t1_degradation": 1 - (drifted.t1_us / base.t1_us),
+            "t2_degradation": 1 - (drifted.t2_us / base.t2_us),
+            "single_qubit_error_increase": (drifted.single_qubit_error - base.single_qubit_error)
+            / base.single_qubit_error,
+            "two_qubit_error_increase": (drifted.two_qubit_error - base.two_qubit_error)
+            / base.two_qubit_error,
+            "readout_error_increase": (drifted.readout_error - base.readout_error)
+            / base.readout_error,
+        }
+
+    def reset(self):
+        """Reset internal state (for telegraph noise)."""
+        self._telegraph_state = 0
+        if self.drift_config.random_seed is not None:
+            import random
+
+            self._rng = random.Random(self.drift_config.random_seed)
+
+
 def estimate_circuit_fidelity(
     circuit_depth: int, num_two_qubit_gates: int, profile: DeviceNoiseProfile
 ) -> float:
