@@ -93,9 +93,9 @@
 ## Phase 5: Cross-Loop Validation (Days 10-11)
 
 ### 5.1 Integrated Experiment
-- [ ] Run combined experiment: better calibration → better mitigation → larger circuits
-- [ ] Quantify cross-loop coupling from experimental data
-- [ ] Validate: improvements in one loop benefit others
+- [x] Run combined experiment: better calibration → better mitigation → larger circuits
+- [x] Quantify cross-loop coupling from experimental data
+- [x] Validate: improvements in one loop benefit others
 
 ### 5.2 Bottleneck Validation
 - [ ] Artificially introduce bottlenecks (e.g., limit calibration data)

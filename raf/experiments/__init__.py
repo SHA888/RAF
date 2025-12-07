@@ -13,6 +13,11 @@ from .control_optimization import (
     OptimizationResult,
     OptimizationStrategy,
 )
+from .cross_loop_validation import (
+    CrossLoopEffect,
+    CrossLoopValidationExperiment,
+    IntegratedExperimentResult,
+)
 from .error_mitigation import ErrorMitigationExperiment
 from .metrics_collector import ExperimentalMetricsCollector
 
@@ -28,4 +33,7 @@ __all__ = [
     "OptimizationResult",
     "OptimizationStrategy",
     "ControlOptimizationMetrics",
+    "CrossLoopValidationExperiment",
+    "CrossLoopEffect",
+    "IntegratedExperimentResult",
 ]
