@@ -79,9 +79,9 @@
 - [x] Create `DriftingNoiseModel` with configurable drift rate
 
 ### 4.2 ML-Based Calibration Tracking
-- [ ] Implement simple LSTM/MLP for noise parameter prediction
-- [ ] Train on synthetic drift trajectories
-- [ ] Measure: prediction accuracy, recalibration frequency reduction
+- [x] Implement simple LSTM/MLP for noise parameter prediction
+- [x] Train on synthetic drift trajectories
+- [x] Measure: prediction accuracy, recalibration frequency reduction
 
 ### 4.3 Control Optimization (Simplified)
 - [ ] Implement pulse-level optimization using Qiskit Pulse (if feasible)
