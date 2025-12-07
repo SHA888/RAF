@@ -84,9 +84,9 @@
 - [x] Measure: prediction accuracy, recalibration frequency reduction
 
 ### 4.3 Control Optimization (Simplified)
-- [ ] Implement pulse-level optimization using Qiskit Pulse (if feasible)
-- [ ] OR: Gate-level optimization with noise-aware compilation
-- [ ] Measure: gate fidelity improvement, circuit depth reduction
+- [x] Implement pulse-level optimization using Qiskit Pulse (if feasible)
+- [x] OR: Gate-level optimization with noise-aware compilation
+- [x] Measure: gate fidelity improvement, circuit depth reduction
 
 ---
 

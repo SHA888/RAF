@@ -5,6 +5,14 @@ Provides empirical validation experiments for the three acceleration loops.
 """
 
 from .ansatz_design import AnsatzDesignExperiment, HardwareHeterogeneityStudy, NeuralSurrogate
+from .control_optimization import (
+    ControlOptimizationExperiment,
+    ControlOptimizationMetrics,
+    GateOptimizer,
+    NoiseAwareCompiler,
+    OptimizationResult,
+    OptimizationStrategy,
+)
 from .error_mitigation import ErrorMitigationExperiment
 from .metrics_collector import ExperimentalMetricsCollector
 
@@ -14,4 +22,10 @@ __all__ = [
     "HardwareHeterogeneityStudy",
     "NeuralSurrogate",
     "ExperimentalMetricsCollector",
+    "ControlOptimizationExperiment",
+    "NoiseAwareCompiler",
+    "GateOptimizer",
+    "OptimizationResult",
+    "OptimizationStrategy",
+    "ControlOptimizationMetrics",
 ]
