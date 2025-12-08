@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "total_scenarios": 6,
+    "avg_prediction_accuracy": 0.9130465596025524,
+    "avg_acceleration_drop": 0.2456962621167472,
+    "validation_passed": true
+  },
+  "scenarios": [
+    {
+      "bottleneck_type": "limited_calibration_data",
+      "severity": 0.8,
+      "baseline_acceleration": 0.6626043463410113,
+      "bottlenecked_acceleration": 0.5,
+      "acceleration_drop": 0.2454018710244416,
+      "predicted_bottlenecks": [
+        "limited_calibration_data",
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.9163214968195533
+    },
+    {
+      "bottleneck_type": "high_drift_rate",
+      "severity": 0.7,
+      "baseline_acceleration": 0.6593014778685791,
+      "bottlenecked_acceleration": 0.5,
+      "acceleration_drop": 0.2416215998537974,
+      "predicted_bottlenecks": [
+        "fast_drift",
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.7932972798830379
+    },
+    {
+      "bottleneck_type": "low_control_bandwidth",
+      "severity": 0.6,
+      "baseline_acceleration": 0.6623947846941097,
+      "bottlenecked_acceleration": 0.5000450539288759,
+      "acceleration_drop": 0.24509512229962085,
+      "predicted_bottlenecks": [
+        "low_bandwidth",
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.9639239021603033
+    },
+    {
+      "bottleneck_type": "high_characterization_overhead",
+      "severity": 0.5,
+      "baseline_acceleration": 0.6629770450156317,
+      "bottlenecked_acceleration": 0.5018278342085162,
+      "acceleration_drop": 0.24306906554104893,
+      "predicted_bottlenecks": [
+        "high_characterization_cost",
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.9655447475671608
+    },
+    {
+      "bottleneck_type": "model_complexity",
+      "severity": 0.6,
+      "baseline_acceleration": 0.6625667232323748,
+      "bottlenecked_acceleration": 0.5,
+      "acceleration_drop": 0.24535902201559784,
+      "predicted_bottlenecks": [
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.9162872176124783
+    },
+    {
+      "bottleneck_type": "mitigation_overhead",
+      "severity": 0.5,
+      "baseline_acceleration": 0.670736652330314,
+      "bottlenecked_acceleration": 0.5006171169255035,
+      "acceleration_drop": 0.2536308919659763,
+      "predicted_bottlenecks": [
+        "high_mitigation_overhead",
+        "model_complexity"
+      ],
+      "prediction_accuracy": 0.922904713572781
+    }
+  ]
+}

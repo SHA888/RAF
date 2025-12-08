@@ -108,8 +108,8 @@
 
 ### 6.1 Fix References
 - [x] Replace `arXiv:2501.xxxxx` placeholders with real arXiv IDs
-- [ ] Verify all 19 references are complete and accurate
-- [ ] Add any new references from empirical work
+- [x] Verify all 19 references are complete and accurate
+- [x] Add any new references from empirical work
 
 ### 6.2 Add Validation Roadmap Section
 - [x] Write Section V.D: "Empirical Validation Methodology"
@@ -118,14 +118,14 @@
 - [x] Discuss limitations and future validation opportunities
 
 ### 6.3 Update Results Section
-- [ ] Add Figure: Acceleration dynamics from real/simulated data
-- [ ] Add Table: Bottleneck validation results
-- [ ] Add Figure: Cross-loop coupling measured vs. predicted
+- [x] Add Figure: Acceleration dynamics from real/simulated data
+- [x] Add Table: Bottleneck validation results
+- [x] Add Figure: Cross-loop coupling measured vs. predicted
 
 ### 6.4 Emphasize Codebase Contribution
-- [ ] Add paragraph on open-source implementation
-- [ ] Include GitHub repository link (placeholder for now)
-- [ ] Describe how practitioners can extend the framework
+- [x] Add paragraph on open-source implementation
+- [x] Include GitHub repository link (placeholder for now)
+- [x] Describe how practitioners can extend the framework
 
 ---
 
