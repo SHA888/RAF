@@ -89,11 +89,9 @@ directions. Section IV introduces our Reciprocal Acceleration Framework
 with detailed loop analysis. Section V derives research roadmap
 implications, and Section VI concludes.
 
-In alignment with open science principles, we will make supplementary
-materials—including detailed loop characterizations, extended literature
-analysis, and framework visualization code—available in a public
-repository upon acceptance. A link will be provided in the camera-ready
-version.
+In alignment with open science principles, supplementary materials—including
+detailed loop characterizations, extended literature analysis, and framework
+visualization code—are available at github.com/SHA888/RAF.
 
 II. Quantum Enhancement of Machine Learning
 
@@ -117,10 +115,10 @@ Recent work has focused on understanding when quantum kernels provide
 genuine advantage. Liu et al. [3] established that quantum kernel
 advantage requires careful feature map design—randomly chosen quantum
 feature maps typically do not outperform classical methods.
-García-Martín et al. [4] connected quantum kernels to Gaussian
-processes, providing a theoretical framework (GP-QML) for understanding
-generalization in quantum machine learning. This connection opens
-pathways for principled kernel design rather than ad hoc circuit
+García-Martín et al. [4] showed that quantum neural networks converge to
+Gaussian processes in the large Hilbert space limit, providing a theoretical
+framework for understanding generalization in quantum machine learning. This
+connection opens pathways for principled design rather than ad hoc circuit
 construction.
 
 B. Variational Quantum Classifiers
