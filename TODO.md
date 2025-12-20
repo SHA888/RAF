@@ -195,7 +195,7 @@ If real hardware access is limited:
 - [x] Publication-quality figures
 
 ### Stretch (Nice to Have)
-- [ ] PennyLane integration
+- [x] PennyLane integration
 - [ ] Multiple hardware backends comparison (see Phase 8 below)
 - [ ] Interactive dashboard for experiments
 - [ ] Pre-trained surrogate models included
