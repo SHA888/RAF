@@ -135,7 +135,12 @@
 - [x] Add integration tests for Qiskit backend
 - [x] Update README with empirical examples
 - [x] Create `examples/empirical_validation.py` script
-- [ ] Ensure all experiments are reproducible
+- [x] Ensure all experiments are reproducible
+  - [x] Add global reproducibility utility (set_all_seeds: numpy/random/torch, Qiskit seed_simulator/seed_transpiler)
+  - [x] Expose seed param on experiment constructors/runs and route to all RNG paths (SimulatedLoop, CrossLoop, ControlOptimization, mitigation/train)
+  - [x] Persist run configs (seed + params) for replayability
+  - [x] Replace hardcoded seeds (e.g., np.random.seed(42) in NeuralSurrogate) with passed-in seeds
+  - [x] CLI/config: global seed flag and run-config persistence in examples
 
 ### 7.2 Paper Finalization
 - [x] Proofread entire manuscript

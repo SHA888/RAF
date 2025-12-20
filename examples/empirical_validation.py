@@ -27,9 +27,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from raf.backends import DeviceNoiseProfile
 from raf.experiments import ErrorMitigationExperiment
+from raf.utils import persist_run_config, set_all_seeds
 
 
-def run_quick_demo():
+def run_quick_demo(seed: int | None = None):
     """Run a quick demonstration (2-3 minutes)."""
     print("=" * 70)
     print("RAF Error Mitigation Loop - Quick Demo")
@@ -37,7 +38,7 @@ def run_quick_demo():
     print()
 
     # Create experiment with IBM Manila-like noise
-    experiment = ErrorMitigationExperiment(noise_profile_name="manila")
+    experiment = ErrorMitigationExperiment(noise_profile_name="manila", random_seed=seed)
 
     print("Configuration:")
     print(f"  Noise profile: {experiment.noise_profile_name}")
@@ -61,7 +62,7 @@ def run_quick_demo():
     return experiment, results
 
 
-def run_full_study():
+def run_full_study(seed: int | None = None):
     """Run a comprehensive study (10-15 minutes)."""
     print("=" * 70)
     print("RAF Error Mitigation Loop - Full Study")
@@ -77,7 +78,7 @@ def run_full_study():
         print(f"Testing with {profile_name} noise profile")
         print(f"{'='*50}\n")
 
-        experiment = ErrorMitigationExperiment(noise_profile_name=profile_name)
+        experiment = ErrorMitigationExperiment(noise_profile_name=profile_name, random_seed=seed)
 
         results = experiment.run_acceleration_study(
             num_iterations=5,
@@ -169,21 +170,51 @@ def main():
     parser.add_argument(
         "--save-plots", action="store_true", help="Save plots to files instead of displaying"
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Global seed for reproducibility (applies to Python/NumPy/Qiskit and experiments)",
+    )
+    parser.add_argument(
+        "--save-config",
+        type=str,
+        default=None,
+        help="Optional path to persist run configuration (JSON)",
+    )
 
     args = parser.parse_args()
+
+    # Apply global seed if provided
+    if args.seed is not None:
+        set_all_seeds(args.seed)
 
     if args.mode == "profiles":
         demonstrate_noise_profiles()
     elif args.mode == "quick":
-        experiment, results = run_quick_demo()
+        experiment, results = run_quick_demo(seed=args.seed)
 
         if args.save_plots:
             try:
                 experiment.plot_results(save_path="em_loop_results.png")
             except Exception as e:
                 print(f"Could not save plots: {e}")
+
+        if args.save_config:
+            persist_run_config(
+                {
+                    "mode": "quick",
+                    "seed": args.seed,
+                    "noise_profile": experiment.noise_profile_name,
+                    "shots": 512,
+                    "depths": [3, 5, 7],
+                    "num_iterations": 3,
+                    "circuits_per_iteration": 5,
+                },
+                args.save_config,
+            )
     elif args.mode == "full":
-        all_results = run_full_study()
+        all_results = run_full_study(seed=args.seed)
 
         if args.save_plots:
             for profile_name, data in all_results.items():
@@ -191,6 +222,20 @@ def main():
                     data["experiment"].plot_results(save_path=f"em_loop_{profile_name}.png")
                 except Exception as e:
                     print(f"Could not save plots for {profile_name}: {e}")
+
+        if args.save_config:
+            persist_run_config(
+                {
+                    "mode": "full",
+                    "seed": args.seed,
+                    "profiles": list(all_results.keys()),
+                    "shots": 1024,
+                    "depths": [3, 5, 7, 10],
+                    "num_iterations": 5,
+                    "circuits_per_iteration": 8,
+                },
+                args.save_config,
+            )
 
     print("\n" + "=" * 70)
     print("Empirical validation complete!")

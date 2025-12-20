@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
+from raf.utils import set_all_seeds
+
 from .metrics_collector import ExperimentalMetricsCollector
 
 
@@ -217,6 +219,7 @@ class ErrorMitigationExperiment:
         backend: Any = None,
         ideal_backend: Any = None,
         noise_profile_name: str = "manila",
+        random_seed: Optional[int] = None,
     ):
         """
         Initialize experiment.
@@ -226,9 +229,14 @@ class ErrorMitigationExperiment:
             ideal_backend: Ideal backend for ground truth
             noise_profile_name: Name of noise profile to use
         """
+        self.seed = random_seed
+        if random_seed is not None:
+            set_all_seeds(random_seed)
+
         self.backend = backend
         self.ideal_backend = ideal_backend
         self.noise_profile_name = noise_profile_name
+        self.rng = np.random.default_rng(random_seed)
 
         self.collector = ExperimentalMetricsCollector("error_mitigation_loop")
         self.zne = ZNEMitigator()
@@ -273,16 +281,15 @@ class ErrorMitigationExperiment:
         except ImportError:
             raise ImportError("qiskit required")
 
-        if seed is not None:
-            np.random.seed(seed)
+        local_rng = np.random.default_rng(seed) if seed is not None else self.rng
 
         qc = QuantumCircuit(num_qubits)
 
         for d in range(depth):
             # Single-qubit rotations
             for q in range(num_qubits):
-                theta = np.random.uniform(0, 2 * np.pi)
-                phi = np.random.uniform(0, 2 * np.pi)
+                theta = local_rng.uniform(0, 2 * np.pi)
+                phi = local_rng.uniform(0, 2 * np.pi)
                 qc.rx(theta, q)
                 qc.rz(phi, q)
 
@@ -298,6 +305,7 @@ class ErrorMitigationExperiment:
         num_qubits: int = 2,
         num_layers: int = 2,
         params: Optional[List[float]] = None,
+        seed: Optional[int] = None,
     ) -> Any:
         """
         Create a VQE-style ansatz circuit.
@@ -315,9 +323,11 @@ class ErrorMitigationExperiment:
         except ImportError:
             raise ImportError("qiskit required")
 
+        local_rng = np.random.default_rng(seed) if seed is not None else self.rng
+
         num_params = num_qubits * num_layers * 2
         if params is None:
-            params = np.random.uniform(0, 2 * np.pi, num_params)
+            params = local_rng.uniform(0, 2 * np.pi, num_params)
 
         qc = QuantumCircuit(num_qubits)
 

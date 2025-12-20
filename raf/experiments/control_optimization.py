@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from raf.backends.noise_models import DeviceNoiseProfile
+from raf.utils import set_all_seeds
 
 
 class OptimizationStrategy(Enum):
@@ -281,6 +282,7 @@ class NoiseAwareCompiler:
         noise_profile: DeviceNoiseProfile,
         strategies: Optional[List[OptimizationStrategy]] = None,
         optimization_level: int = 2,
+        random_seed: Optional[int] = None,
     ):
         """
         Initialize noise-aware compiler.
@@ -289,6 +291,7 @@ class NoiseAwareCompiler:
             noise_profile: Device noise characteristics
             strategies: List of optimization strategies to apply
             optimization_level: 0-3, higher = more aggressive optimization
+            random_seed: Seed for deterministic compilation/transpilation
         """
         self.noise_profile = noise_profile
         self.strategies = strategies or [
@@ -297,7 +300,8 @@ class NoiseAwareCompiler:
             OptimizationStrategy.NOISE_ADAPTIVE,
         ]
         self.optimization_level = optimization_level
-        self.gate_optimizer = GateOptimizer()
+        self.seed = random_seed
+        self.gate_optimizer = GateOptimizer(random_seed=random_seed)
 
         # Build qubit error map for routing
         self._build_error_map()
@@ -411,14 +415,14 @@ class NoiseAwareCompiler:
                     circuit,
                     coupling_map=self.noise_profile.coupling_map,
                     optimization_level=self.optimization_level,
-                    seed_transpiler=42,
+                    seed_transpiler=self.seed,
                 )
                 return optimized
             else:
                 return transpile(
                     circuit,
                     optimization_level=self.optimization_level,
-                    seed_transpiler=42,
+                    seed_transpiler=self.seed,
                 )
         except Exception:
             return circuit
@@ -431,7 +435,7 @@ class NoiseAwareCompiler:
             return transpile(
                 circuit,
                 optimization_level=3,  # Maximum optimization
-                seed_transpiler=42,
+                seed_transpiler=self.seed,
             )
         except Exception:
             return circuit
@@ -576,10 +580,14 @@ class ControlOptimizationExperiment:
             strategies: Optimization strategies to test
             random_seed: For reproducibility
         """
+        self.seed = random_seed
+        if random_seed is not None:
+            set_all_seeds(random_seed)
+
         self.noise_profile = noise_profile
         self.strategies = strategies
         self.rng = np.random.default_rng(random_seed)
-        self.compiler = NoiseAwareCompiler(noise_profile, strategies)
+        self.compiler = NoiseAwareCompiler(noise_profile, strategies, random_seed=random_seed)
         self.results: List[OptimizationResult] = []
 
     def _generate_random_circuit(

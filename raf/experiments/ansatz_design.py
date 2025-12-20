@@ -12,10 +12,12 @@ Key components:
 """
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+
+from raf.utils import set_all_seeds
 
 from ..backends import create_backend
 from .metrics_collector import ExperimentalMetricsCollector
@@ -39,7 +41,12 @@ class CircuitCandidate:
     # Metadata
     generation: int = 0
     parent_id: Optional[int] = None
-    circuit_id: int = field(default_factory=lambda: np.random.randint(0, 1000000))
+    circuit_id: Optional[int] = None
+
+    def __post_init__(self):
+        if self.circuit_id is None:
+            # fallback to global RNG (seeded by experiment-wide set_all_seeds)
+            self.circuit_id = int(np.random.randint(0, 1_000_000))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -63,7 +70,7 @@ class NeuralSurrogate:
     enabling faster architecture search.
     """
 
-    def __init__(self, hidden_sizes: List[int] = None):
+    def __init__(self, hidden_sizes: List[int] = None, random_seed: Optional[int] = None):
         """
         Initialize neural surrogate.
 
@@ -76,6 +83,7 @@ class NeuralSurrogate:
         self.scaler_y = None
         self.is_trained = False
         self.training_history: List[Dict] = []
+        self.rng = np.random.default_rng(random_seed)
 
     def _encode_circuit(self, candidate: CircuitCandidate) -> np.ndarray:
         """Encode circuit candidate as feature vector."""
@@ -144,16 +152,13 @@ class NeuralSurrogate:
         X_norm = (X - self.scaler_X[0]) / self.scaler_X[1]
         y_norm = (y - self.scaler_y[0]) / self.scaler_y[1]
 
-        # Simple MLP with numpy (no external dependencies)
-        np.random.seed(42)
-
         # Initialize weights
         layers = [X.shape[1]] + self.hidden_sizes + [1]
         self.weights = []
         self.biases = []
 
         for i in range(len(layers) - 1):
-            w = np.random.randn(layers[i], layers[i + 1]) * 0.1
+            w = self.rng.standard_normal((layers[i], layers[i + 1])) * 0.1
             b = np.zeros(layers[i + 1])
             self.weights.append(w)
             self.biases.append(b)
@@ -252,11 +257,13 @@ class EvolutionaryQAS:
         population_size: int = 20,
         mutation_rate: float = 0.3,
         elite_fraction: float = 0.2,
+        random_seed: Optional[int] = None,
     ):
         self.num_qubits = num_qubits
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.elite_fraction = elite_fraction
+        self.rng = np.random.default_rng(random_seed)
 
         self.gate_options = ["rx", "ry", "rz", "cx", "h"]
         self.entanglement_options = ["linear", "circular", "full"]
@@ -266,9 +273,9 @@ class EvolutionaryQAS:
         population = []
 
         for _ in range(self.population_size):
-            depth = np.random.randint(2, 8)
-            gate_sequence = [np.random.choice(self.gate_options) for _ in range(depth * 2)]
-            entanglement = np.random.choice(self.entanglement_options)
+            depth = self.rng.integers(2, 8)
+            gate_sequence = [self.rng.choice(self.gate_options) for _ in range(depth * 2)]
+            entanglement = self.rng.choice(self.entanglement_options)
 
             candidate = CircuitCandidate(
                 num_qubits=self.num_qubits,
@@ -288,23 +295,23 @@ class EvolutionaryQAS:
         new_entanglement = candidate.entanglement
 
         # Mutate gate sequence
-        if np.random.random() < self.mutation_rate:
+        if self.rng.random() < self.mutation_rate:
             if len(new_sequence) > 0:
-                idx = np.random.randint(len(new_sequence))
-                new_sequence[idx] = np.random.choice(self.gate_options)
+                idx = self.rng.integers(len(new_sequence))
+                new_sequence[idx] = self.rng.choice(self.gate_options)
 
         # Mutate depth (add/remove layer)
-        if np.random.random() < self.mutation_rate * 0.5:
-            if np.random.random() < 0.5 and new_depth > 2:
+        if self.rng.random() < self.mutation_rate * 0.5:
+            if self.rng.random() < 0.5 and new_depth > 2:
                 new_depth -= 1
                 new_sequence = new_sequence[:-2] if len(new_sequence) > 2 else new_sequence
             else:
                 new_depth += 1
-                new_sequence.extend([np.random.choice(self.gate_options) for _ in range(2)])
+                new_sequence.extend([self.rng.choice(self.gate_options) for _ in range(2)])
 
         # Mutate entanglement
-        if np.random.random() < self.mutation_rate * 0.3:
-            new_entanglement = np.random.choice(self.entanglement_options)
+        if self.rng.random() < self.mutation_rate * 0.3:
+            new_entanglement = self.rng.choice(self.entanglement_options)
 
         return CircuitCandidate(
             num_qubits=self.num_qubits,
@@ -340,6 +347,7 @@ class AnsatzDesignExperiment:
         self,
         noise_profile_name: str = "manila",
         num_qubits: int = 4,
+        random_seed: Optional[int] = None,
     ):
         """
         Initialize experiment.
@@ -348,12 +356,17 @@ class AnsatzDesignExperiment:
             noise_profile_name: Noise profile for simulation
             num_qubits: Number of qubits for circuits
         """
+        self.seed = random_seed
+        if random_seed is not None:
+            set_all_seeds(random_seed)
+
         self.backend = create_backend(noise_profile_name)
         self.num_qubits = num_qubits
         self.noise_profile_name = noise_profile_name
+        self.rng = np.random.default_rng(random_seed)
 
-        self.surrogate = NeuralSurrogate()
-        self.qas = EvolutionaryQAS(num_qubits=num_qubits)
+        self.surrogate = NeuralSurrogate(random_seed=random_seed)
+        self.qas = EvolutionaryQAS(num_qubits=num_qubits, random_seed=random_seed)
         self.collector = ExperimentalMetricsCollector("ansatz_design")
 
         self.all_candidates: List[CircuitCandidate] = []
@@ -420,7 +433,7 @@ class AnsatzDesignExperiment:
             circuit = self._build_circuit(candidate)
 
             # Bind random parameters
-            params = {p: np.random.uniform(0, 2 * np.pi) for p in circuit.parameters}
+            params = {p: self.rng.uniform(0, 2 * np.pi) for p in circuit.parameters}
             bound_circuit = circuit.assign_parameters(params)
 
             # Execute
@@ -468,9 +481,9 @@ class AnsatzDesignExperiment:
 
         for i in range(num_evaluations):
             # Generate random candidate
-            depth = np.random.randint(2, 8)
-            gate_sequence = [np.random.choice(self.qas.gate_options) for _ in range(depth * 2)]
-            entanglement = np.random.choice(self.qas.entanglement_options)
+            depth = self.rng.integers(2, 8)
+            gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
+            entanglement = self.rng.choice(self.qas.entanglement_options)
 
             candidate = CircuitCandidate(
                 num_qubits=self.num_qubits,
@@ -524,9 +537,9 @@ class AnsatzDesignExperiment:
         # Phase 1: Initial random sampling
         print(f"  Phase 1: Initial sampling ({initial_samples} circuits)...")
         for i in range(initial_samples):
-            depth = np.random.randint(2, 8)
-            gate_sequence = [np.random.choice(self.qas.gate_options) for _ in range(depth * 2)]
-            entanglement = np.random.choice(self.qas.entanglement_options)
+            depth = self.rng.integers(2, 8)
+            gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
+            entanglement = self.rng.choice(self.qas.entanglement_options)
 
             candidate = CircuitCandidate(
                 num_qubits=self.num_qubits,
@@ -557,9 +570,9 @@ class AnsatzDesignExperiment:
             test_candidates = []
 
             for _ in range(batch_size):
-                depth = np.random.randint(2, 8)
-                gate_sequence = [np.random.choice(self.qas.gate_options) for _ in range(depth * 2)]
-                entanglement = np.random.choice(self.qas.entanglement_options)
+                depth = self.rng.integers(2, 8)
+                gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
+                entanglement = self.rng.choice(self.qas.entanglement_options)
 
                 test_candidates.append(
                     CircuitCandidate(

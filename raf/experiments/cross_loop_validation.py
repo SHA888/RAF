@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 from raf.backends.noise_models import DeviceNoiseProfile
+from raf.utils import set_all_seeds
 
 
 @dataclass
@@ -154,6 +155,10 @@ class CrossLoopValidationExperiment:
             noise_profile: Device noise profile (default: IBM Manila-like)
             random_seed: For reproducibility
         """
+        self.seed = random_seed
+        if random_seed is not None:
+            set_all_seeds(random_seed)
+
         self.noise_profile = noise_profile or DeviceNoiseProfile.ibm_manila_like()
         self.rng = np.random.default_rng(random_seed)
 

@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from raf.core.metrics import BottleneckIndicator, BottleneckSeverity
+from raf.utils import set_all_seeds
 
 
 class BottleneckType(Enum):
@@ -108,6 +109,7 @@ class SimulatedLoop:
         random_seed: Optional[int] = None,
     ):
         self.name = name
+        self.seed = random_seed
         self.rng = np.random.default_rng(random_seed)
 
         # Loop state
@@ -412,6 +414,10 @@ class BottleneckValidationExperiment:
             scenarios: Custom bottleneck scenarios (default: predefined set)
             random_seed: For reproducibility
         """
+        self.seed = random_seed
+        if random_seed is not None:
+            set_all_seeds(random_seed)
+
         self.scenarios = scenarios or self.DEFAULT_SCENARIOS
         self.rng = np.random.default_rng(random_seed)
         self.loop = SimulatedLoop(random_seed=random_seed)
