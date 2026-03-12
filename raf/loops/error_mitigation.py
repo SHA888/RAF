@@ -12,7 +12,9 @@ next-generation mitigation models.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -100,6 +102,7 @@ class ErrorMitigationLoop(AccelerationLoop):
         name: str = "error_mitigation",
         initial_accuracy: float = 0.5,
         initial_scale: float = 10.0,
+        measured_results_path: Optional[str] = None,
     ):
         """
         Initialize the Error Mitigation Loop.
@@ -120,6 +123,11 @@ class ErrorMitigationLoop(AccelerationLoop):
             experiment_scale=initial_scale,
         )
 
+        self._measured_overall_acceleration: Optional[float] = None
+        self._measured_error_reduction_by_iteration: Optional[Dict[int, float]] = None
+        if measured_results_path is not None:
+            self.load_measured_metrics(measured_results_path)
+
         # Initialize progress metrics
         self.metrics.progress["mitigation_accuracy"] = ProgressMetric(
             domain="mitigation_accuracy",
@@ -134,6 +142,33 @@ class ErrorMitigationLoop(AccelerationLoop):
             unit="qubit-depth",
             direction="higher",
         )
+
+    def load_measured_metrics(self, filepath: str):
+        path = Path(filepath)
+        with open(path, "r") as f:
+            data = json.load(f)
+
+        acceleration = data.get("acceleration_metrics") or {}
+        iteration_stats = acceleration.get("iteration_stats") or []
+
+        if not isinstance(iteration_stats, list):
+            raise ValueError("acceleration_metrics.iteration_stats must be a list")
+
+        measured_error_reduction: Dict[int, float] = {}
+        for stat in iteration_stats:
+            if not isinstance(stat, dict):
+                continue
+            iteration = stat.get("iteration")
+            avg_error_reduction = stat.get("avg_error_reduction")
+            if isinstance(iteration, int) and isinstance(avg_error_reduction, (int, float)):
+                measured_error_reduction[iteration] = float(avg_error_reduction)
+
+        overall_acceleration = acceleration.get("overall_acceleration")
+        if not isinstance(overall_acceleration, (int, float)):
+            raise ValueError("No measured overall_acceleration found in results JSON")
+
+        self._measured_overall_acceleration = float(overall_acceleration)
+        self._measured_error_reduction_by_iteration = measured_error_reduction
 
     @property
     def stages(self) -> List[str]:
@@ -175,6 +210,24 @@ class ErrorMitigationLoop(AccelerationLoop):
         - Growth in training data volume
         - Reduction in calibration cost
         """
+        if self._measured_overall_acceleration is not None:
+            iteration_error_reduction = None
+            if self._measured_error_reduction_by_iteration is not None:
+                iteration_error_reduction = self._measured_error_reduction_by_iteration.get(
+                    self.state.iteration
+                )
+            return AccelerationMetric(
+                name=f"{self.name}_acceleration",
+                value=float(self._measured_overall_acceleration),
+                baseline=1.0,
+                iteration=self.state.iteration,
+                metadata={
+                    "source": "measured",
+                    "overall_acceleration": float(self._measured_overall_acceleration),
+                    "avg_error_reduction": iteration_error_reduction,
+                },
+            )
+
         # Get historical values if available
         accuracy_history = self.metrics.progress["mitigation_accuracy"].history
         scale_history = self.metrics.progress["experiment_scale"].history

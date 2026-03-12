@@ -131,6 +131,7 @@ cython_debug/
 # IDE
 .idea/
 .vscode/
+.windsurf/
 *.swp
 *.swo
 *~
@@ -145,3 +146,4 @@ Thumbs.db
 # Keep figures/ and results/ in repo for reproducibility
 # But ignore temporary outputs
 /tmp_results/
+/resources/

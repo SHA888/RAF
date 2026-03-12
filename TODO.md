@@ -45,7 +45,7 @@
 - [x] Generate plots: mitigation accuracy vs. circuit depth, acceleration over iterations
 
 ### 2.3 Metrics from Real Data
-- [ ] Replace simulated `AccelerationMetric` values with measured data
+- [x] Replace simulated `AccelerationMetric` values with measured data
 - [x] Implement `ExperimentalMetricsCollector` class
 - [x] Track: fidelity improvement, overhead reduction, iteration speedup
 

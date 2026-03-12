@@ -6,6 +6,7 @@ using realistic noisy simulation.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -514,7 +515,12 @@ class ErrorMitigationExperiment:
 
     def save_results(self, filepath: str):
         """Save experiment results to file."""
-        self.collector.save(filepath)
+        path = Path(filepath)
+        if not path.is_absolute() and path.parent == Path("."):
+            path = Path("results") / "error_mitigation" / path.name
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.collector.save(str(path))
 
     def plot_results(self, save_path: Optional[str] = None):
         """
