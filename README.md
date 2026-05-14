@@ -1,7 +1,7 @@
 # Reciprocal Acceleration Framework (RAF)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12-3.13](https://img.shields.io/badge/python-3.12%E2%80%933.13-blue.svg)](https://www.python.org/downloads/)
 [![Open Science](https://img.shields.io/badge/Open-Science-green.svg)](https://opensource.org/)
 
 A systematic framework for understanding and accelerating co-evolutionary dynamics between Quantum Computing (QC) and Machine Learning (ML).
@@ -15,6 +15,7 @@ The Reciprocal Acceleration Framework formalizes the bidirectional synergy betwe
 3. **Calibration-Control Loop** - Operating at the hardware/physics level
 
 This implementation provides tools for:
+
 - Analyzing feedback dynamics in QC-ML systems
 - Identifying rate-limiting bottlenecks
 - Guiding research prioritization
@@ -89,14 +90,14 @@ python examples/empirical_validation.py --mode quick
 
 RAF supports multiple quantum hardware vendors through a unified interface:
 
-| Backend | Provider | Install | Devices |
-|---------|----------|---------|---------|
-| `AerBackend` | Local | `uv sync --extra quantum` | Simulators with realistic noise |
-| `IBMQuantumBackend` | IBM Quantum | `uv sync --extra ibm` | Brisbane, Kyoto, Osaka, etc. |
-| `BraketBackend` | AWS Braket | `uv sync --extra braket` | IonQ, Rigetti, OQC, QuEra |
-| `AzureQuantumBackend` | Azure Quantum | `uv sync --extra azure` | IonQ, Quantinuum, Rigetti, PASQAL |
-| `IQMBackend` | IQM | `uv sync --extra iqm` | Garnet (European) |
-| `PennyLaneBackend` | PennyLane | `uv sync --extra pennylane` | Gradient-based VQA optimization |
+| Backend               | Provider      | Install                     | Devices                           |
+| --------------------- | ------------- | --------------------------- | --------------------------------- |
+| `AerBackend`          | Local         | `uv sync --extra quantum`   | Simulators with realistic noise   |
+| `IBMQuantumBackend`   | IBM Quantum   | `uv sync --extra ibm`       | Brisbane, Kyoto, Osaka, etc.      |
+| `BraketBackend`       | AWS Braket    | `uv sync --extra braket`    | IonQ, Rigetti, OQC, QuEra         |
+| `AzureQuantumBackend` | Azure Quantum | `uv sync --extra azure`     | IonQ, Quantinuum, Rigetti, PASQAL |
+| `IQMBackend`          | IQM           | `uv sync --extra iqm`       | Garnet (European)                 |
+| `PennyLaneBackend`    | PennyLane     | `uv sync --extra pennylane` | Gradient-based VQA optimization   |
 
 Install all backends: `uv sync --all-extras`
 
@@ -133,12 +134,12 @@ backend = PennyLaneBackend("default.qubit", wires=4)
 
 ### Supported Noise Profiles (Simulation)
 
-| Profile | Device Type | Qubits | Description |
-|---------|-------------|--------|-------------|
-| `manila` | Superconducting | 5 | IBM Manila-like |
-| `kolkata` | Superconducting | 27 | IBM Kolkata-like |
-| `ionq` | Trapped Ion | 11 | IonQ Harmony-like |
-| `sycamore` | Superconducting | 53 | Google Sycamore-like |
+| Profile    | Device Type     | Qubits | Description          |
+| ---------- | --------------- | ------ | -------------------- |
+| `manila`   | Superconducting | 5      | IBM Manila-like      |
+| `kolkata`  | Superconducting | 27     | IBM Kolkata-like     |
+| `ionq`     | Trapped Ion     | 11     | IonQ Harmony-like    |
+| `sycamore` | Superconducting | 53     | Google Sycamore-like |
 
 ### Example: Error Mitigation Experiment
 
@@ -209,6 +210,7 @@ ML-QEM → Cleaner Outputs → Larger QML Experiments → More Training Data →
 ```
 
 **Bottlenecks:**
+
 - Calibration data acquisition cost
 - Generalization limits across devices
 - Diminishing returns near fundamental limits
@@ -220,6 +222,7 @@ QAS → Improved Circuits → Better QML Results → Training Signal → Neural 
 ```
 
 **Bottlenecks:**
+
 - Evaluation cost (quantum circuit execution)
 - Surrogate model accuracy
 - Hardware heterogeneity
@@ -231,6 +234,7 @@ ML Noise Models → Optimized Control → Lower Error Rates → Deeper Circuits 
 ```
 
 **Bottlenecks:**
+
 - Model complexity for non-Markovian noise
 - Drift timescales
 - Control bandwidth limitations
@@ -244,12 +248,14 @@ A loop exhibits **acceleration** when each iteration increases the rate of progr
 ### Cross-Loop Coupling
 
 The three loops exhibit significant cross-loop coupling:
+
 - Improvements in Calibration-Control → Benefits Error Mitigation and Ansatz Design
 - Better ansatz designs → Reduced noise sensitivity → Eases demands on mitigation and calibration
 
 ### High-Leverage Investments
 
 Based on loop analysis:
+
 1. **Surrogate Model Development** - Accelerates all three loops
 2. **Standardized Benchmarks** - Enables systematic progress tracking
 3. **Cross-Platform Abstractions** - Reduces redundant effort
@@ -280,6 +286,7 @@ If you use this framework in your research, please cite:
 ## Related Work
 
 This framework builds upon and extends:
+
 - Singh (2025) - Quantum-AI Synergy evaluation framework
 - AlphaQubit (DeepMind) - Neural network quantum error decoding
 - GP-QML (Los Alamos) - Gaussian processes for quantum ML
