@@ -6,14 +6,16 @@ RAF provides a unified interface for multiple quantum hardware vendors and simul
 
 | Backend | Provider | Type | Install Command |
 |---------|----------|------|-----------------|
-| `AerBackend` | Qiskit Aer | Simulator | `pip install raf[quantum]` |
-| `IBMQuantumBackend` | IBM Quantum | Hardware | `pip install raf[ibm]` |
-| `BraketBackend` | AWS Braket | Hardware/Simulator | `pip install raf[braket]` |
-| `AzureQuantumBackend` | Azure Quantum | Hardware/Simulator | `pip install raf[azure]` |
-| `IQMBackend` | IQM | Hardware | `pip install raf[iqm]` |
-| `PennyLaneBackend` | PennyLane | Simulator/Hardware | `pip install raf[pennylane]` |
+| `AerBackend` | Qiskit Aer | Simulator | `uv sync --extra quantum` |
+| `IBMQuantumBackend` | IBM Quantum | Hardware | `uv sync --extra ibm` |
+| `BraketBackend` | AWS Braket | Hardware/Simulator | `uv sync --extra braket` |
+| `AzureQuantumBackend` | Azure Quantum | Hardware/Simulator | `uv sync --extra azure` |
+| `IQMBackend` | IQM | Hardware | `uv sync --extra iqm` |
+| `PennyLaneBackend` | PennyLane | Simulator/Hardware | `uv sync --extra pennylane` |
 
-Install all backends: `pip install raf[all-backends]`
+Install all backends: `uv sync --all-extras`
+
+Or with pip: `pip install raf[all-backends]`
 
 ## Quick Start
 
@@ -46,6 +48,10 @@ Qiskit Aer provides high-performance local simulation with optional realistic no
 ### Installation
 
 ```bash
+# Using uv (recommended)
+uv sync --extra quantum
+
+# Or with pip
 pip install raf[quantum]
 ```
 
@@ -95,8 +101,14 @@ Access IBM Quantum hardware through the IBM Quantum Platform.
 ### Installation
 
 ```bash
+# Using uv (recommended)
+uv sync --extra ibm
+
+# Or with pip
 pip install raf[ibm]
 ```
+
+> **Note**: IBM Quantum backend requires a separate virtual environment due to dependency conflicts. See [CLAUDE.md](../CLAUDE.md#backend-selection--availability) for detailed setup instructions.
 
 ### Setup
 
@@ -141,6 +153,10 @@ Access multiple vendors through Amazon Braket: IonQ, Rigetti, OQC, QuEra.
 ### Installation
 
 ```bash
+# Using uv (recommended)
+uv sync --extra braket
+
+# Or with pip
 pip install raf[braket]
 ```
 
@@ -207,6 +223,10 @@ Access multiple vendors through Azure Quantum: IonQ, Quantinuum, Rigetti, PASQAL
 ### Installation
 
 ```bash
+# Using uv (recommended)
+uv sync --extra azure
+
+# Or with pip
 pip install raf[azure]
 ```
 
@@ -276,8 +296,14 @@ Access IQM quantum computers (European provider).
 ### Installation
 
 ```bash
+# Using uv (recommended)
+uv sync --extra iqm
+
+# Or with pip
 pip install raf[iqm]
 ```
+
+> **Note**: IQM backend requires a separate virtual environment due to Qiskit version constraints. See [CLAUDE.md](../CLAUDE.md#backend-selection--availability) for detailed setup instructions.
 
 ### Setup
 
@@ -326,11 +352,18 @@ PennyLane backend for gradient-based quantum optimization and variational algori
 ### Installation
 
 ```bash
-pip install raf[pennylane]
+# Using uv (recommended)
+uv sync --extra pennylane
 
 # Optional: High-performance simulators
+uv pip install pennylane-lightning  # For lightning.qubit
+
+# Or with pip
+pip install raf[pennylane]
 pip install pennylane-lightning  # For lightning.qubit
 ```
+
+> **Note**: PennyLane backend requires a separate virtual environment due to transitive dependencies. See [CLAUDE.md](../CLAUDE.md#backend-selection--availability) for detailed setup instructions.
 
 ### Usage
 

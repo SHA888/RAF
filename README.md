@@ -1,7 +1,7 @@
 # Reciprocal Acceleration Framework (RAF)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Open Science](https://img.shields.io/badge/Open-Science-green.svg)](https://opensource.org/)
 
 A systematic framework for understanding and accelerating co-evolutionary dynamics between Quantum Computing (QC) and Machine Learning (ML).
@@ -21,6 +21,19 @@ This implementation provides tools for:
 - Visualizing co-evolutionary progress
 
 ## Installation
+
+### Using `uv` (Recommended - Modern Python Tooling)
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/RAF.git
+cd RAF
+
+# Install with uv (creates venv automatically)
+uv sync
+```
+
+### Using pip (Traditional)
 
 ```bash
 # Clone the repository
@@ -63,10 +76,12 @@ raf.visualize()
 RAF includes tools for empirical validation using realistic quantum simulation and real hardware:
 
 ```bash
-# Install core quantum simulation (recommended)
-pip install raf[quantum]
+# Using uv (recommended)
+uv sync --all-extras
+python examples/empirical_validation.py --mode quick
 
-# Run empirical validation demo
+# Or using pip
+pip install -e ".[quantum]"
 python examples/empirical_validation.py --mode quick
 ```
 
@@ -76,14 +91,16 @@ RAF supports multiple quantum hardware vendors through a unified interface:
 
 | Backend | Provider | Install | Devices |
 |---------|----------|---------|---------|
-| `AerBackend` | Local | `pip install raf[quantum]` | Simulators with realistic noise |
-| `IBMQuantumBackend` | IBM Quantum | `pip install raf[ibm]` | Brisbane, Kyoto, Osaka, etc. |
-| `BraketBackend` | AWS Braket | `pip install raf[braket]` | IonQ, Rigetti, OQC, QuEra |
-| `AzureQuantumBackend` | Azure Quantum | `pip install raf[azure]` | IonQ, Quantinuum, Rigetti, PASQAL |
-| `IQMBackend` | IQM | `pip install raf[iqm]` | Garnet (European) |
-| `PennyLaneBackend` | PennyLane | `pip install raf[pennylane]` | Gradient-based VQA optimization |
+| `AerBackend` | Local | `uv sync --extra quantum` | Simulators with realistic noise |
+| `IBMQuantumBackend` | IBM Quantum | `uv sync --extra ibm` | Brisbane, Kyoto, Osaka, etc. |
+| `BraketBackend` | AWS Braket | `uv sync --extra braket` | IonQ, Rigetti, OQC, QuEra |
+| `AzureQuantumBackend` | Azure Quantum | `uv sync --extra azure` | IonQ, Quantinuum, Rigetti, PASQAL |
+| `IQMBackend` | IQM | `uv sync --extra iqm` | Garnet (European) |
+| `PennyLaneBackend` | PennyLane | `uv sync --extra pennylane` | Gradient-based VQA optimization |
 
-Install all backends: `pip install raf[all-backends]`
+Install all backends: `uv sync --all-extras`
+
+Or with pip: `pip install raf[all-backends]`
 
 ### Backend Usage Examples
 

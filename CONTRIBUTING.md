@@ -23,10 +23,17 @@ Thank you for your interest in contributing to the Reciprocal Acceleration Frame
 ### Code Style
 
 - Follow PEP 8 guidelines
-- Use type hints
+- Use type hints (Python 3.12+ syntax: `dict[K, V]`, `T | None`)
 - Write docstrings for all public functions/classes
-- Format code with `black`
-- Sort imports with `isort`
+- Format code with `black` (`uv run black raf/`)
+- Sort imports with `isort` (`uv run isort raf/`)
+- Lint with `ruff` (`uv run ruff check raf/ --fix`)
+- Type check with `mypy` (`uv run mypy raf/ --strict`)
+
+Pre-commit hooks (run automatically on commit):
+```bash
+uv run pre-commit run --all-files
+```
 
 ### Testing
 
@@ -41,6 +48,30 @@ Thank you for your interest in contributing to the Reciprocal Acceleration Frame
 - Update examples if API changes
 
 ## Development Setup
+
+### Using `uv` (Recommended - Modern Python Tooling)
+
+```bash
+# Clone your fork
+git clone https://github.com/yourusername/RAF.git
+cd RAF
+
+# Install development dependencies
+uv sync --all-extras
+
+# Run tests
+pytest tests/ -v
+
+# Format and lint code (automatic with pre-commit)
+uv run pre-commit run --all-files
+
+# Or format manually
+uv run black raf/
+uv run isort raf/
+uv run ruff check raf/ --fix
+```
+
+### Using pip (Traditional)
 
 ```bash
 # Clone your fork
@@ -60,6 +91,7 @@ pytest tests/ -v
 # Format code
 black raf/
 isort raf/
+ruff check raf/ --fix
 ```
 
 ## Areas for Contribution

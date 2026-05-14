@@ -12,6 +12,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quick Start
 
+### Using `uv` (Recommended)
+
+```bash
+# Install with all quantum extras and development tools
+uv sync --all-extras
+
+# Run tests
+pytest tests/ -v
+
+# Format and lint
+uv run black raf/ && uv run isort raf/ && uv run ruff check raf/ --fix
+
+# Or use pre-commit hooks
+uv run pre-commit run --all-files
+
+# Run a basic example
+python examples/basic_usage.py
+
+# Run empirical validation with quantum simulation
+python examples/empirical_validation.py --mode quick
+```
+
+### Using pip (Traditional)
+
 ```bash
 # Install in development mode
 pip install -e ".[dev,quantum]"
@@ -20,7 +44,7 @@ pip install -e ".[dev,quantum]"
 pytest tests/ -v
 
 # Format and lint
-black raf/ && isort raf/ && ruff check raf/
+black raf/ && isort raf/ && ruff check raf/ --fix
 
 # Run a basic example
 python examples/basic_usage.py
@@ -93,14 +117,14 @@ raf/
   source venv-ibm/bin/activate
   pip install qiskit-ibm-runtime
   ```
-  
+
 - 🔴 **IQM (trapped-ion)**: Requires separate venv with `qiskit<1.3` (incompatible with qiskit 2.x)
   ```bash
   python -m venv venv-iqm
   source venv-iqm/bin/activate
   pip install qiskit-iqm "qiskit<1.3"
   ```
-  
+
 - 🔴 **PennyLane**: Requires separate venv (transitive `ibm-platform-services` dependency)
   ```bash
   python -m venv venv-pennylane
@@ -179,8 +203,10 @@ python examples/multi_vendor_validation.py --simulators-only
 ### Installation Variants
 
 ```bash
+# Using uv (recommended):
+
 # Minimal: core framework only (no quantum simulation)
-pip install -e "."
+uv sync
 
 # Recommended: includes local quantum simulation + AWS/Azure + dev tools
 uv sync --all-extras
@@ -188,10 +214,26 @@ uv sync --all-extras
 # Quantum + dev only (no cloud backends)
 uv sync --extras quantum,dev
 
-# IBM Quantum in separate environment
+# Specific backend only
+uv sync --extra quantum   # Local simulation (Qiskit Aer)
+uv sync --extra braket    # AWS Braket (IonQ, Rigetti, OQC, QuEra)
+uv sync --extra azure     # Azure Quantum (IonQ, Quantinuum, Rigetti, PASQAL)
+
+# Using pip (traditional):
+
+# Minimal: core framework only (no quantum simulation)
+pip install -e "."
+
+# Recommended: includes local quantum simulation + AWS/Azure + dev tools
+pip install -e ".[all]"
+
+# Quantum + dev only (no cloud backends)
+pip install -e ".[quantum,dev]"
+
+# IBM Quantum in separate environment (dependency conflicts)
 python -m venv venv-ibm && source venv-ibm/bin/activate && pip install -e ".[quantum]" qiskit-ibm-runtime
 
-# IQM in separate environment  
+# IQM in separate environment (Qiskit version constraints)
 python -m venv venv-iqm && source venv-iqm/bin/activate && pip install "qiskit<1.3" qiskit-iqm
 ```
 
