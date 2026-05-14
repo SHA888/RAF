@@ -275,6 +275,11 @@ If real hardware access is limited:
 
 **Validation**:
 ```bash
+# Using uv (recommended)
+uv sync
+python -c "import sys; assert sys.version_info >= (3, 12)"
+
+# Or using pip
 python -c "import sys; assert sys.version_info >= (3, 12)" && pip install -e .
 ```
 
@@ -303,6 +308,12 @@ python -c "import sys; assert sys.version_info >= (3, 12)" && pip install -e .
 
 **Validation**:
 ```bash
+# Using uv (recommended)
+uv run pre-commit run --all-files
+uv run pytest tests/
+uv run mypy raf/
+
+# Or with pip (tools already installed)
 pre-commit run --all-files && pytest tests/ && mypy raf/
 ```
 
@@ -338,13 +349,20 @@ pre-commit run --all-files && pytest tests/ && mypy raf/
 
 **Testing Strategy** (per-group):
 ```bash
-# Test each dependency group
-pip install "numpy>=1.26" "scipy>=1.14" && pytest tests/ -v
+# Using uv (recommended)
+uv sync --extras quantum,dev
+pytest tests/ -v
 
 # Validate pandas migration (watch for deprecated API usage)
-pip install "pandas>=2.2" && pytest tests/ -v
+pytest tests/ -v
 
 # Validate documentation build
+uv sync --extras docs
+uv run sphinx-build docs/ build/
+
+# Or using pip
+pip install "numpy>=1.26" "scipy>=1.14" && pytest tests/ -v
+pip install "pandas>=2.2" && pytest tests/ -v
 pip install -e ".[docs]" && sphinx-build docs/ build/
 ```
 
@@ -379,6 +397,11 @@ pip install -e ".[docs]" && sphinx-build docs/ build/
 
 **Validation**:
 ```bash
+# Using uv (recommended)
+uv run mypy raf/ --strict
+uv run ruff check raf/ --select UP
+
+# Or with pip (tools already installed)
 mypy raf/ --strict && ruff check raf/ --select UP
 ```
 
@@ -408,6 +431,11 @@ mypy raf/ --strict && ruff check raf/ --select UP
 
 **Validation**:
 ```bash
+# Using uv (recommended)
+uv run pytest tests/ -v --cov=raf --cov-report=term-missing --cov-report=html
+uv run coverage report --fail-under=85
+
+# Or with pip (tools already installed)
 pytest tests/ -v --cov=raf --cov-report=term-missing --cov-report=html
 coverage report --fail-under=85
 ```
@@ -437,7 +465,11 @@ coverage report --fail-under=85
 
 **Validation**:
 ```bash
-# Verify package metadata is valid
+# Using uv (recommended)
+uv build --sdist
+tar -tzf dist/raf-*.tar.gz | head -20
+
+# Or using pip
 python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 ```
 
