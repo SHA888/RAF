@@ -11,8 +11,8 @@ which increases both the diversity and reliability of training data for
 next-generation mitigation models.
 """
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
