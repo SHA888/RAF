@@ -168,12 +168,227 @@
 - [x] Prepare supplementary materials (code, data)
 - [x] Generate final figures in publication quality
 
-### 7.3 Submission Preparation
+### 7.3 Submission Preparation (UPDATED: Post-WCCI)
 
-- [ ] Create camera-ready PDF
-- [ ] Prepare author information
-- [ ] Write cover letter (if required)
-- [ ] Submit to IEEE WCCI 2026
+- [x] Create camera-ready PDF → DEFER to 7.4 (arXiv first)
+- [x] Prepare author information
+- [x] Write cover letter → Need for Nature MI submission (Phase 10)
+- [x] IEEE WCCI 2026 → ❌ MISSED (Jan 31 deadline passed)
+
+**New Path**: arXiv + Nature MI + AAAI 2027 (see Phase 10)
+
+---
+
+## Phase 8: Multi-Vendor Hardware Validation (DEFERRED - Future Work)
+
+> **Status**: Deferred due to vendor account access issues. Current simulation-based
+> validation is scientifically valid. Real hardware validation planned for future work.
+
+### 8.1 Azure Quantum Setup (Deferred)
+
+- [ ] Create Azure account and Quantum workspace
+- [ ] Configure `azure-quantum` credentials
+- [ ] Test connection with IonQ simulator
+
+### 8.2 AWS Braket Setup (Deferred)
+
+- [ ] Create AWS account with Braket access
+- [ ] Configure AWS credentials
+- [ ] Test connection with IonQ/Rigetti simulators
+
+### 8.3 Cross-Vendor Validation Experiments (Deferred)
+
+- [ ] Run Error Mitigation loop on IonQ (trapped-ion)
+- [ ] Run Error Mitigation loop on Rigetti (superconducting)
+- [ ] Compare acceleration dynamics across hardware types
+- [ ] Measure hardware-specific bottleneck effects
+
+### 8.4 Paper Enhancement (Deferred)
+
+- [ ] Add Table: Cross-vendor acceleration comparison
+- [ ] Add Figure: Hardware heterogeneity impact on loop dynamics
+- [ ] Update Section V.D with real hardware results
+- [ ] Strengthen "hardware-agnostic" claims with empirical evidence
+
+---
+
+## Phase 10: arXiv + Journal Submission (PRIORITY - START NOW)
+
+**Goal**: Publish preprint on arXiv by June 1, 2026 + formal venue submission by July 1, 2026
+
+**Timeline**: 3 weeks (May 15 - Jun 5, 2026)
+
+---
+
+### Phase 10.1: Manuscript Finalization (Week 1-2, May 15-29)
+
+**Deliverables**: Publication-ready manuscript + figures
+
+- [ ] Extract quantitative results from experiments
+  - [ ] Run: `python examples/empirical_validation.py --mode full`
+  - [ ] Collect all outputs to `results/`
+  - [ ] Extract: mitigation_accuracy, experiment_scale, acceleration_metrics
+
+- [ ] Generate publication-quality figures (5-7 total)
+  - [ ] Figure 1: The Three Acceleration Loops (diagram)
+  - [ ] Figure 2: Error Mitigation Loop acceleration dynamics (line plot)
+  - [ ] Figure 3: Cross-loop coupling matrix (heatmap)
+  - [ ] Figure 4: Bottleneck validation results (bar chart)
+  - [ ] Table 1: Empirical results summary (acceleration_rate, bottleneck_type, recommendation)
+  - [ ] Table 2: Hardware heterogeneity impact (loop_name, device, acceleration_rate, bottleneck)
+
+- [ ] Write manuscript sections
+  - [ ] Abstract (max 250 words) — state 3 main findings
+  - [ ] Introduction (1 page) — motivation, problem, contributions
+  - [ ] Related Work (1 page) — Singh 2025, AlphaQubit, GP-QML, position of RAF
+  - [ ] Framework (2-3 pages) — loop formalization, metrics, coupling, bottlenecks
+  - [ ] Empirical Validation (2-3 pages) — experimental setup, results by loop, cross-loop findings
+  - [ ] Discussion (1-2 pages) — findings summary, limitations (simulation-only, 5-qubit scale), future work
+  - [ ] Conclusion (0.5 page)
+  - [ ] References (1 page) — verify all DOIs/URLs
+
+- [ ] Format for submission
+  - [ ] Choose format: IEEE 2-column OR NIPS format
+  - [ ] Use Overleaf.com (free, no install) OR local LaTeX
+  - [ ] Compile to PDF with all figures embedded
+  - [ ] Page limit: 6-12 pages (depending on venue)
+
+**Effort**: ~40 hours (writing) + 10 hours (figures) = 50 hours total
+
+**Validation**:
+```bash
+# Verify empirical data is ready
+python examples/empirical_validation.py --mode quick
+# Manual check: all figures are high-res (300+ dpi)
+# Manual check: all citations have DOIs
+```
+
+---
+
+### Phase 10.2: arXiv Submission (Week 2, May 22-29)
+
+**Deliverables**: Preprint on arXiv with public GitHub link
+
+- [ ] Create arXiv account: https://arxiv.org/user/register
+- [ ] Prepare arXiv submission package
+  - [ ] `paper.pdf` (compiled, all figures embedded)
+  - [ ] `source.tar.gz` (LaTeX source, figures, bib file)
+  - [ ] Verify: No author names if anonymized (arXiv allows names for this)
+
+- [ ] Select categories
+  - [ ] Primary: cs.LG (Machine Learning)
+  - [ ] Secondary: quant-ph (Quantum Physics)
+  - [ ] Tertiary: cs.SY (Systems & Control)
+
+- [ ] Submit to arXiv via https://arxiv.org/submit
+  - [ ] Get arXiv ID (format: 2605.xxxxx)
+  - [ ] Expected publication: 24-48 hours
+
+- [ ] Post-publication
+  - [ ] Update GitHub README.md with arXiv link
+    ```markdown
+    ## Preprint
+
+    This work is available on arXiv: [arXiv:2605.xxxxx](https://arxiv.org/abs/2605.xxxxx)
+    ```
+  - [ ] Tweet/announce: "RAF paper available at arXiv:2605.xxxxx"
+  - [ ] Share on Reddit r/quantum, r/MachineLearning, Quantum Computing Slack
+  - [ ] Solicit feedback from quantum computing community
+
+**Effort**: ~5 hours (formatting + upload)
+
+**Timeline**: arXiv ID in hand by **June 1, 2026**
+
+---
+
+### Phase 10.3: Formal Journal Submission (Week 3-4, May 29 - Jun 12)
+
+**Deliverables**: Submitted manuscript to Nature Machine Intelligence OR Quantum Science & Technology
+
+#### 10.3.1 Nature Machine Intelligence (PRIMARY TARGET)
+
+- [ ] Create author account at https://www.nature.com/natmachintell/
+- [ ] Reformat as perspective piece (3-4k words)
+  - [ ] Shorten to 3,500 words (perspective format)
+  - [ ] Focus on "why this matters" over experimental details
+  - [ ] Remove some empirical results, emphasize insights
+
+- [ ] Write cover letter
+  - [ ] 1-2 paragraphs explaining significance
+  - [ ] Highlight: novel framework, multiple acceleration loops, cross-loop coupling
+  - [ ] Mention arXiv preprint for full details
+
+- [ ] Submit via https://www.nature.com/natmachintell/
+  - [ ] Include: manuscript PDF, figures, author info, suggested reviewers
+  - [ ] Expected review time: 2-3 months
+  - [ ] Expected decision: **October-November 2026**
+
+**Effort**: ~10 hours (reformat + cover letter)
+
+#### 10.3.2 Backup: Quantum Science & Technology (if Nature rejects)
+
+- [ ] Create author account at https://iopscience.iop.org/journal/2058-9565
+- [ ] Keep full technical manuscript (6-8 pages)
+- [ ] Write cover letter (same as Nature MI)
+- [ ] Submit with same figures + tables
+- [ ] Expected review time: 2-3 months
+- [ ] Expected decision: **December 2026** (faster track available)
+
+**Effort**: ~2 hours (already formatted)
+
+---
+
+### Phase 10.4: Conference Submission (Week 4, Jun 5-12)
+
+**Deliverables**: Submitted manuscript to AAAI 2027
+
+#### 10.4.1 AAAI 2027 (RECOMMENDED CONFERENCE)
+
+- [ ] Create AAAI 2027 account (opens ~June 2026)
+- [ ] Reformat as technical conference paper
+  - [ ] Shorten to 8 pages + references
+  - [ ] Focus on empirical validation results
+  - [ ] Include all figures + tables
+
+- [ ] Write cover letter
+  - [ ] Position as "framework for understanding QC-ML acceleration"
+  - [ ] Mention prior work (Singh 2025, etc.)
+  - [ ] Highlight novelty: first empirical validation of cross-loop coupling
+
+- [ ] Submit before deadline (assumed **August 15, 2026**)
+  - [ ] Early submission (by June-July) may get faster review
+  - [ ] Expected decision: **October-November 2026**
+
+**Timeline**:
+- Deadline: ~Aug 15, 2026
+- Review period: Aug-Oct 2026
+- Decision: Late October 2026
+- Conference: Feb 2027
+
+**Effort**: ~5 hours (reformat + cover letter)
+
+---
+
+### Phase 10.5: Parallel Actions (During Review)
+
+**While waiting for responses (Jun-Oct 2026)**:
+
+- [ ] GitHub engagement
+  - [ ] Create GitHub Issues for extension ideas
+  - [ ] Ask for Stars/citations in README
+  - [ ] Welcome community contributions
+
+- [ ] Community outreach
+  - [ ] Post on quantum computing forums (Reddit, Slack, Discourse)
+  - [ ] Link to arXiv preprint
+  - [ ] Solicit feedback for revision
+
+- [ ] Code improvements (if time allows)
+  - [ ] Increase test coverage to 85%+
+  - [ ] Complete Phase 9.4 (type hints modernization)
+  - [ ] Add interactive dashboard for experiments
+
+**Effort**: ~10 hours (optional, flexibility based on review feedback)
 
 ---
 
@@ -263,24 +478,16 @@ If real hardware access is limited:
 
 ---
 
-## Daily Schedule (Suggested)
+## Revised Publication Timeline (Post-WCCI)
 
-| Day | Focus      | Deliverables                                       |
-| --- | ---------- | -------------------------------------------------- |
-| 1   | Setup      | Qiskit installed, IBM account, backend abstraction |
-| 2   | Backend    | `QiskitBackend`, `AerBackend` complete             |
-| 3   | Noise      | Noise models calibrated, basic circuits running    |
-| 4   | EM Loop    | VQE circuits, mitigation experiment design         |
-| 5   | EM Loop    | Data collection, acceleration metrics              |
-| 6   | AD Loop    | Surrogate model implementation                     |
-| 7   | AD Loop    | QAS experiment running                             |
-| 8   | AD Loop    | Results analysis, heterogeneity study              |
-| 9   | CC Loop    | Drift simulation, ML tracking                      |
-| 10  | CC Loop    | Control optimization, results                      |
-| 11  | Cross-Loop | Integrated experiment, validation                  |
-| 12  | Paper      | References fixed, roadmap written                  |
-| 13  | Paper      | Results section updated, figures                   |
-| 14  | Polish     | Final review, submission prep                      |
+| Week | Dates | Focus | Deliverables |
+|------|-------|-------|--------------|
+| 1 | May 15-22 | Manuscript finalization | Draft + figures complete |
+| 2 | May 22-29 | arXiv submission | Preprint online (arXiv ID obtained) |
+| 3 | May 29-Jun 5 | Journal submission | Submitted to Nature MI + AAAI 2027 |
+| 4-10 | Jun-Aug | Review phase | Community feedback on preprint |
+| 11-14 | Aug-Oct | Revision phase | Address reviewer comments |
+| 15+ | Oct-Dec 2026 | Publication | Expected acceptance + publication ✅ |
 
 ---
 
@@ -579,10 +786,49 @@ python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 
 ---
 
+## Timeline Summary: arXiv + Multi-Venue Strategy
+
+**Immediate Priority** (Weeks 1-2):
+- Finalize manuscript with empirical results
+- Generate publication-quality figures
+- Submit to arXiv by June 1, 2026
+
+**Secondary Priority** (Week 3):
+- Prepare journal submission (Nature MI perspective)
+- Prepare conference submission (AAAI 2027)
+- Both in parallel for coverage
+
+**Expected Publication** (Q4 2026):
+- arXiv preprint: June 2026 ✅
+- Nature MI/journal decision: Oct-Dec 2026
+- AAAI 2027 decision: Oct-Nov 2026
+- Formal publication: **Dec 2026 or Q1 2027**
+
+---
+
+## Critical Path Dependencies
+
+```
+Phase 10.1 (Manuscript)
+    ↓
+Phase 10.2 (arXiv) ← MILESTONE: June 1, 2026
+    ↓
+Phase 10.3 (Journal) ← MILESTONE: July 1, 2026
+    ↓
+Phase 10.4 (Conference) ← MILESTONE: Aug 15, 2026
+    ↓
+Review & Revision (Aug-Oct 2026)
+    ↓
+Publication (Oct-Dec 2026) ✅
+```
+
+---
+
 ## Notes
 
-- Queue times on IBM Quantum can be unpredictable; submit jobs early
-- Focus on Error Mitigation loop first (most feasible, clearest signal)
-- Noise simulation with FakeBackends is scientifically valid and commonly used
-- Keep experiments small (2-5 qubits) to ensure tractability
-- Document all experimental parameters for reproducibility
+- **arXiv first**: Stamps priority, allows parallel submissions
+- **Parallel venues**: Nature MI (primary) + AAAI 2027 (conference backup) maximizes coverage
+- **Simulation is valid**: Device-calibrated noise accepted at top venues; real hardware as future work
+- **Test coverage critical**: Ensure 85%+ before final submission
+- **Community feedback**: Use arXiv comments to improve before journal review
+- **Documentation**: Phase 10.5 includes code improvements during review phase
