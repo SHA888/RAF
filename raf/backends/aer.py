@@ -3,7 +3,7 @@ Qiskit Aer backend for noisy quantum simulation.
 """
 
 import time
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import Any, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 from .noise_models import DeviceNoiseProfile, NoiseModelBuilder
@@ -41,8 +41,8 @@ class AerBackend(QuantumBackend):
 
         self.noise_profile = noise_profile
         self.use_gpu = use_gpu
-        self._noise_model = None
-        self._backend = None
+        self._noise_model: Any = None
+        self._backend: Any = None
 
         self._initialize_backend()
 
@@ -63,6 +63,7 @@ class AerBackend(QuantumBackend):
 
         # GPU configuration
         if self.use_gpu:
+            assert self._backend is not None
             self._backend.set_options(device="GPU")
 
     def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:

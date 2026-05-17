@@ -18,7 +18,7 @@ Setup:
 """
 
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -78,8 +78,8 @@ class BraketBackend(QuantumBackend):
         self.s3_prefix = s3_prefix
         self.region = region
 
-        self._device = None
-        self._s3_location = None
+        self._device: Any = None
+        self._s3_location: Optional[Tuple[str, str]] = None
 
     def _initialize(self) -> None:
         """Lazy initialization of Braket device."""

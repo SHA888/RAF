@@ -82,7 +82,7 @@ def run_simulation(iterations: int = 20, scenario: str = "baseline") -> Dict[str
     raf.add_loop(calibration_loop)
 
     # Run simulation
-    history = {
+    history: Dict[str, List[float]] = {
         "error_mitigation": [],
         "ansatz_design": [],
         "calibration_control": [],

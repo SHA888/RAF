@@ -353,7 +353,7 @@ class NoiseAwareCompiler:
         f_two = (1 - self.noise_profile.two_qubit_error) ** n_two
         f_readout = (1 - self.noise_profile.readout_error) ** circuit.num_qubits
 
-        return f_single * f_two * f_readout
+        return float(f_single * f_two * f_readout)
 
     def _count_gates(self, circuit: Any) -> Tuple[int, int, int]:
         """Count total gates, depth, and two-qubit gates."""

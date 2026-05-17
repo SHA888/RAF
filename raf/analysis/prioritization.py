@@ -52,7 +52,7 @@ class InvestmentOpportunity:
     timeline: str
     roi_score: float = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Compute ROI: impact × (1 - maturity) / effort
         if self.effort > 0:
             self.roi_score = self.impact_score * (1 - self.maturity) / self.effort
@@ -177,18 +177,18 @@ class ResearchPrioritizer:
         },
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the research prioritizer."""
         self.opportunities: List[InvestmentOpportunity] = []
         self._init_default_opportunities()
 
-    def _init_default_opportunities(self):
+    def _init_default_opportunities(self) -> None:
         """Initialize default investment opportunities."""
         for opp_def in self.DEFAULT_OPPORTUNITIES:
-            opp = InvestmentOpportunity(**opp_def)
+            opp = InvestmentOpportunity(**opp_def)  # type: ignore[arg-type]
             self.opportunities.append(opp)
 
-    def add_opportunity(self, opportunity: InvestmentOpportunity):
+    def add_opportunity(self, opportunity: InvestmentOpportunity) -> None:
         """Add a custom investment opportunity."""
         self.opportunities.append(opportunity)
 
@@ -227,7 +227,7 @@ class ResearchPrioritizer:
             "high_roi_count": len([o for o in ranked if o.roi_score > 0.3]),
         }
 
-    def _adjust_for_framework(self, framework) -> List[InvestmentOpportunity]:
+    def _adjust_for_framework(self, framework: Any) -> List[InvestmentOpportunity]:
         """Adjust opportunity scores based on framework state."""
         adjusted = []
 
@@ -290,7 +290,7 @@ class ResearchPrioritizer:
         return groups
 
     def _generate_phases(
-        self, opportunities: List[InvestmentOpportunity], framework
+        self, opportunities: List[InvestmentOpportunity], framework: Any
     ) -> List[Dict[str, Any]]:
         """Generate phased implementation plan."""
         phases = []
@@ -353,7 +353,7 @@ class ResearchPrioritizer:
         return phases
 
     def _compute_expected_acceleration(
-        self, top_investments: List[InvestmentOpportunity], framework
+        self, top_investments: List[InvestmentOpportunity], framework: Any
     ) -> Dict[str, float]:
         """Compute expected acceleration from top investments."""
         expected = {loop: 1.0 for loop in framework.loops}
@@ -367,7 +367,9 @@ class ResearchPrioritizer:
 
         return expected
 
-    def compare_strategies(self, framework, strategies: List[List[str]]) -> List[Dict[str, Any]]:
+    def compare_strategies(
+        self, framework: Any, strategies: List[List[str]]
+    ) -> List[Dict[str, Any]]:
         """
         Compare different investment strategies.
 

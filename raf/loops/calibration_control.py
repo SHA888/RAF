@@ -514,7 +514,7 @@ class CalibrationControlLoop(AccelerationLoop):
         )
 
         # Quantum volume ~ 2^(effective_depth)^(1/3) for reasonable approximation
-        return 2 ** (effective_depth ** (1 / 3))
+        return float(2 ** (effective_depth ** (1 / 3)))
 
     def summary(self) -> Dict[str, Any]:
         """Generate a summary including calibration-control-specific state."""

@@ -319,7 +319,7 @@ class SimulatedLoop:
         # Add small noise
         acceleration *= 1.0 + 0.05 * self.rng.standard_normal()
 
-        return max(0.5, acceleration)
+        return float(max(0.5, acceleration))
 
     def iterate(self, n_iterations: int = 5) -> float:
         """

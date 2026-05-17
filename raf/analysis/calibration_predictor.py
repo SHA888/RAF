@@ -384,18 +384,21 @@ class CalibrationPredictor:
         """Normalize input data."""
         if self._input_mean is None:
             return X
+        assert self._input_std is not None
         return (X - self._input_mean) / (self._input_std + 1e-8)
 
     def _normalize_output(self, y: np.ndarray) -> np.ndarray:
         """Normalize output data."""
         if self._output_mean is None:
             return y
+        assert self._output_std is not None
         return (y - self._output_mean) / (self._output_std + 1e-8)
 
     def _denormalize_output(self, y: np.ndarray) -> np.ndarray:
         """Denormalize output data."""
         if self._output_mean is None:
             return y
+        assert self._output_std is not None
         return y * (self._output_std + 1e-8) + self._output_mean
 
     def train(
@@ -455,7 +458,7 @@ class CalibrationPredictor:
         self._initialize_weights(input_dim, output_dim)
 
         # Training loop
-        history = {"train_loss": [], "val_loss": []}
+        history: Dict[str, List[float]] = {"train_loss": [], "val_loss": []}
         n_train = len(X_train)
 
         for epoch in range(epochs):
@@ -542,8 +545,10 @@ class CalibrationPredictor:
         confidence = None
         if return_confidence:
             # Simple confidence based on how far predictions are from training mean
-            deviation = np.abs(y_pred_flat - self._output_mean) / (self._output_std + 1e-8)
-            confidence = np.exp(-np.mean(deviation, axis=1))
+            if self._output_mean is not None:
+                assert self._output_std is not None
+                deviation = np.abs(y_pred_flat - self._output_mean) / (self._output_std + 1e-8)
+                confidence = np.exp(-np.mean(deviation, axis=1))
 
         return y_pred, confidence
 

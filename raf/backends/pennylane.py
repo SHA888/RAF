@@ -209,7 +209,7 @@ class PennyLaneBackend(QuantumBackend):
         """Execute multiple circuits."""
         return [self.execute(circuit, shots=shots, **kwargs) for circuit in circuits]
 
-    def _qiskit_to_pennylane(self, qiskit_circuit: Any) -> Callable:
+    def _qiskit_to_pennylane(self, qiskit_circuit: Any) -> Callable[..., Any]:
         """Convert Qiskit circuit to PennyLane QNode."""
         try:
             import pennylane as qml
@@ -231,7 +231,7 @@ class PennyLaneBackend(QuantumBackend):
             ops.append((gate_name, qubits, params))
 
         @qml.qnode(self._device)
-        def circuit():
+        def circuit() -> Any:
             for gate_name, qubits, params in ops:
                 if gate_name == "h":
                     qml.Hadamard(wires=qubits[0])
@@ -264,7 +264,7 @@ class PennyLaneBackend(QuantumBackend):
 
             return qml.probs(wires=range(self.wires))
 
-        return circuit
+        return circuit  # type: ignore[no-any-return]
 
     def _result_to_counts(self, result: Any, shots: int) -> Dict[str, int]:
         """Convert PennyLane result to counts dictionary."""
@@ -283,7 +283,7 @@ class PennyLaneBackend(QuantumBackend):
             total = sum(counts.values())
             if total < shots and counts:
                 # Add remaining to most probable
-                max_key = max(counts, key=counts.get)
+                max_key = max(counts, key=lambda k: counts[k])
                 counts[max_key] += shots - total
 
             return counts
@@ -295,8 +295,8 @@ class PennyLaneBackend(QuantumBackend):
         self,
         circuit_fn: Callable,
         diff_method: str = "best",
-        **qnode_kwargs,
-    ) -> Callable:
+        **qnode_kwargs: Any,
+    ) -> Callable[..., Any]:
         """
         Create a PennyLane QNode from a circuit function.
 
@@ -310,7 +310,7 @@ class PennyLaneBackend(QuantumBackend):
         """
         import pennylane as qml
 
-        return qml.QNode(
+        return qml.QNode(  # type: ignore[no-any-return]
             circuit_fn,
             self._device,
             diff_method=diff_method,
@@ -318,29 +318,27 @@ class PennyLaneBackend(QuantumBackend):
         )
 
     def compute_expectation(
-        self,
-        circuit_fn: Callable,
-        observable: Any,
-        params: Optional[np.ndarray] = None,
-        **kwargs,
+        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs: Any
     ) -> float:
         """
         Compute expectation value of an observable.
 
         Args:
-            circuit_fn: Function defining the quantum circuit
+            circuit: Function defining the quantum circuit
             observable: PennyLane observable (e.g., qml.PauliZ(0))
-            params: Circuit parameters
-            **kwargs: Additional options
+            shots: Not used by PennyLane backend (for compatibility with parent)
+            **kwargs: Can include 'params' for circuit parameters
 
         Returns:
             Expectation value
         """
         import pennylane as qml
 
+        params = kwargs.get("params", None)
+
         @qml.qnode(self._device)
-        def expectation_circuit(*args):
-            circuit_fn(*args)
+        def expectation_circuit(*args: Any) -> Any:
+            circuit(*args) if callable(circuit) else None
             return qml.expval(observable)
 
         if params is not None:

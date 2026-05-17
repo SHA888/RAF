@@ -736,7 +736,7 @@ class CrossLoopValidationExperiment:
             )
 
         final_depth = self.circuit_state["max_reliable_depth"]
-        return (final_depth - initial_depth) / max(1, initial_depth)
+        return float((final_depth - initial_depth) / max(1, initial_depth))
 
     def _interpret_validation(self, benefit_ratio: float, effect_size: float) -> str:
         """Generate interpretation of validation results."""

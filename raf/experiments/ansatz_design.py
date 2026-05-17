@@ -70,7 +70,7 @@ class NeuralSurrogate:
     enabling faster architecture search.
     """
 
-    def __init__(self, hidden_sizes: List[int] = None, random_seed: Optional[int] = None):
+    def __init__(self, hidden_sizes: Optional[List[int]] = None, random_seed: Optional[int] = None):
         """
         Initialize neural surrogate.
 
@@ -78,9 +78,9 @@ class NeuralSurrogate:
             hidden_sizes: Hidden layer sizes for MLP
         """
         self.hidden_sizes = hidden_sizes or [64, 32]
-        self.model = None
-        self.scaler_X = None
-        self.scaler_y = None
+        self.model: Any = None
+        self.scaler_X: Optional[tuple[Any, Any]] = None
+        self.scaler_y: Optional[tuple[Any, Any]] = None
         self.is_trained = False
         self.training_history: List[Dict] = []
         self.rng = np.random.default_rng(random_seed)
@@ -149,6 +149,8 @@ class NeuralSurrogate:
         self.scaler_X = (X.mean(axis=0), X.std(axis=0) + 1e-8)
         self.scaler_y = (y.mean(), y.std() + 1e-8)
 
+        assert self.scaler_X is not None
+        assert self.scaler_y is not None
         X_norm = (X - self.scaler_X[0]) / self.scaler_X[1]
         y_norm = (y - self.scaler_y[0]) / self.scaler_y[1]
 
@@ -224,6 +226,7 @@ class NeuralSurrogate:
             raise ValueError("Surrogate not trained")
 
         x = self._encode_circuit(candidate)
+        assert self.scaler_X is not None
         x_norm = (x - self.scaler_X[0]) / self.scaler_X[1]
 
         # Forward pass
@@ -236,6 +239,7 @@ class NeuralSurrogate:
                 a = z
 
         # Denormalize
+        assert self.scaler_y is not None
         pred = a * self.scaler_y[1] + self.scaler_y[0]
         return float(pred)
 
@@ -476,7 +480,7 @@ class AnsatzDesignExperiment:
         print(f"Running random search ({num_evaluations} evaluations)...")
 
         candidates = []
-        best_performance = 0
+        best_performance = 0.0
         best_candidate = None
 
         for i in range(num_evaluations):
@@ -496,7 +500,7 @@ class AnsatzDesignExperiment:
             candidate = self.evaluate_candidate(candidate, shots=shots)
             candidates.append(candidate)
 
-            if candidate.performance > best_performance:
+            if candidate.performance is not None and candidate.performance > best_performance:
                 best_performance = candidate.performance
                 best_candidate = candidate
 
@@ -531,7 +535,7 @@ class AnsatzDesignExperiment:
         print(f"Running surrogate-guided search ({num_evaluations} evaluations)...")
 
         candidates = []
-        best_performance = 0
+        best_performance = 0.0
         best_candidate = None
 
         # Phase 1: Initial random sampling
@@ -551,7 +555,7 @@ class AnsatzDesignExperiment:
             candidate = self.evaluate_candidate(candidate, shots=shots)
             candidates.append(candidate)
 
-            if candidate.performance > best_performance:
+            if candidate.performance is not None and candidate.performance > best_performance:
                 best_performance = candidate.performance
                 best_candidate = candidate
 
@@ -858,7 +862,7 @@ class HardwareHeterogeneityStudy:
 
     def __init__(
         self,
-        noise_profiles: List[str] = None,
+        noise_profiles: Optional[List[str]] = None,
         num_qubits: int = 4,
     ):
         """

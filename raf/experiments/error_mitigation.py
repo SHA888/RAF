@@ -7,7 +7,7 @@ using realistic noisy simulation.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -48,7 +48,7 @@ class ZNEMitigator:
     Simple implementation for demonstration purposes.
     """
 
-    def __init__(self, scale_factors: List[float] = None):
+    def __init__(self, scale_factors: Optional[List[float]] = None):
         # Use smaller scale factors for better extrapolation
         self.scale_factors = scale_factors or [1.0, 1.5, 2.0]
 
@@ -158,7 +158,7 @@ class CDRMitigator:
     def __init__(self, num_training_circuits: int = 20):
         self.num_training_circuits = num_training_circuits
         self.model = None
-        self._training_data = []
+        self._training_data: List[Tuple[Any, Any]] = []
 
     def train(
         self,
@@ -264,7 +264,7 @@ class ErrorMitigationExperiment:
         self,
         num_qubits: int = 2,
         depth: int = 5,
-        seed: int = None,
+        seed: Optional[int] = None,
     ) -> Any:
         """
         Create a parameterized test circuit.
@@ -430,7 +430,7 @@ class ErrorMitigationExperiment:
         self,
         num_iterations: int = 5,
         circuits_per_iteration: int = 10,
-        depths: List[int] = None,
+        depths: Optional[List[int]] = None,
         shots: int = 1024,
     ) -> Dict[str, Any]:
         """

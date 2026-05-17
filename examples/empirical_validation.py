@@ -102,16 +102,17 @@ def run_full_study(seed: int | None = None):
     print("=" * 70)
 
     for profile_name, data in all_results.items():
-        metrics = data["results"]["acceleration_metrics"]
+        results_dict = data["results"]  # type: ignore[index]
+        metrics = results_dict["acceleration_metrics"]  # type: ignore[index]
         print(f"\n{profile_name}:")
-        print(f"  Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}")
+        print(f"  Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}")  # type: ignore[union-attr]
         print(
             f"  Final error reduction: {metrics.get('final_error_reduction', 0):.1%}"
-            if metrics.get("final_error_reduction")
+            if metrics.get("final_error_reduction")  # type: ignore[union-attr]
             else "  Final error reduction: N/A"
         )
 
-        bottlenecks = data["results"]["bottleneck_indicators"]
+        bottlenecks = results_dict["bottleneck_indicators"]  # type: ignore[index]
         print(f"  Bottlenecks: {bottlenecks.get('num_bottlenecks', 0)}")
 
     return all_results

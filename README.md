@@ -49,7 +49,7 @@ novelty. See CHANGELOG v3 entry above.
 
 ## Overview
 
-The Reciprocal Acceleration Framework provides an open-source Python reference implementation of QC-ML co-evolutionary frameworks described in Singh (2025), Shukla (2025), Maes (2025), and related work. It operationalizes their feedback-loop dynamics through three task-based acceleration loops:
+The Reciprocal Acceleration Framework provides an open-source Python reference implementation of Quantum Computing - Machine Learning (QC-ML) co-evolutionary frameworks described in Singh (2025), Shukla (2025), Maes (2025), and related work. It operationalizes their feedback-loop dynamics through three task-based acceleration loops:
 
 1. **Error Mitigation Loop** - Operating at the output/application level
 2. **Ansatz Design Loop** - Operating at the algorithm/circuit level

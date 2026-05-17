@@ -65,11 +65,11 @@ class CrossLoopAnalyzer:
         >>> print(results["leverage_points"])
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the cross-loop analyzer."""
         self.analysis_history: List[Dict[str, Any]] = []
 
-    def analyze(self, framework) -> Dict[str, Any]:
+    def analyze(self, framework: Any) -> Dict[str, Any]:
         """
         Perform comprehensive cross-loop analysis.
 
@@ -107,7 +107,7 @@ class CrossLoopAnalyzer:
         self.analysis_history.append(results)
         return results
 
-    def _build_coupling_matrix(self, framework) -> Dict[str, Dict[str, float]]:
+    def _build_coupling_matrix(self, framework: Any) -> Dict[str, Dict[str, float]]:
         """Build the coupling matrix from framework couplings."""
         loop_names = list(framework.loops.keys())
         matrix = {name: {n: 0.0 for n in loop_names} for name in loop_names}
@@ -118,7 +118,7 @@ class CrossLoopAnalyzer:
 
         return matrix
 
-    def _compute_current_effects(self, framework) -> List[InteractionEffect]:
+    def _compute_current_effects(self, framework: Any) -> List[InteractionEffect]:
         """Compute current interaction effects based on loop states."""
         effects = []
 
@@ -148,7 +148,7 @@ class CrossLoopAnalyzer:
         return sorted(effects, key=lambda e: abs(e.effect_magnitude), reverse=True)
 
     def _identify_leverage_points(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework
+        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
     ) -> List[Dict[str, Any]]:
         """Identify high-leverage intervention points."""
         leverage_points = []
@@ -194,7 +194,7 @@ class CrossLoopAnalyzer:
             return f"Balanced: {loop_name} both influences and is influenced by other loops"
 
     def _predict_cascades(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework
+        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
     ) -> Dict[str, List[Dict[str, Any]]]:
         """Predict cascade effects from improvements in each loop."""
         predictions = {}
@@ -231,12 +231,16 @@ class CrossLoopAnalyzer:
                                     }
                                 )
 
-            predictions[source_loop] = sorted(cascade, key=lambda c: float(c["cumulative"]), reverse=True)
+            predictions[source_loop] = sorted(
+                cascade,
+                key=lambda c: float(c["cumulative"]),  # type: ignore[arg-type]
+                reverse=True,
+            )
 
         return predictions
 
     def _compute_optimal_allocation(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework
+        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
     ) -> Dict[str, float]:
         """Compute optimal resource allocation across loops."""
         allocations = {}
@@ -301,7 +305,7 @@ class CrossLoopAnalyzer:
         return actual_connections / max_connections
 
     def simulate_intervention(
-        self, framework, target_loop: str, improvement: float = 0.2
+        self, framework: Any, target_loop: str, improvement: float = 0.2
     ) -> Dict[str, float]:
         """
         Simulate the effect of an intervention on one loop.

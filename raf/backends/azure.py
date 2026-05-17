@@ -23,7 +23,7 @@ Setup:
 
 import os
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 

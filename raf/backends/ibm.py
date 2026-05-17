@@ -48,8 +48,8 @@ class IBMQuantumBackend(QuantumBackend):
         self.channel = channel
         self.instance = instance
 
-        self._service = None
-        self._backend = None
+        self._service: Any = None
+        self._backend: Any = None
 
     def _initialize(self) -> None:
         """Lazy initialization of IBM Quantum service."""

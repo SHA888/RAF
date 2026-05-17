@@ -143,7 +143,7 @@ class ExperimentalMetricsCollector:
 
             mitigated_runs = [r for r in it_runs if r.mitigated_error is not None]
             avg_mitigated_error = (
-                sum(r.mitigated_error for r in mitigated_runs) / len(mitigated_runs)
+                sum((float(r.mitigated_error) for r in mitigated_runs), 0.0) / len(mitigated_runs)  # type: ignore[arg-type]
                 if mitigated_runs
                 else None
             )
@@ -245,7 +245,7 @@ class ExperimentalMetricsCollector:
             )
 
         # Check for depth limitation
-        depths = [r.circuit_depth for r in self.runs]
+        depths = [float(r.circuit_depth) for r in self.runs]
         errors = [r.noisy_error for r in self.runs]
 
         # Simple correlation check
@@ -286,7 +286,7 @@ class ExperimentalMetricsCollector:
         if denominator == 0:
             return 0.0
 
-        return numerator / denominator
+        return float(numerator / denominator)
 
     def to_dataframe(self):
         """Convert runs to pandas DataFrame."""

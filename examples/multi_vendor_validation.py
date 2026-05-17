@@ -145,7 +145,7 @@ def run_braket_validation(device: str = "sv1"):
         return None
 
     try:
-        backend = BraketBackend(device_type=device)
+        backend = BraketBackend(device_name=device)
         # Run simple test
         from qiskit import QuantumCircuit
 

@@ -2,6 +2,8 @@
 Interactive dashboard for the Reciprocal Acceleration Framework.
 """
 
+from typing import Any
+
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
@@ -36,11 +38,11 @@ class RAFDashboard:
         "converged": "cyan",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the dashboard."""
         self.console = Console()
 
-    def display(self, framework):
+    def display(self, framework: Any) -> None:
         """
         Display the full dashboard.
 
@@ -73,7 +75,7 @@ class RAFDashboard:
         # Recommendations
         self._display_recommendations(framework)
 
-    def _display_loop_status(self, framework):
+    def _display_loop_status(self, framework: Any) -> None:
         """Display loop status table."""
         table = Table(title="Loop Status", box=box.ROUNDED)
 
@@ -101,7 +103,7 @@ class RAFDashboard:
         self.console.print(table)
         self.console.print()
 
-    def _display_acceleration(self, framework):
+    def _display_acceleration(self, framework: Any) -> None:
         """Display acceleration metrics."""
         analysis = framework.analyze()
 
@@ -126,7 +128,7 @@ class RAFDashboard:
         )
         self.console.print()
 
-    def _display_bottlenecks(self, framework):
+    def _display_bottlenecks(self, framework: Any) -> None:
         """Display active bottlenecks."""
         table = Table(title="Active Bottlenecks", box=box.ROUNDED)
 
@@ -159,7 +161,7 @@ class RAFDashboard:
         self.console.print(table)
         self.console.print()
 
-    def _display_cross_loop(self, framework):
+    def _display_cross_loop(self, framework: Any) -> None:
         """Display cross-loop effects."""
         table = Table(title="Cross-Loop Coupling", box=box.ROUNDED)
 
@@ -189,7 +191,7 @@ class RAFDashboard:
         self.console.print(table)
         self.console.print()
 
-    def _display_recommendations(self, framework):
+    def _display_recommendations(self, framework: Any) -> None:
         """Display recommendations."""
         analysis = framework.analyze()
 
@@ -204,7 +206,7 @@ class RAFDashboard:
                 )
             )
 
-    def display_loop_detail(self, loop):
+    def display_loop_detail(self, loop: Any) -> None:
         """
         Display detailed view of a single loop.
 
@@ -256,7 +258,7 @@ class RAFDashboard:
             for rec in recs:
                 self.console.print(f"  • {rec}")
 
-    def display_summary(self, framework) -> str:
+    def display_summary(self, framework: Any) -> str:
         """
         Generate and return a summary string.
 

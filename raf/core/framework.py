@@ -354,7 +354,7 @@ class ReciprocalAccelerationFramework:
 
         # Add high-leverage investment recommendations
         for investment in self.HIGH_LEVERAGE_INVESTMENTS[:2]:
-            if investment["current_maturity"] < 0.5:
+            if float(investment["current_maturity"]) < 0.5:  # type: ignore[arg-type]
                 recommendations.append(
                     f"[High-Leverage] Invest in {investment['name']}: {investment['rationale']}"
                 )
@@ -367,12 +367,13 @@ class ReciprocalAccelerationFramework:
 
         for inv in self.HIGH_LEVERAGE_INVESTMENTS:
             # Check which affected loops are actually in the framework
-            active_affected = [loop for loop in inv["affected_loops"] if loop in self.loops]
+            affected_loops: List[str] = inv["affected_loops"]  # type: ignore[assignment]
+            active_affected = [loop for loop in affected_loops if loop in self.loops]
 
             if active_affected:
                 # Compute adjusted impact based on active loops
-                coverage = len(active_affected) / len(inv["affected_loops"])
-                adjusted_impact = float(inv["impact_score"]) * coverage
+                coverage = len(active_affected) / len(affected_loops)
+                adjusted_impact = float(inv["impact_score"]) * coverage  # type: ignore[arg-type]
 
                 investments.append(
                     {
@@ -380,8 +381,8 @@ class ReciprocalAccelerationFramework:
                         "description": inv["description"],
                         "affected_loops": active_affected,
                         "impact_score": adjusted_impact,
-                        "current_maturity": float(inv["current_maturity"]),
-                        "opportunity_score": adjusted_impact * (1 - float(inv["current_maturity"])),
+                        "current_maturity": float(inv["current_maturity"]),  # type: ignore[arg-type]
+                        "opportunity_score": adjusted_impact * (1 - float(inv["current_maturity"])),  # type: ignore[arg-type]
                         "rationale": inv["rationale"],
                     }
                 )
