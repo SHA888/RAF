@@ -259,7 +259,7 @@ class ProgressMetric:
             return None
         # Simple linear trend
         x = np.arange(len(values))
-        slope = np.polyfit(x, values, 1)[0]
+        slope = float(np.polyfit(x, values, 1)[0])
         # Adjust sign based on direction
         return -slope if self.direction == "lower" else slope
 
