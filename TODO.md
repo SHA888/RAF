@@ -1,4 +1,18 @@
-# RAF Empirical Validation TODO
+# RAF Project TODO
+
+## Active Goal & Timeline (v3 — 2026-05-17)
+
+**Goal**: Submit RAF to the Journal of Open Source Software (JOSS) as an open-source reference implementation of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025).
+
+**Timeline**: ~3-4 months (May 17, 2026 → JOSS submission August 2026 → DOI assigned Sep-Oct 2026).
+
+See `Status (v3)` block below for full rationale, and `Phase 10 v3` for the active plan. See also Phase 11 (methodology prerequisites for JOSS submission).
+
+---
+
+## Goal & Timeline v0 (SUPERSEDED 2026-05-17 — kept for traceability)
+
+> Superseded first by Phase 10 v1 (arXiv + Nature MI, Jan 2026), then by Phase 10 v2 (NeurIPS workshops, May 2026 morning), then by Phase 10 v3 (JOSS, May 2026 afternoon). Original framing preserved verbatim below per `keep verbatim reserved` rule.
 
 **Goal**: Transform RAF from a conceptual framework to an empirically-grounded paper suitable for IEEE WCCI 2026.
 
@@ -627,7 +641,7 @@ JOSS paper format reference: https://joss.readthedocs.io/en/latest/paper.html
 
 ---
 
-## Phase 11: Methodology Fixes (PREREQUISITE for Phase 10 v2 — added 2026-05-17)
+## Phase 11: Methodology Fixes (PREREQUISITE for Phase 10 v3 / JOSS submission — added 2026-05-17, re-targeted for v3)
 
 > **v3 priority re-ordering (2026-05-17)** — under JOSS-first strategy (Phase 10 v3 supersedes Phase 10 v2):
 >
@@ -638,9 +652,9 @@ JOSS paper format reference: https://joss.readthedocs.io/en/latest/paper.html
 >
 > The original Phase 11 content below remains accurate; only the priority and the "Definition of Done" change.
 
-**Goal**: Fix three concrete methodology issues so that the workshop paper can honestly claim what it presents. Without these, no submission is defensible.
+**Goal**: Fix three concrete methodology issues so that the JOSS submission (and any future paper) can honestly claim what it presents. Without these, no submission is defensible.
 
-**Timeline**: ~6-10 weeks (May 17, 2026 → ~July 31, 2026), running in parallel with Phase 10 v2 .1 CFP monitoring.
+**Timeline**: ~6-10 weeks (May 17, 2026 → ~July 31, 2026), running in parallel with Phase 10 v3 .1 repo preparation.
 
 **Owner**: This is the most important code work before any paper drafting begins.
 
