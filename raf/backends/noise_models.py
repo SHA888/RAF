@@ -545,13 +545,13 @@ class NoiseModelBuilder:
 
         profile = DeviceNoiseProfile(
             name=f"{device_name}_published",
-            device_type=spec["device_type"],
-            num_qubits=spec["num_qubits"],
-            t1_us=spec["t1_us"],
-            t2_us=spec["t2_us"],
-            single_qubit_error=spec["single_qubit_error"],
-            two_qubit_error=spec["two_qubit_error"],
-            readout_error=spec["readout_error"],
+            device_type=DeviceType(spec["device_type"]),
+            num_qubits=int(spec["num_qubits"]),
+            t1_us=float(spec["t1_us"]),
+            t2_us=float(spec["t2_us"]),
+            single_qubit_error=float(spec["single_qubit_error"]),
+            two_qubit_error=float(spec["two_qubit_error"]),
+            readout_error=float(spec["readout_error"]),
             metadata={"source": "published_specifications"},
         )
 
@@ -667,7 +667,8 @@ class DriftingNoiseModel:
             # Use time to seed consistent behavior
             steps = int(time_hours * 10)  # 10 steps per hour
             walk = 0.0
-            rng = self._rng.__class__(self.drift_config.random_seed or 42)
+            seed = self.drift_config.random_seed or 42
+            rng = self._rng.__class__(seed)
             for _ in range(steps):
                 walk += rng.gauss(0, cfg.drift_rate * 0.1)
             factor = 1.0 + max(-cfg.amplitude, min(cfg.amplitude, walk))
@@ -676,7 +677,8 @@ class DriftingNoiseModel:
         elif cfg.drift_type == DriftType.TELEGRAPH:
             # Telegraph noise: sudden jumps between states
             # Simulate Poisson process for jumps
-            rng = self._rng.__class__(self.drift_config.random_seed or 42)
+            seed = self.drift_config.random_seed or 42
+            rng = self._rng.__class__(seed)
             state = 0
             t = 0.0
             while t < time_hours:
