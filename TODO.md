@@ -418,14 +418,14 @@ python -c "import sys; assert sys.version_info >= (3, 12)" && pip install -e .
 
 #### 9.2.2 pyproject.toml Tool Configuration
 
-- [ ] Update `[tool.black]` target-version from `['py39', 'py310', 'py311', 'py312']` to `['py312', 'py313']`
-- [ ] Update `[tool.isort]` to add `py_version = "312"`
-- [ ] Update `[tool.ruff]` target-version from `"py39"` to `"py312"`
-- [ ] Add comprehensive `[tool.ruff.lint]` configuration (E, W, F, I, C4, B, UP, ARG, SIM, PERF rules)
-- [ ] Update `[tool.mypy]` python_version from `"3.9"` to `"3.12"`
-- [ ] Add strict mypy settings: `disallow_untyped_defs`, `disallow_incomplete_defs`, `check_untyped_defs`, `no_implicit_optional`
-- [ ] Update `[tool.pytest.ini_options]` to add `minversion = "8.0"` and coverage reports
-- [ ] Run `pre-commit run --all-files` to validate all changes
+- [x] Update `[tool.black]` target-version from `['py39', 'py310', 'py311', 'py312']` to `['py312', 'py313']`
+- [x] Update `[tool.isort]` to add `py_version = "312"`
+- [x] Update `[tool.ruff]` target-version from `"py39"` to `"py312"`
+- [x] Add comprehensive `[tool.ruff.lint]` configuration (E, W, F, I, C4, B, UP, ARG, SIM, PERF rules)
+- [x] Update `[tool.mypy]` python_version from `"3.9"` to `"3.12"`
+- [x] Add strict mypy settings: `disallow_untyped_defs`, `disallow_incomplete_defs`, `check_untyped_defs`, `no_implicit_optional`
+- [x] Update `[tool.pytest.ini_options]` to add `minversion = "8.0"` and coverage reports
+- [x] Run `pre-commit run --all-files` to validate all changes
 
 **Validation**:
 
