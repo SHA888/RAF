@@ -372,7 +372,7 @@ class ReciprocalAccelerationFramework:
             if active_affected:
                 # Compute adjusted impact based on active loops
                 coverage = len(active_affected) / len(inv["affected_loops"])
-                adjusted_impact = inv["impact_score"] * coverage
+                adjusted_impact = float(inv["impact_score"]) * coverage
 
                 investments.append(
                     {
@@ -380,8 +380,8 @@ class ReciprocalAccelerationFramework:
                         "description": inv["description"],
                         "affected_loops": active_affected,
                         "impact_score": adjusted_impact,
-                        "current_maturity": inv["current_maturity"],
-                        "opportunity_score": adjusted_impact * (1 - inv["current_maturity"]),
+                        "current_maturity": float(inv["current_maturity"]),
+                        "opportunity_score": adjusted_impact * (1 - float(inv["current_maturity"])),
                         "rationale": inv["rationale"],
                     }
                 )
