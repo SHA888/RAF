@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 
-@dataclass
+@dataclass(slots=True)
 class LoopConfig:
     """Configuration for an acceleration loop."""
 
@@ -17,7 +17,7 @@ class LoopConfig:
     initial_params: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(slots=True)
 class RAFConfig:
     """
     Configuration for the Reciprocal Acceleration Framework.

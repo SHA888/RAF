@@ -511,13 +511,13 @@ pip install -e ".[docs]" && sphinx-build docs/ build/
 
 #### 9.4.2 Type Aliases & Advanced Patterns
 
-- [ ] Create `/raf/types.py` with common type aliases:
+- [x] Create `/raf/types.py` with common type aliases:
   ```python
   LoopMetrics: TypeAlias = dict[str, AccelerationMetric]
   BottleneckMap: TypeAlias = dict[str, list[BottleneckIndicator]]
   ```
-- [ ] Use `TypedDict` for configuration dataclasses in `/raf/utils/config.py`
-- [ ] Add `@dataclass` modernization where applicable (use `slots=True` for memory efficiency)
+- [x] Use `TypedDict` for configuration dataclasses in `/raf/utils/config.py`
+- [x] Add `@dataclass` modernization where applicable (use `slots=True` for memory efficiency)
 
 #### 9.4.3 Type Checking
 
