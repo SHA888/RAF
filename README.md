@@ -1,4 +1,4 @@
-# <!--
+<!--
 
 CHANGELOG (most recent first)
 Historical content (taglines, sections, code examples that were replaced)
