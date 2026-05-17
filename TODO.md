@@ -521,9 +521,9 @@ pip install -e ".[docs]" && sphinx-build docs/ build/
 
 #### 9.4.3 Type Checking
 
-- [ ] Run `mypy raf/ --strict` and fix any errors
-- [ ] Run `ruff check raf/ --select UP` to find remaining type issues
-- [ ] Ensure all public functions have return type annotations
+- [x] Run `mypy raf/ --strict` and fix any errors
+- [x] Run `ruff check raf/ --select UP` to find remaining type issues
+- [x] Ensure all public functions have return type annotations
 
 **Validation**:
 
