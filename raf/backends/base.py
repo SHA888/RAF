@@ -188,7 +188,7 @@ class CircuitMetrics:
     @classmethod
     def from_qiskit_circuit(cls, circuit: Any) -> "CircuitMetrics":
         """Extract metrics from a Qiskit QuantumCircuit."""
-        gate_counts = {}
+        gate_counts: dict[str, int] = {}
         two_qubit_count = 0
 
         for instruction in circuit.data:

@@ -273,7 +273,7 @@ class ResearchPrioritizer:
         self, opportunities: List[InvestmentOpportunity]
     ) -> Dict[str, List[str]]:
         """Group opportunities by timeline."""
-        groups = {
+        groups: Dict[str, List[str]] = {
             "short_term": [],  # < 1 year
             "medium_term": [],  # 1-2 years
             "long_term": [],  # > 2 years

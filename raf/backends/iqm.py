@@ -13,7 +13,7 @@ Setup:
 
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -56,10 +56,13 @@ class IQMBackend(QuantumBackend):
         if self._backend is not None:
             return
 
-        try:
+        if TYPE_CHECKING:
             from qiskit_iqm import IQMProvider
-        except ImportError:
-            raise ImportError("qiskit-iqm required. Install with: pip install qiskit-iqm")
+        else:
+            try:
+                from qiskit_iqm import IQMProvider
+            except ImportError:
+                raise ImportError("qiskit-iqm required. Install with: pip install qiskit-iqm")
 
         if not self.token:
             raise ValueError(
@@ -73,6 +76,8 @@ class IQMBackend(QuantumBackend):
     def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
         """Execute circuit on IQM hardware."""
         self._initialize()
+
+        assert self._backend is not None
 
         from qiskit import transpile
 

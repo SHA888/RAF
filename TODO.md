@@ -408,13 +408,13 @@ python -c "import sys; assert sys.version_info >= (3, 12)" && pip install -e .
 
 #### 9.2.1 Pre-commit Hooks
 
-- [ ] Update `pre-commit-hooks` rev from `v4.5.0` to `v4.6.0`
-- [ ] Update `black` rev from `24.3.0` to `24.4.0`
-- [ ] Update `isort` rev from `5.13.2` to `5.13.2` (already latest, keep as-is)
-- [ ] Update `ruff` rev from `v0.3.4` to `v0.5.0+`
-- [ ] Add `ruff-format` hook (native formatter introduced in ruff 0.4+)
-- [ ] Add `mypy` pre-commit hook with `v1.11.0`
-- [ ] Update Python version targets in hooks from `python3` to `python3.12`
+- [x] Update `pre-commit-hooks` rev from `v4.5.0` to `v4.6.0`
+- [x] Update `black` rev from `24.3.0` to `24.4.0`
+- [x] Update `isort` rev from `5.13.2` to `5.13.2` (already latest, keep as-is)
+- [x] Update `ruff` rev from `v0.3.4` to `v0.5.0+`
+- [x] Add `ruff-format` hook (native formatter introduced in ruff 0.4+)
+- [x] Add `mypy` pre-commit hook with `v1.11.0`
+- [x] Update Python version targets in hooks from `python3` to `python3.12`
 
 #### 9.2.2 pyproject.toml Tool Configuration
 

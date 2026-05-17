@@ -167,7 +167,7 @@ class LoopDynamicsVisualizer:
 
         # Draw edges with varying width based on coupling strength
         edges = G.edges(data=True)
-        weights = [e[2]["weight"] * 3 for e in edges]
+        weights: list[float] = [e[2]["weight"] * 3 for e in edges]
         nx.draw_networkx_edges(
             G, pos, width=weights, alpha=0.6, edge_color="gray", arrows=True, arrowsize=20, ax=ax
         )
@@ -211,20 +211,21 @@ class LoopDynamicsVisualizer:
         loop_names = list(framework.loops.keys())
         bottleneck_types = set()
 
-        data = {}
+        data: dict[str, dict[str, float]] = {}
         for name, loop in framework.loops.items():
             bottlenecks = loop.identify_bottlenecks()
             data[name] = {}
             for b in bottlenecks:
-                bottleneck_types.add(b.constraint_type)
-                data[name][b.constraint_type] = b.severity_score if b.is_active else 0
+                btype: str = b.constraint_type
+                bottleneck_types.add(btype)
+                data[name][btype] = b.severity_score if b.is_active else 0
 
-        bottleneck_types = sorted(bottleneck_types)
+        bottleneck_types_sorted = sorted(bottleneck_types)
 
         # Create matrix
-        matrix = np.zeros((len(loop_names), len(bottleneck_types)))
+        matrix = np.zeros((len(loop_names), len(bottleneck_types_sorted)))
         for i, loop in enumerate(loop_names):
-            for j, btype in enumerate(bottleneck_types):
+            for j, btype in enumerate(bottleneck_types_sorted):
                 matrix[i, j] = data.get(loop, {}).get(btype, 0)
 
         fig, ax = plt.subplots(figsize=self.figsize)
