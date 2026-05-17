@@ -8,7 +8,7 @@ import pytest
 class TestDeviceNoiseProfile:
     """Tests for DeviceNoiseProfile."""
 
-    def test_ibm_manila_like(self):
+    def test_ibm_manila_like(self) -> None:
         from raf.backends import DeviceNoiseProfile
 
         profile = DeviceNoiseProfile.ibm_manila_like()
@@ -21,7 +21,7 @@ class TestDeviceNoiseProfile:
         assert profile.two_qubit_error == 1e-2
         assert profile.readout_error == 2e-2
 
-    def test_ionq_harmony_like(self):
+    def test_ionq_harmony_like(self) -> None:
         from raf.backends import DeviceNoiseProfile
 
         profile = DeviceNoiseProfile.ionq_harmony_like()
@@ -31,7 +31,7 @@ class TestDeviceNoiseProfile:
         assert profile.t1_us == 10000.0  # Much longer coherence
         assert profile.single_qubit_error < profile.two_qubit_error
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         from raf.backends import DeviceNoiseProfile
 
         profile = DeviceNoiseProfile.ibm_manila_like()
@@ -46,11 +46,11 @@ class TestDeviceNoiseProfile:
 class TestNoiseModelBuilder:
     """Tests for NoiseModelBuilder."""
 
-    @pytest.mark.skipif(
+    @pytest.mark.skipif(  # type: ignore[misc]
         not pytest.importorskip("qiskit_aer", reason="qiskit-aer not installed"),
         reason="qiskit-aer not installed",
     )
-    def test_build_noise_model(self):
+    def test_build_noise_model(self) -> None:
         from raf.backends import DeviceNoiseProfile, NoiseModelBuilder
 
         profile = DeviceNoiseProfile.ibm_manila_like()
@@ -62,11 +62,11 @@ class TestNoiseModelBuilder:
         # Check that noise model has quantum errors
         assert len(noise_model.noise_instructions) > 0
 
-    @pytest.mark.skipif(
+    @pytest.mark.skipif(  # type: ignore[misc]
         not pytest.importorskip("qiskit_aer", reason="qiskit-aer not installed"),
         reason="qiskit-aer not installed",
     )
-    def test_build_with_drift(self):
+    def test_build_with_drift(self) -> None:
         from raf.backends import DeviceNoiseProfile, NoiseModelBuilder
 
         profile = DeviceNoiseProfile.ibm_manila_like()
@@ -81,7 +81,7 @@ class TestNoiseModelBuilder:
 class TestEstimateFidelity:
     """Tests for fidelity estimation."""
 
-    def test_estimate_circuit_fidelity(self):
+    def test_estimate_circuit_fidelity(self) -> None:
         from raf.backends import DeviceNoiseProfile
         from raf.backends.noise_models import estimate_circuit_fidelity
 
@@ -109,7 +109,7 @@ class TestEstimateFidelity:
 class TestAerBackend:
     """Tests for AerBackend."""
 
-    def test_create_ideal_backend(self):
+    def test_create_ideal_backend(self) -> None:
         from raf.backends import create_backend
 
         backend = create_backend("ideal")
@@ -117,7 +117,7 @@ class TestAerBackend:
         assert backend.name == "aer_simulator"
         assert backend.noise_profile is None
 
-    def test_create_noisy_backend(self):
+    def test_create_noisy_backend(self) -> None:
         from raf.backends import create_backend
 
         backend = create_backend("manila")
@@ -125,7 +125,7 @@ class TestAerBackend:
         assert "noisy" in backend.name
         assert backend.noise_profile is not None
 
-    def test_execute_circuit(self):
+    def test_execute_circuit(self) -> None:
         from qiskit import QuantumCircuit
 
         from raf.backends import create_backend
@@ -144,7 +144,7 @@ class TestAerBackend:
         assert len(result.counts) > 0
         assert sum(result.counts.values()) == 100
 
-    def test_execute_noisy_circuit(self):
+    def test_execute_noisy_circuit(self) -> None:
         from qiskit import QuantumCircuit
 
         from raf.backends import create_backend
@@ -162,7 +162,7 @@ class TestAerBackend:
         assert result.shots == 100
         assert result.error_rate_estimate is not None
 
-    def test_backend_statistics(self):
+    def test_backend_statistics(self) -> None:
         from qiskit import QuantumCircuit
 
         from raf.backends import create_backend
@@ -186,7 +186,7 @@ class TestAerBackend:
 class TestExecutionResult:
     """Tests for ExecutionResult."""
 
-    def test_probabilities(self):
+    def test_probabilities(self) -> None:
         from raf.backends.base import BackendType, ExecutionResult
 
         result = ExecutionResult(
@@ -206,11 +206,11 @@ class TestExecutionResult:
 class TestCircuitMetrics:
     """Tests for CircuitMetrics."""
 
-    @pytest.mark.skipif(
+    @pytest.mark.skipif(  # type: ignore[misc]
         not pytest.importorskip("qiskit", reason="qiskit not installed"),
         reason="qiskit not installed",
     )
-    def test_from_qiskit_circuit(self):
+    def test_from_qiskit_circuit(self) -> None:
         from qiskit import QuantumCircuit
 
         from raf.backends.base import CircuitMetrics

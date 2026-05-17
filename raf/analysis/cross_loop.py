@@ -6,7 +6,7 @@ identifying leverage points and synergistic opportunities.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -32,7 +32,7 @@ class InteractionEffect:
     confidence: float
     description: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source_loop": self.source_loop,
             "target_loop": self.target_loop,
@@ -67,9 +67,9 @@ class CrossLoopAnalyzer:
 
     def __init__(self) -> None:
         """Initialize the cross-loop analyzer."""
-        self.analysis_history: List[Dict[str, Any]] = []
+        self.analysis_history: list[dict[str, Any]] = []
 
-    def analyze(self, framework: Any) -> Dict[str, Any]:
+    def analyze(self, framework: Any) -> dict[str, Any]:
         """
         Perform comprehensive cross-loop analysis.
 
@@ -107,10 +107,10 @@ class CrossLoopAnalyzer:
         self.analysis_history.append(results)
         return results
 
-    def _build_coupling_matrix(self, framework: Any) -> Dict[str, Dict[str, float]]:
+    def _build_coupling_matrix(self, framework: Any) -> dict[str, dict[str, float]]:
         """Build the coupling matrix from framework couplings."""
         loop_names = list(framework.loops.keys())
-        matrix = {name: {n: 0.0 for n in loop_names} for name in loop_names}
+        matrix = {name: dict.fromkeys(loop_names, 0.0) for name in loop_names}
 
         for coupling in framework.couplings:
             if coupling.source_loop in matrix and coupling.target_loop in matrix:
@@ -118,7 +118,7 @@ class CrossLoopAnalyzer:
 
         return matrix
 
-    def _compute_current_effects(self, framework: Any) -> List[InteractionEffect]:
+    def _compute_current_effects(self, framework: Any) -> list[InteractionEffect]:
         """Compute current interaction effects based on loop states."""
         effects = []
 
@@ -148,8 +148,8 @@ class CrossLoopAnalyzer:
         return sorted(effects, key=lambda e: abs(e.effect_magnitude), reverse=True)
 
     def _identify_leverage_points(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
-    ) -> List[Dict[str, Any]]:
+        self, coupling_matrix: dict[str, dict[str, float]], framework: Any
+    ) -> list[dict[str, Any]]:
         """Identify high-leverage intervention points."""
         leverage_points = []
 
@@ -194,8 +194,8 @@ class CrossLoopAnalyzer:
             return f"Balanced: {loop_name} both influences and is influenced by other loops"
 
     def _predict_cascades(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
-    ) -> Dict[str, List[Dict[str, Any]]]:
+        self, coupling_matrix: dict[str, dict[str, float]], _framework: Any
+    ) -> dict[str, list[dict[str, Any]]]:
         """Predict cascade effects from improvements in each loop."""
         predictions = {}
 
@@ -240,8 +240,8 @@ class CrossLoopAnalyzer:
         return predictions
 
     def _compute_optimal_allocation(
-        self, coupling_matrix: Dict[str, Dict[str, float]], framework: Any
-    ) -> Dict[str, float]:
+        self, coupling_matrix: dict[str, dict[str, float]], framework: Any
+    ) -> dict[str, float]:
         """Compute optimal resource allocation across loops."""
         allocations = {}
 
@@ -280,15 +280,15 @@ class CrossLoopAnalyzer:
 
         return allocations
 
-    def _total_coupling(self, coupling_matrix: Dict[str, Dict[str, float]]) -> float:
+    def _total_coupling(self, coupling_matrix: dict[str, dict[str, float]]) -> float:
         """Compute total coupling strength in the system."""
         total = 0.0
         for source in coupling_matrix:
-            for target, strength in coupling_matrix[source].items():
+            for strength in coupling_matrix[source].values():
                 total += strength
         return total
 
-    def _network_density(self, coupling_matrix: Dict[str, Dict[str, float]]) -> float:
+    def _network_density(self, coupling_matrix: dict[str, dict[str, float]]) -> float:
         """Compute network density (fraction of possible connections that exist)."""
         n = len(coupling_matrix)
         if n <= 1:
@@ -306,7 +306,7 @@ class CrossLoopAnalyzer:
 
     def simulate_intervention(
         self, framework: Any, target_loop: str, improvement: float = 0.2
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Simulate the effect of an intervention on one loop.
 
@@ -319,7 +319,7 @@ class CrossLoopAnalyzer:
             Predicted effects on all loops
         """
         coupling_matrix = self._build_coupling_matrix(framework)
-        effects = {loop: 0.0 for loop in coupling_matrix}
+        effects = dict.fromkeys(coupling_matrix, 0.0)
         effects[target_loop] = improvement
 
         # Propagate through coupling matrix

@@ -12,7 +12,7 @@ Key components:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -43,9 +43,9 @@ class OptimizationResult:
     optimized_two_qubit_count: int
     estimated_fidelity_before: float
     estimated_fidelity_after: float
-    strategies_applied: List[str]
+    strategies_applied: list[str]
     optimization_time_ms: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def depth_reduction(self) -> float:
@@ -75,7 +75,7 @@ class OptimizationResult:
             return 0.0
         return (infidelity_before - infidelity_after) / infidelity_before
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "original_depth": self.original_depth,
             "optimized_depth": self.optimized_depth,
@@ -108,7 +108,7 @@ class ControlOptimizationMetrics:
     best_fidelity_improvement: float
     worst_fidelity_improvement: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "avg_depth_reduction": self.avg_depth_reduction,
             "avg_gate_reduction": self.avg_gate_reduction,
@@ -129,14 +129,14 @@ class GateOptimizer:
     applied independently or in combination.
     """
 
-    def __init__(self, random_seed: Optional[int] = None):
+    def __init__(self, random_seed: int | None = None):
         """Initialize gate optimizer."""
         self.rng = np.random.default_rng(random_seed)
 
     def cancel_adjacent_gates(
         self,
-        gate_sequence: List[Tuple[str, List[int]]],
-    ) -> List[Tuple[str, List[int]]]:
+        gate_sequence: list[tuple[str, list[int]]],
+    ) -> list[tuple[str, list[int]]]:
         """
         Cancel adjacent inverse gates (e.g., X-X, H-H, CNOT-CNOT).
 
@@ -176,8 +176,8 @@ class GateOptimizer:
 
     def merge_rotations(
         self,
-        gate_sequence: List[Tuple[str, List[int], float]],
-    ) -> List[Tuple[str, List[int], float]]:
+        gate_sequence: list[tuple[str, list[int], float]],
+    ) -> list[tuple[str, list[int], float]]:
         """
         Merge consecutive rotation gates on the same qubit.
 
@@ -216,8 +216,8 @@ class GateOptimizer:
 
     def reorder_commuting_gates(
         self,
-        gate_sequence: List[Tuple[str, List[int]]],
-    ) -> List[Tuple[str, List[int]]]:
+        gate_sequence: list[tuple[str, list[int]]],
+    ) -> list[tuple[str, list[int]]]:
         """
         Reorder commuting gates to enable further optimizations.
 
@@ -243,12 +243,10 @@ class GateOptimizer:
                 gate1, qubits1 = optimized[i]
                 gate2, qubits2 = optimized[i + 1]
 
-                # Check if gates operate on disjoint qubits
-                if set(qubits1).isdisjoint(set(qubits2)):
-                    # Prefer single-qubit gates first (enables more cancellations)
-                    if len(qubits1) > len(qubits2):
-                        optimized[i], optimized[i + 1] = optimized[i + 1], optimized[i]
-                        changed = True
+                # Check if gates operate on disjoint qubits; prefer single-qubit gates first
+                if set(qubits1).isdisjoint(set(qubits2)) and len(qubits1) > len(qubits2):
+                    optimized[i], optimized[i + 1] = optimized[i + 1], optimized[i]
+                    changed = True
 
         return optimized
 
@@ -280,9 +278,9 @@ class NoiseAwareCompiler:
     def __init__(
         self,
         noise_profile: DeviceNoiseProfile,
-        strategies: Optional[List[OptimizationStrategy]] = None,
+        strategies: list[OptimizationStrategy] | None = None,
         optimization_level: int = 2,
-        random_seed: Optional[int] = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize noise-aware compiler.
@@ -306,7 +304,7 @@ class NoiseAwareCompiler:
         # Build qubit error map for routing
         self._build_error_map()
 
-    def _build_error_map(self):
+    def _build_error_map(self) -> None:
         """Build error maps for noise-aware routing."""
         n_qubits = self.noise_profile.num_qubits
 
@@ -355,7 +353,7 @@ class NoiseAwareCompiler:
 
         return float(f_single * f_two * f_readout)
 
-    def _count_gates(self, circuit: Any) -> Tuple[int, int, int]:
+    def _count_gates(self, circuit: Any) -> tuple[int, int, int]:
         """Count total gates, depth, and two-qubit gates."""
         total = len(circuit.data)
         depth = circuit.depth()
@@ -569,8 +567,8 @@ class ControlOptimizationExperiment:
     def __init__(
         self,
         noise_profile: DeviceNoiseProfile,
-        strategies: Optional[List[OptimizationStrategy]] = None,
-        random_seed: Optional[int] = None,
+        strategies: list[OptimizationStrategy] | None = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize experiment.
@@ -588,7 +586,7 @@ class ControlOptimizationExperiment:
         self.strategies = strategies
         self.rng = np.random.default_rng(random_seed)
         self.compiler = NoiseAwareCompiler(noise_profile, strategies, random_seed=random_seed)
-        self.results: List[OptimizationResult] = []
+        self.results: list[OptimizationResult] = []
 
     def _generate_random_circuit(
         self,
@@ -609,8 +607,8 @@ class ControlOptimizationExperiment:
                 YGate,
                 ZGate,
             )
-        except ImportError:
-            raise ImportError("qiskit is required for circuit generation")
+        except ImportError as err:
+            raise ImportError("qiskit is required for circuit generation") from err
 
         qc = QuantumCircuit(n_qubits)
 
@@ -639,12 +637,12 @@ class ControlOptimizationExperiment:
         """Generate a VQE-like variational circuit."""
         try:
             from qiskit import QuantumCircuit
-        except ImportError:
-            raise ImportError("qiskit is required for circuit generation")
+        except ImportError as err:
+            raise ImportError("qiskit is required for circuit generation") from err
 
         qc = QuantumCircuit(n_qubits)
 
-        for layer in range(n_layers):
+        for _layer in range(n_layers):
             # Rotation layer
             for q in range(n_qubits):
                 theta = self.rng.uniform(0, 2 * np.pi)
@@ -676,7 +674,7 @@ class ControlOptimizationExperiment:
         self,
         n_circuits: int = 20,
         n_qubits: int = 5,
-        depths: Optional[List[int]] = None,
+        depths: list[int] | None = None,
         circuit_type: str = "random",
     ) -> ControlOptimizationMetrics:
         """
@@ -749,7 +747,7 @@ class ControlOptimizationExperiment:
         n_circuits: int = 10,
         n_qubits: int = 5,
         depth: int = 20,
-    ) -> Dict[str, ControlOptimizationMetrics]:
+    ) -> dict[str, ControlOptimizationMetrics]:
         """
         Compare different optimization strategies.
 
@@ -790,7 +788,7 @@ class ControlOptimizationExperiment:
 
         return results
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate experiment summary."""
         metrics = self.compute_metrics()
         return {

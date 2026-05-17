@@ -14,7 +14,7 @@ next-generation mitigation models.
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -46,7 +46,7 @@ class ErrorMitigationState:
     training_data_volume: float = 1000.0
     calibration_cost: float = 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "mitigation_accuracy": self.mitigation_accuracy,
             "output_fidelity": self.output_fidelity,
@@ -102,7 +102,7 @@ class ErrorMitigationLoop(AccelerationLoop):
         name: str = "error_mitigation",
         initial_accuracy: float = 0.5,
         initial_scale: float = 10.0,
-        measured_results_path: Optional[str] = None,
+        measured_results_path: str | None = None,
     ):
         """
         Initialize the Error Mitigation Loop.
@@ -123,8 +123,8 @@ class ErrorMitigationLoop(AccelerationLoop):
             experiment_scale=initial_scale,
         )
 
-        self._measured_overall_acceleration: Optional[float] = None
-        self._measured_error_reduction_by_iteration: Optional[Dict[int, float]] = None
+        self._measured_overall_acceleration: float | None = None
+        self._measured_error_reduction_by_iteration: dict[int, float] | None = None
         if measured_results_path is not None:
             self.load_measured_metrics(measured_results_path)
 
@@ -143,9 +143,9 @@ class ErrorMitigationLoop(AccelerationLoop):
             direction="higher",
         )
 
-    def load_measured_metrics(self, filepath: str):
+    def load_measured_metrics(self, filepath: str) -> None:
         path = Path(filepath)
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
 
         acceleration = data.get("acceleration_metrics") or {}
@@ -154,49 +154,49 @@ class ErrorMitigationLoop(AccelerationLoop):
         if not isinstance(iteration_stats, list):
             raise ValueError("acceleration_metrics.iteration_stats must be a list")
 
-        measured_error_reduction: Dict[int, float] = {}
+        measured_error_reduction: dict[int, float] = {}
         for stat in iteration_stats:
             if not isinstance(stat, dict):
                 continue
             iteration = stat.get("iteration")
             avg_error_reduction = stat.get("avg_error_reduction")
-            if isinstance(iteration, int) and isinstance(avg_error_reduction, (int, float)):
+            if isinstance(iteration, int) and isinstance(avg_error_reduction, int | float):
                 measured_error_reduction[iteration] = float(avg_error_reduction)
 
         overall_acceleration = acceleration.get("overall_acceleration")
-        if not isinstance(overall_acceleration, (int, float)):
+        if not isinstance(overall_acceleration, int | float):
             raise ValueError("No measured overall_acceleration found in results JSON")
 
         self._measured_overall_acceleration = float(overall_acceleration)
         self._measured_error_reduction_by_iteration = measured_error_reduction
 
     @property
-    def stages(self) -> List[str]:
+    def stages(self) -> list[str]:
         return self.STAGES
 
     @property
-    def bottleneck_types(self) -> List[str]:
+    def bottleneck_types(self) -> list[str]:
         return self.BOTTLENECK_TYPES
 
-    def set_mitigation_accuracy(self, accuracy: float):
+    def set_mitigation_accuracy(self, accuracy: float) -> None:
         """Set the current mitigation accuracy."""
         self.em_state.mitigation_accuracy = np.clip(accuracy, 0.0, 1.0)
         self.metrics.progress["mitigation_accuracy"].record(accuracy)
 
-    def set_output_fidelity(self, fidelity: float):
+    def set_output_fidelity(self, fidelity: float) -> None:
         """Set the current output fidelity."""
         self.em_state.output_fidelity = np.clip(fidelity, 0.0, 1.0)
 
-    def set_experiment_scale(self, scale: float):
+    def set_experiment_scale(self, scale: float) -> None:
         """Set the current experiment scale."""
         self.em_state.experiment_scale = max(1.0, scale)
         self.metrics.progress["experiment_scale"].record(scale)
 
-    def set_training_data_volume(self, volume: float):
+    def set_training_data_volume(self, volume: float) -> None:
         """Set the current training data volume."""
         self.em_state.training_data_volume = max(0.0, volume)
 
-    def set_calibration_cost(self, cost: float):
+    def set_calibration_cost(self, cost: float) -> None:
         """Set the current calibration cost."""
         self.em_state.calibration_cost = max(0.1, cost)
 
@@ -269,7 +269,7 @@ class ErrorMitigationLoop(AccelerationLoop):
             },
         )
 
-    def identify_bottlenecks(self) -> List[BottleneckIndicator]:
+    def identify_bottlenecks(self) -> list[BottleneckIndicator]:
         """
         Identify current bottlenecks in the loop.
 
@@ -378,7 +378,7 @@ class ErrorMitigationLoop(AccelerationLoop):
 
         return bottlenecks
 
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """Generate recommendations for accelerating this loop."""
         recommendations = []
 
@@ -442,7 +442,7 @@ class ErrorMitigationLoop(AccelerationLoop):
         # Run iteration
         return self.iterate()
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate a summary including error mitigation-specific state."""
         base_summary = super().summary()
         base_summary["em_state"] = self.em_state.to_dict()

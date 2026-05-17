@@ -9,8 +9,6 @@ This example demonstrates:
 4. Analyzing convergence properties
 """
 
-from typing import Dict, List
-
 import numpy as np
 
 from raf import ReciprocalAccelerationFramework
@@ -18,7 +16,7 @@ from raf.analysis import CrossLoopAnalyzer
 from raf.loops import AnsatzDesignLoop, CalibrationControlLoop, ErrorMitigationLoop
 
 
-def run_simulation(iterations: int = 20, scenario: str = "baseline") -> Dict[str, List[float]]:
+def run_simulation(iterations: int = 20, scenario: str = "baseline") -> dict[str, list[float]]:
     """
     Run a simulation with specified parameters.
 
@@ -82,7 +80,7 @@ def run_simulation(iterations: int = 20, scenario: str = "baseline") -> Dict[str
     raf.add_loop(calibration_loop)
 
     # Run simulation
-    history: Dict[str, List[float]] = {
+    history: dict[str, list[float]] = {
         "error_mitigation": [],
         "ansatz_design": [],
         "calibration_control": [],
@@ -104,7 +102,7 @@ def run_simulation(iterations: int = 20, scenario: str = "baseline") -> Dict[str
     return history
 
 
-def compare_scenarios():
+def compare_scenarios() -> dict[str, dict[str, list[float]]]:
     """Compare different investment scenarios."""
     print("=" * 60)
     print("Scenario Comparison Study")
@@ -141,7 +139,7 @@ def compare_scenarios():
     return results
 
 
-def analyze_convergence():
+def analyze_convergence() -> dict[str, list[float]]:
     """Analyze convergence properties of the loops."""
     print("=" * 60)
     print("Convergence Analysis")
@@ -182,7 +180,7 @@ def analyze_convergence():
     return history
 
 
-def intervention_study():
+def intervention_study() -> None:
     """Study the effect of targeted interventions."""
     print("=" * 60)
     print("Intervention Study")
@@ -214,7 +212,7 @@ def intervention_study():
     print("Simulating interventions on each loop:")
     print("-" * 50)
 
-    for target_loop in raf.loops.keys():
+    for target_loop in raf.loops:
         effects = analyzer.simulate_intervention(raf, target_loop, improvement=0.3)
 
         print(f"\nIntervention on {target_loop}:")
@@ -226,9 +224,9 @@ def intervention_study():
 
     # Identify best intervention target
     best_target = None
-    best_total_effect = 0
+    best_total_effect = 0.0
 
-    for target_loop in raf.loops.keys():
+    for target_loop in raf.loops:
         effects = analyzer.simulate_intervention(raf, target_loop, improvement=0.3)
         total_effect = sum(effects.values())
 
@@ -240,7 +238,7 @@ def intervention_study():
     print(f"Total system effect: {best_total_effect:.3f}")
 
 
-def main():
+def main() -> None:
     """Run all simulation studies."""
     print("\n" + "=" * 60)
     print("RECIPROCAL ACCELERATION FRAMEWORK - SIMULATION STUDIES")

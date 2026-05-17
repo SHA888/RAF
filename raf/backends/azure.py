@@ -23,7 +23,7 @@ Setup:
 
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -58,10 +58,10 @@ class AzureQuantumBackend(QuantumBackend):
     def __init__(
         self,
         target: str = "ionq.simulator",
-        subscription_id: Optional[str] = None,
-        resource_group: Optional[str] = None,
-        workspace_name: Optional[str] = None,
-        location: Optional[str] = None,
+        subscription_id: str | None = None,
+        resource_group: str | None = None,
+        workspace_name: str | None = None,
+        location: str | None = None,
     ):
         """
         Initialize Azure Quantum backend.
@@ -98,10 +98,10 @@ class AzureQuantumBackend(QuantumBackend):
         try:
             from azure.quantum import Workspace
             from azure.quantum.qiskit import AzureQuantumProvider
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "azure-quantum required. Install with: pip install azure-quantum qsharp"
-            )
+            ) from err
 
         if not all([self.subscription_id, self.resource_group, self.workspace_name]):
             raise ValueError(
@@ -121,7 +121,7 @@ class AzureQuantumBackend(QuantumBackend):
         provider = AzureQuantumProvider(workspace=self._workspace)
         self._backend = provider.get_backend(self.target)
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **_kwargs: Any) -> ExecutionResult:
         """Execute circuit on Azure Quantum target."""
         self._initialize()
 
@@ -157,20 +157,17 @@ class AzureQuantumBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **kwargs: Any
+    ) -> list[ExecutionResult]:
         """Execute multiple circuits."""
-        results = []
-        for circuit in circuits:
-            results.append(self.execute(circuit, shots=shots, **kwargs))
-        return results
+        return [self.execute(circuit, shots=shots, **kwargs) for circuit in circuits]
 
     @classmethod
-    def list_targets(cls) -> Dict[str, str]:
+    def list_targets(cls) -> dict[str, str]:
         """List available Azure Quantum targets."""
         return AZURE_TARGETS.copy()
 
-    def get_cost_estimate(self, circuit: Any, shots: int = 1024) -> Dict[str, Any]:
+    def get_cost_estimate(self, circuit: Any, shots: int = 1024) -> dict[str, Any]:
         """Estimate cost for running a circuit."""
         self._initialize()
 

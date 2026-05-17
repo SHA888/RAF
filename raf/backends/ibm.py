@@ -13,7 +13,7 @@ Setup:
 
 import os
 import time
-from typing import Any, List, Optional
+from typing import Any
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -28,7 +28,7 @@ class IBMQuantumBackend(QuantumBackend):
     def __init__(
         self,
         backend_name: str = "ibm_brisbane",
-        token: Optional[str] = None,
+        token: str | None = None,
         channel: str = "ibm_quantum",
         instance: str = "ibm-q/open/main",
     ):
@@ -58,10 +58,10 @@ class IBMQuantumBackend(QuantumBackend):
 
         try:
             from qiskit_ibm_runtime import QiskitRuntimeService
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "qiskit-ibm-runtime required. Install with: pip install qiskit-ibm-runtime"
-            )
+            ) from err
 
         if not self.token:
             raise ValueError(
@@ -76,7 +76,7 @@ class IBMQuantumBackend(QuantumBackend):
         )
         self._backend = self._service.backend(self.backend_name)
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **_kwargs: Any) -> ExecutionResult:
         """Execute circuit on IBM Quantum hardware."""
         self._initialize()
 
@@ -114,8 +114,8 @@ class IBMQuantumBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **_kwargs: Any
+    ) -> list[ExecutionResult]:
         """Execute multiple circuits in a batch."""
         self._initialize()
 
@@ -157,7 +157,7 @@ class IBMQuantumBackend(QuantumBackend):
         return results
 
     @classmethod
-    def list_backends(cls, token: Optional[str] = None) -> List[str]:
+    def list_backends(cls, token: str | None = None) -> list[str]:
         """List available IBM Quantum backends."""
         try:
             from qiskit_ibm_runtime import QiskitRuntimeService

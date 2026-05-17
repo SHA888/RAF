@@ -18,7 +18,7 @@ Setup:
 """
 
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -51,9 +51,9 @@ class BraketBackend(QuantumBackend):
     def __init__(
         self,
         device_name: str = "sv1",
-        s3_bucket: Optional[str] = None,
+        s3_bucket: str | None = None,
         s3_prefix: str = "raf-results",
-        region: Optional[str] = None,
+        region: str | None = None,
     ):
         """
         Initialize AWS Braket backend.
@@ -79,7 +79,7 @@ class BraketBackend(QuantumBackend):
         self.region = region
 
         self._device: Any = None
-        self._s3_location: Optional[Tuple[str, str]] = None
+        self._s3_location: tuple[str, str] | None = None
 
     def _initialize(self) -> None:
         """Lazy initialization of Braket device."""
@@ -89,10 +89,10 @@ class BraketBackend(QuantumBackend):
         try:
             from braket.aws import AwsDevice, AwsSession
             from braket.devices import LocalSimulator
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "amazon-braket-sdk required. Install with: pip install amazon-braket-sdk"
-            )
+            ) from err
 
         # Set up S3 location for results
         if self.s3_bucket:
@@ -154,17 +154,14 @@ class BraketBackend(QuantumBackend):
 
             return braket_circuit
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **_kwargs: Any) -> ExecutionResult:
         """Execute circuit on AWS Braket device."""
         self._initialize()
 
         start_time = time.time()
 
         # Convert Qiskit circuit to Braket if needed
-        if hasattr(circuit, "data"):  # Qiskit circuit
-            braket_circuit = self._qiskit_to_braket(circuit)
-        else:
-            braket_circuit = circuit
+        braket_circuit = self._qiskit_to_braket(circuit) if hasattr(circuit, "data") else circuit
 
         # Run on device
         assert self._device is not None
@@ -195,22 +192,19 @@ class BraketBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **kwargs: Any
+    ) -> list[ExecutionResult]:
         """Execute multiple circuits."""
         # Braket supports batch execution for some devices
-        results = []
-        for circuit in circuits:
-            results.append(self.execute(circuit, shots=shots, **kwargs))
-        return results
+        return [self.execute(circuit, shots=shots, **kwargs) for circuit in circuits]
 
     @classmethod
-    def list_devices(cls) -> Dict[str, str]:
+    def list_devices(cls) -> dict[str, str]:
         """List available Braket devices."""
         return BRAKET_DEVICES.copy()
 
     @classmethod
-    def get_device_info(cls, device_name: str) -> Dict[str, Any]:
+    def get_device_info(cls, device_name: str) -> dict[str, Any]:
         """Get information about a specific device."""
         try:
             from braket.aws import AwsDevice

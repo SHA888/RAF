@@ -15,7 +15,7 @@ from raf.loops import AnsatzDesignLoop, CalibrationControlLoop, ErrorMitigationL
 from raf.visualization import LoopDynamicsVisualizer, RAFDashboard
 
 
-def main():
+def main() -> None:
     print("=" * 60)
     print("Reciprocal Acceleration Framework - Basic Example")
     print("=" * 60)

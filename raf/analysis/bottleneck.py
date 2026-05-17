@@ -7,11 +7,14 @@ bottlenecks across acceleration loops.
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from raf.core.metrics import BottleneckIndicator
+
+if TYPE_CHECKING:
+    from raf.core.framework import ReciprocalAccelerationFramework
 
 
 @dataclass
@@ -29,13 +32,13 @@ class BottleneckCluster:
     """
 
     name: str
-    bottlenecks: List[BottleneckIndicator]
+    bottlenecks: list[BottleneckIndicator]
     common_type: str
-    affected_loops: List[str]
+    affected_loops: list[str]
     aggregate_severity: float
     recommended_intervention: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "bottleneck_count": len(self.bottlenecks),
@@ -75,11 +78,11 @@ class BottleneckAnalyzer:
         "systemic": ["generalization", "heterogeneity"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the bottleneck analyzer."""
-        self.analysis_history: List[Dict[str, Any]] = []
+        self.analysis_history: list[dict[str, Any]] = []
 
-    def analyze(self, framework) -> Dict[str, Any]:
+    def analyze(self, framework: "ReciprocalAccelerationFramework") -> dict[str, Any]:
         """
         Perform comprehensive bottleneck analysis.
 
@@ -118,7 +121,9 @@ class BottleneckAnalyzer:
         self.analysis_history.append(results)
         return results
 
-    def _collect_bottlenecks(self, framework) -> List[BottleneckIndicator]:
+    def _collect_bottlenecks(
+        self, framework: "ReciprocalAccelerationFramework"
+    ) -> list[BottleneckIndicator]:
         """Collect all bottlenecks from framework loops."""
         bottlenecks = []
         for loop in framework.loops.values():
@@ -127,8 +132,8 @@ class BottleneckAnalyzer:
         return bottlenecks
 
     def _cluster_bottlenecks(
-        self, bottlenecks: List[BottleneckIndicator]
-    ) -> List[BottleneckCluster]:
+        self, bottlenecks: list[BottleneckIndicator]
+    ) -> list[BottleneckCluster]:
         """Cluster related bottlenecks."""
         clusters = []
 
@@ -139,7 +144,7 @@ class BottleneckAnalyzer:
 
         for constraint_type, group in type_groups.items():
             if len(group) >= 1:
-                affected_loops = list(set(b.loop_name for b in group))
+                affected_loops = list({b.loop_name for b in group})
                 aggregate_severity: float = float(np.mean([b.severity_score for b in group]))
 
                 # Determine category
@@ -174,7 +179,7 @@ class BottleneckAnalyzer:
         }
         return interventions.get(constraint_type, "Further investigation needed")
 
-    def _compute_priorities(self, bottlenecks: List[BottleneckIndicator]) -> List[Dict[str, Any]]:
+    def _compute_priorities(self, bottlenecks: list[BottleneckIndicator]) -> list[dict[str, Any]]:
         """Compute priority ranking for bottlenecks."""
         priorities = []
 
@@ -198,8 +203,8 @@ class BottleneckAnalyzer:
         return sorted(priorities, key=lambda p: p["priority_score"], reverse=True)
 
     def _identify_systemic_issues(
-        self, bottlenecks: List[BottleneckIndicator], framework
-    ) -> List[Dict[str, Any]]:
+        self, bottlenecks: list[BottleneckIndicator], framework: "ReciprocalAccelerationFramework"
+    ) -> list[dict[str, Any]]:
         """Identify issues that affect multiple loops."""
         systemic = []
 
@@ -224,30 +229,32 @@ class BottleneckAnalyzer:
         return systemic
 
     def _generate_recommendations(
-        self, clusters: List[BottleneckCluster], systemic_issues: List[Dict[str, Any]]
-    ) -> List[str]:
+        self, clusters: list[BottleneckCluster], systemic_issues: list[dict[str, Any]]
+    ) -> list[str]:
         """Generate prioritized recommendations."""
         recommendations = []
 
         # Address systemic issues first
-        for issue in systemic_issues:
-            if issue["leverage"] == "high":
-                recommendations.append(
-                    f"[HIGH LEVERAGE] Address {issue['type']} constraints - "
-                    f"affects all loops: {', '.join(issue['affected_loops'])}"
-                )
+        recommendations += [
+            f"[HIGH LEVERAGE] Address {issue['type']} constraints - "
+            f"affects all loops: {', '.join(issue['affected_loops'])}"
+            for issue in systemic_issues
+            if issue["leverage"] == "high"
+        ]
 
         # Then cluster-based recommendations
-        for cluster in clusters[:3]:  # Top 3 clusters
-            if cluster.aggregate_severity > 0.5:
-                recommendations.append(
-                    f"[{cluster.common_type.upper()}] {cluster.recommended_intervention} "
-                    f"(affects: {', '.join(cluster.affected_loops)})"
-                )
+        recommendations += [
+            f"[{cluster.common_type.upper()}] {cluster.recommended_intervention} "
+            f"(affects: {', '.join(cluster.affected_loops)})"
+            for cluster in clusters[:3]  # Top 3 clusters
+            if cluster.aggregate_severity > 0.5
+        ]
 
         return recommendations
 
-    def _group_by_loop(self, bottlenecks: List[BottleneckIndicator]) -> Dict[str, List[Dict]]:
+    def _group_by_loop(
+        self, bottlenecks: list[BottleneckIndicator]
+    ) -> dict[str, list[dict[str, Any]]]:
         """Group bottlenecks by loop."""
         grouped = defaultdict(list)
         for b in bottlenecks:
@@ -261,14 +268,14 @@ class BottleneckAnalyzer:
             )
         return dict(grouped)
 
-    def _group_by_type(self, bottlenecks: List[BottleneckIndicator]) -> Dict[str, int]:
+    def _group_by_type(self, bottlenecks: list[BottleneckIndicator]) -> dict[str, int]:
         """Count bottlenecks by type."""
         counts: defaultdict[str, int] = defaultdict(int)
         for b in bottlenecks:
             counts[b.constraint_type] += 1
         return dict(counts)
 
-    def compare_analyses(self, idx1: int = -2, idx2: int = -1) -> Dict[str, Any]:
+    def compare_analyses(self, idx1: int = -2, idx2: int = -1) -> dict[str, Any]:
         """
         Compare two analyses to track progress.
 

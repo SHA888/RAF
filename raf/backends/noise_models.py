@@ -9,7 +9,7 @@ import math
 import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class DeviceType(Enum):
@@ -48,13 +48,13 @@ class DeviceNoiseProfile:
     readout_time_us: float = 1.0  # ~1 us
 
     # Connectivity (optional)
-    coupling_map: Optional[List[Tuple[int, int]]] = None
+    coupling_map: list[tuple[int, int]] | None = None
 
     # Additional noise sources
     crosstalk_strength: float = 0.01
     leakage_rate: float = 0.001
 
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def ibm_manila_like(cls) -> "DeviceNoiseProfile":
@@ -103,11 +103,7 @@ class DeviceNoiseProfile:
         Noise profile similar to IonQ Harmony (11 qubits, trapped ion).
         """
         # All-to-all connectivity for trapped ions
-        coupling = []
-        for i in range(11):
-            for j in range(11):
-                if i != j:
-                    coupling.append((i, j))
+        coupling = [(i, j) for i in range(11) for j in range(11) if i != j]
 
         return cls(
             name="ionq_harmony_like",
@@ -143,7 +139,7 @@ class DeviceNoiseProfile:
             two_qubit_gate_time_us=0.012,  # Very fast iSWAP
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -285,10 +281,10 @@ class NoiseModelBuilder:
                 depolarizing_error,
                 thermal_relaxation_error,
             )
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
-                "qiskit-aer is required for noise modeling. " "Install with: pip install qiskit-aer"
-            )
+                "qiskit-aer is required for noise modeling. Install with: pip install qiskit-aer"
+            ) from err
 
         noise_model = NoiseModel()
 
@@ -373,10 +369,10 @@ class NoiseModelBuilder:
         """
         try:
             from qiskit_ibm_runtime.fake_provider import FakeKolkataV2, FakeManilaV2
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
-                "qiskit-ibm-runtime is required. " "Install with: pip install qiskit-ibm-runtime"
-            )
+                "qiskit-ibm-runtime is required. Install with: pip install qiskit-ibm-runtime"
+            ) from err
 
         backends = {
             "fake_manila": FakeManilaV2,
@@ -413,10 +409,10 @@ class NoiseModelBuilder:
         """
         try:
             from braket.aws import AwsDevice
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 "amazon-braket-sdk is required. Install with: pip install amazon-braket-sdk"
-            )
+            ) from err
 
         # Map short names to ARNs
         device_arns = {
@@ -450,7 +446,7 @@ class NoiseModelBuilder:
             return NoiseModelBuilder(profile)
 
         except Exception as e:
-            raise RuntimeError(f"Failed to fetch device properties: {e}")
+            raise RuntimeError(f"Failed to fetch device properties: {e}") from e
 
     @staticmethod
     def from_published_specs(device_name: str) -> "NoiseModelBuilder":
@@ -467,7 +463,7 @@ class NoiseModelBuilder:
             NoiseModelBuilder with published specifications
         """
         # Published specifications from vendor documentation and papers
-        published_specs: Dict[str, Dict[str, Any]] = {
+        published_specs: dict[str, dict[str, Any]] = {
             # IonQ published specs (from ionq.com and papers)
             "ionq_harmony": {
                 "num_qubits": 11,
@@ -578,7 +574,7 @@ class DriftConfig:
     amplitude: float = 0.5  # Maximum relative change from baseline
     period_hours: float = 24.0  # Period for sinusoidal drift
     jump_probability: float = 0.1  # Probability of jump per hour (telegraph)
-    random_seed: Optional[int] = None  # For reproducibility
+    random_seed: int | None = None  # For reproducibility
 
     def __post_init__(self) -> None:
         if self.random_seed is not None:
@@ -610,7 +606,7 @@ class DriftingNoiseModel:
     def __init__(
         self,
         base_profile: DeviceNoiseProfile,
-        drift_config: Optional[DriftConfig] = None,
+        drift_config: DriftConfig | None = None,
     ) -> None:
         """
         Initialize drifting noise model.
@@ -740,7 +736,7 @@ class DriftingNoiseModel:
         self,
         duration_hours: float,
         sample_interval_hours: float = 0.5,
-    ) -> List[Tuple[float, DeviceNoiseProfile]]:
+    ) -> list[tuple[float, DeviceNoiseProfile]]:
         """
         Generate a trajectory of noise profiles over time.
 
@@ -761,7 +757,7 @@ class DriftingNoiseModel:
             t += sample_interval_hours
         return trajectory
 
-    def get_drift_metrics(self, time_hours: float) -> Dict[str, float]:
+    def get_drift_metrics(self, time_hours: float) -> dict[str, float]:
         """
         Get drift metrics at a specific time.
 

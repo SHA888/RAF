@@ -11,7 +11,7 @@ that were previously masked by dominant error sources.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -47,7 +47,7 @@ class CalibrationControlState:
     control_bandwidth: float = 1.0
     characterization_overhead: float = 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "noise_model_accuracy": self.noise_model_accuracy,
             "gate_fidelity": self.gate_fidelity,
@@ -162,7 +162,7 @@ class CalibrationControlLoop(AccelerationLoop):
             direction="higher",
         )
 
-    def _set_modality_defaults(self):
+    def _set_modality_defaults(self) -> None:
         """Set hardware modality-specific default parameters."""
         modality_params = {
             "superconducting": {
@@ -193,37 +193,37 @@ class CalibrationControlLoop(AccelerationLoop):
         self.cc_state.control_bandwidth = params["control_bandwidth"]
 
     @property
-    def stages(self) -> List[str]:
+    def stages(self) -> list[str]:
         return self.STAGES
 
     @property
-    def bottleneck_types(self) -> List[str]:
+    def bottleneck_types(self) -> list[str]:
         return self.BOTTLENECK_TYPES
 
-    def set_noise_model_accuracy(self, accuracy: float):
+    def set_noise_model_accuracy(self, accuracy: float) -> None:
         """Set the current noise model accuracy."""
         self.cc_state.noise_model_accuracy = np.clip(accuracy, 0.0, 1.0)
         self.metrics.progress["noise_model_accuracy"].record(accuracy)
 
-    def set_gate_fidelity(self, fidelity: float):
+    def set_gate_fidelity(self, fidelity: float) -> None:
         """Set the current gate fidelity."""
         self.cc_state.gate_fidelity = np.clip(fidelity, 0.9, 0.9999)
         self.metrics.progress["gate_fidelity"].record(fidelity)
 
-    def set_coherence_time(self, time_us: float):
+    def set_coherence_time(self, time_us: float) -> None:
         """Set the coherence time in microseconds."""
         self.cc_state.coherence_time = max(1.0, time_us)
 
-    def set_max_circuit_depth(self, depth: int):
+    def set_max_circuit_depth(self, depth: int) -> None:
         """Set the maximum feasible circuit depth."""
         self.cc_state.max_circuit_depth = max(10, depth)
         self.metrics.progress["max_circuit_depth"].record(float(depth))
 
-    def set_drift_rate(self, rate: float):
+    def set_drift_rate(self, rate: float) -> None:
         """Set the parameter drift rate."""
         self.cc_state.drift_rate = max(0.1, rate)
 
-    def set_control_bandwidth(self, bandwidth: float):
+    def set_control_bandwidth(self, bandwidth: float) -> None:
         """Set the control bandwidth."""
         self.cc_state.control_bandwidth = max(0.1, bandwidth)
 
@@ -296,7 +296,7 @@ class CalibrationControlLoop(AccelerationLoop):
             },
         )
 
-    def identify_bottlenecks(self) -> List[BottleneckIndicator]:
+    def identify_bottlenecks(self) -> list[BottleneckIndicator]:
         """
         Identify current bottlenecks in the loop.
 
@@ -429,7 +429,7 @@ class CalibrationControlLoop(AccelerationLoop):
 
         return bottlenecks
 
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """Generate recommendations for accelerating this loop."""
         recommendations = []
 
@@ -516,7 +516,7 @@ class CalibrationControlLoop(AccelerationLoop):
         # Quantum volume ~ 2^(effective_depth)^(1/3) for reasonable approximation
         return float(2 ** (effective_depth ** (1 / 3)))
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate a summary including calibration-control-specific state."""
         base_summary = super().summary()
         base_summary["cc_state"] = self.cc_state.to_dict()

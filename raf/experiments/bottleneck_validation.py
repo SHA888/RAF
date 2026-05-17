@@ -12,7 +12,7 @@ Key experiments:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -38,9 +38,9 @@ class BottleneckScenario:
     bottleneck_type: BottleneckType
     severity: float  # 0-1, how severe the bottleneck is
     description: str
-    parameters: Dict[str, float] = field(default_factory=dict)
+    parameters: dict[str, float] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "bottleneck_type": self.bottleneck_type.value,
             "severity": self.severity,
@@ -57,11 +57,11 @@ class BottleneckEffect:
     baseline_acceleration: float
     bottlenecked_acceleration: float
     acceleration_drop: float  # Relative drop
-    predicted_bottlenecks: List[Dict[str, Any]]
-    observed_impact: Dict[str, float]
+    predicted_bottlenecks: list[dict[str, Any]]
+    observed_impact: dict[str, float]
     prediction_accuracy: float  # How well prediction matched observation
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "scenario": self.scenario.to_dict(),
             "baseline_acceleration": self.baseline_acceleration,
@@ -78,13 +78,13 @@ class ValidationResult:
     """Results from bottleneck validation experiment."""
 
     total_scenarios: int
-    effects: List[BottleneckEffect]
+    effects: list[BottleneckEffect]
     avg_prediction_accuracy: float
     avg_acceleration_drop: float
-    worst_bottleneck: Optional[BottleneckScenario]
+    worst_bottleneck: BottleneckScenario | None
     validation_passed: bool  # True if predictions align with observations
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_scenarios": self.total_scenarios,
             "effects": [e.to_dict() for e in self.effects],
@@ -106,7 +106,7 @@ class SimulatedLoop:
     def __init__(
         self,
         name: str = "simulated_loop",
-        random_seed: Optional[int] = None,
+        random_seed: int | None = None,
     ):
         self.name = name
         self.seed = random_seed
@@ -135,9 +135,9 @@ class SimulatedLoop:
         }
 
         self.iteration = 0
-        self.acceleration_history: List[float] = []
+        self.acceleration_history: list[float] = []
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset loop to initial state."""
         self.state = {
             "noise_model_accuracy": 0.5,
@@ -152,7 +152,7 @@ class SimulatedLoop:
         self.iteration = 0
         self.acceleration_history = []
 
-    def apply_bottleneck(self, scenario: BottleneckScenario):
+    def apply_bottleneck(self, scenario: BottleneckScenario) -> None:
         """Apply an artificial bottleneck to the loop."""
         bt = scenario.bottleneck_type
         severity = scenario.severity
@@ -176,7 +176,7 @@ class SimulatedLoop:
             # Increase mitigation overhead
             self.state["mitigation_overhead"] = 1.0 + severity * 19.0  # Up to 20x
 
-    def identify_bottlenecks(self) -> List[BottleneckIndicator]:
+    def identify_bottlenecks(self) -> list[BottleneckIndicator]:
         """Identify current bottlenecks based on state."""
         bottlenecks = []
 
@@ -404,8 +404,8 @@ class BottleneckValidationExperiment:
 
     def __init__(
         self,
-        scenarios: Optional[List[BottleneckScenario]] = None,
-        random_seed: Optional[int] = None,
+        scenarios: list[BottleneckScenario] | None = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize bottleneck validation experiment.
@@ -421,7 +421,7 @@ class BottleneckValidationExperiment:
         self.scenarios = scenarios or self.DEFAULT_SCENARIOS
         self.rng = np.random.default_rng(random_seed)
         self.loop = SimulatedLoop(random_seed=random_seed)
-        self.results: List[BottleneckEffect] = []
+        self.results: list[BottleneckEffect] = []
 
     def run_baseline(self, n_iterations: int = 10) -> float:
         """Run baseline experiment without bottlenecks."""
@@ -432,7 +432,7 @@ class BottleneckValidationExperiment:
         self,
         scenario: BottleneckScenario,
         n_iterations: int = 10,
-    ) -> Tuple[float, List[BottleneckIndicator]]:
+    ) -> tuple[float, list[BottleneckIndicator]]:
         """
         Run experiment with artificial bottleneck.
 
@@ -472,9 +472,7 @@ class BottleneckValidationExperiment:
             BottleneckEffect with measurements
         """
         # Run baseline trials
-        baseline_accels = []
-        for _ in range(n_trials):
-            baseline_accels.append(self.run_baseline(n_iterations))
+        baseline_accels = [self.run_baseline(n_iterations) for _ in range(n_trials)]
         baseline_acceleration = float(np.mean(baseline_accels))
 
         # Run bottlenecked trials
@@ -526,7 +524,7 @@ class BottleneckValidationExperiment:
     def _compute_prediction_accuracy(
         self,
         scenario: BottleneckScenario,
-        predictions: List[Dict[str, Any]],
+        predictions: list[dict[str, Any]],
         observed_drop: float,
     ) -> float:
         """
@@ -669,7 +667,7 @@ class BottleneckValidationExperiment:
 
         return result
 
-    def compare_predicted_vs_observed(self) -> Dict[str, Any]:
+    def compare_predicted_vs_observed(self) -> dict[str, Any]:
         """
         Generate detailed comparison of predicted vs observed effects.
 
@@ -747,7 +745,7 @@ class BottleneckValidationExperiment:
                 "Significant calibration of detection logic needed."
             )
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate experiment summary."""
         comparison = self.compare_predicted_vs_observed()
 

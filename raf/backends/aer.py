@@ -3,7 +3,7 @@ Qiskit Aer backend for noisy quantum simulation.
 """
 
 import time
-from typing import Any, List, Optional
+from typing import Any
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 from .noise_models import DeviceNoiseProfile, NoiseModelBuilder
@@ -21,7 +21,7 @@ class AerBackend(QuantumBackend):
 
     def __init__(
         self,
-        noise_profile: Optional[DeviceNoiseProfile] = None,
+        noise_profile: DeviceNoiseProfile | None = None,
         use_gpu: bool = False,
     ):
         """
@@ -50,8 +50,10 @@ class AerBackend(QuantumBackend):
         """Initialize the Qiskit Aer backend."""
         try:
             from qiskit_aer import AerSimulator
-        except ImportError:
-            raise ImportError("qiskit-aer is required. Install with: pip install qiskit-aer")
+        except ImportError as err:
+            raise ImportError(
+                "qiskit-aer is required. Install with: pip install qiskit-aer"
+            ) from err
 
         # Build noise model if profile provided
         if self.noise_profile:
@@ -124,8 +126,8 @@ class AerBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **kwargs: Any
+    ) -> list[ExecutionResult]:
         """
         Execute multiple circuits in a batch.
 
@@ -277,7 +279,7 @@ class AerBackend(QuantumBackend):
         self._initialize_backend()
 
 
-def create_backend(profile_name: str = "ideal", **kwargs) -> AerBackend:
+def create_backend(profile_name: str = "ideal", **kwargs: Any) -> AerBackend:
     """
     Factory function to create Aer backend with common profiles.
 

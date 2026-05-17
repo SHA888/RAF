@@ -5,9 +5,10 @@ Demonstrates the acceleration dynamics of ML-based error mitigation
 using realistic noisy simulation.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -48,13 +49,13 @@ class ZNEMitigator:
     Simple implementation for demonstration purposes.
     """
 
-    def __init__(self, scale_factors: Optional[List[float]] = None):
+    def __init__(self, scale_factors: list[float] | None = None) -> None:
         # Use smaller scale factors for better extrapolation
         self.scale_factors = scale_factors or [1.0, 1.5, 2.0]
 
     def mitigate(
         self,
-        executor,
+        executor: Callable[[Any, Any, int], float],
         circuit: Any,
         observable: Any,
         shots: int = 1024,
@@ -126,7 +127,7 @@ class ZNEMitigator:
 
         return folded
 
-    def _richardson_extrapolate(self, scale_factors: List[float], values: List[float]) -> float:
+    def _richardson_extrapolate(self, scale_factors: list[float], values: list[float]) -> float:
         """
         Richardson extrapolation to zero noise.
 
@@ -155,18 +156,18 @@ class CDRMitigator:
     Learns noise model from near-Clifford circuits.
     """
 
-    def __init__(self, num_training_circuits: int = 20):
+    def __init__(self, num_training_circuits: int = 20) -> None:
         self.num_training_circuits = num_training_circuits
         self.model = None
-        self._training_data: List[Tuple[Any, Any]] = []
+        self._training_data: list[tuple[Any, Any]] = []
 
     def train(
         self,
-        executor_noisy,
-        executor_ideal,
-        circuit_generator,
+        executor_noisy: Callable[[Any, int], float],
+        executor_ideal: Callable[[Any, int], float],
+        circuit_generator: Callable[[int], Any],
         shots: int = 1024,
-    ):
+    ) -> None:
         """
         Train CDR model on near-Clifford circuits.
 
@@ -188,7 +189,7 @@ class CDRMitigator:
             noisy_values.append(noisy_val)
             ideal_values.append(ideal_val)
 
-        self._training_data = list(zip(noisy_values, ideal_values))
+        self._training_data = list(zip(noisy_values, ideal_values, strict=False))
 
         # Fit linear model: ideal = a * noisy + b
         x = np.array(noisy_values)
@@ -220,8 +221,8 @@ class ErrorMitigationExperiment:
         backend: Any = None,
         ideal_backend: Any = None,
         noise_profile_name: str = "manila",
-        random_seed: Optional[int] = None,
-    ):
+        random_seed: int | None = None,
+    ) -> None:
         """
         Initialize experiment.
 
@@ -245,7 +246,7 @@ class ErrorMitigationExperiment:
 
         self._setup_backends()
 
-    def _setup_backends(self):
+    def _setup_backends(self) -> None:
         """Initialize backends if not provided."""
         if self.backend is None or self.ideal_backend is None:
             try:
@@ -257,14 +258,16 @@ class ErrorMitigationExperiment:
                 if self.ideal_backend is None:
                     self.ideal_backend = create_backend("ideal")
 
-            except ImportError:
-                raise ImportError("qiskit-aer required. Install with: pip install qiskit-aer")
+            except ImportError as err:
+                raise ImportError(
+                    "qiskit-aer required. Install with: pip install qiskit-aer"
+                ) from err
 
     def create_test_circuit(
         self,
         num_qubits: int = 2,
         depth: int = 5,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> Any:
         """
         Create a parameterized test circuit.
@@ -279,14 +282,14 @@ class ErrorMitigationExperiment:
         """
         try:
             from qiskit import QuantumCircuit
-        except ImportError:
-            raise ImportError("qiskit required")
+        except ImportError as err:
+            raise ImportError("qiskit required") from err
 
         local_rng = np.random.default_rng(seed) if seed is not None else self.rng
 
         qc = QuantumCircuit(num_qubits)
 
-        for d in range(depth):
+        for _d in range(depth):
             # Single-qubit rotations
             for q in range(num_qubits):
                 theta = local_rng.uniform(0, 2 * np.pi)
@@ -305,8 +308,8 @@ class ErrorMitigationExperiment:
         self,
         num_qubits: int = 2,
         num_layers: int = 2,
-        params: Optional[List[float]] = None,
-        seed: Optional[int] = None,
+        params: list[float] | None = None,
+        seed: int | None = None,
     ) -> Any:
         """
         Create a VQE-style ansatz circuit.
@@ -321,19 +324,19 @@ class ErrorMitigationExperiment:
         """
         try:
             from qiskit import QuantumCircuit
-        except ImportError:
-            raise ImportError("qiskit required")
+        except ImportError as err:
+            raise ImportError("qiskit required") from err
 
         local_rng = np.random.default_rng(seed) if seed is not None else self.rng
 
         num_params = num_qubits * num_layers * 2
         if params is None:
-            params = local_rng.uniform(0, 2 * np.pi, num_params)
+            params = local_rng.uniform(0, 2 * np.pi, num_params).tolist()
 
         qc = QuantumCircuit(num_qubits)
 
         param_idx = 0
-        for layer in range(num_layers):
+        for _layer in range(num_layers):
             # Rotation layer
             for q in range(num_qubits):
                 qc.ry(params[param_idx], q)
@@ -353,7 +356,7 @@ class ErrorMitigationExperiment:
         shots: int = 1024,
         apply_mitigation: bool = True,
         mitigation_strength: float = 0.5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run a single error mitigation experiment.
 
@@ -412,7 +415,7 @@ class ErrorMitigationExperiment:
             "mitigated_error": abs(mitigated_exp - ideal_exp) if mitigated_exp else None,
         }
 
-    def _compute_z_expectation(self, counts: Dict[str, int]) -> float:
+    def _compute_z_expectation(self, counts: dict[str, int]) -> float:
         """Compute Z expectation on first qubit from counts."""
         total = sum(counts.values())
         expectation = 0.0
@@ -430,9 +433,9 @@ class ErrorMitigationExperiment:
         self,
         num_iterations: int = 5,
         circuits_per_iteration: int = 10,
-        depths: Optional[List[int]] = None,
+        depths: list[int] | None = None,
         shots: int = 1024,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run full acceleration study across multiple iterations.
 
@@ -513,7 +516,7 @@ class ErrorMitigationExperiment:
             "summary": self.collector.summary(),
         }
 
-    def save_results(self, filepath: str):
+    def save_results(self, filepath: str) -> None:
         """Save experiment results to file."""
         path = Path(filepath)
         if not path.is_absolute() and path.parent == Path("."):
@@ -522,7 +525,7 @@ class ErrorMitigationExperiment:
         path.parent.mkdir(parents=True, exist_ok=True)
         self.collector.save(str(path))
 
-    def plot_results(self, save_path: Optional[str] = None):
+    def plot_results(self, save_path: str | None = None) -> None:
         """
         Plot experiment results (basic 4-panel figure).
 
@@ -608,7 +611,7 @@ class ErrorMitigationExperiment:
         else:
             plt.show()
 
-    def plot_mitigation_accuracy_vs_depth(self, save_path: Optional[str] = None):
+    def plot_mitigation_accuracy_vs_depth(self, save_path: str | None = None) -> None:
         """
         Plot mitigation accuracy vs circuit depth.
 
@@ -714,7 +717,7 @@ class ErrorMitigationExperiment:
         else:
             plt.show()
 
-    def plot_acceleration_over_iterations(self, save_path: Optional[str] = None):
+    def plot_acceleration_over_iterations(self, save_path: str | None = None) -> None:
         """
         Plot acceleration dynamics over iterations.
 
@@ -849,7 +852,7 @@ class ErrorMitigationExperiment:
             va="center",
             fontsize=11,
             family="monospace",
-            bbox=dict(boxstyle="round", facecolor="lightgray", alpha=0.8),
+            bbox={"boxstyle": "round", "facecolor": "lightgray", "alpha": 0.8},
         )
 
         plt.tight_layout()
@@ -860,7 +863,7 @@ class ErrorMitigationExperiment:
         else:
             plt.show()
 
-    def generate_all_plots(self, output_dir: str = "."):
+    def generate_all_plots(self, output_dir: str = ".") -> None:
         """
         Generate all analysis plots and save to directory.
 
@@ -889,7 +892,7 @@ class ErrorMitigationExperiment:
         print(f"All plots saved to {output_dir}")
 
 
-def run_demo():
+def run_demo() -> tuple[ErrorMitigationExperiment, dict[str, Any]]:
     """Run a demonstration of the Error Mitigation experiment."""
     print("=" * 60)
     print("Error Mitigation Loop - Empirical Validation Demo")

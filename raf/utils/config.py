@@ -5,7 +5,7 @@ Configuration management for the Reciprocal Acceleration Framework.
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -14,7 +14,7 @@ class LoopConfig:
 
     name: str
     enabled: bool = True
-    initial_params: Dict[str, Any] = field(default_factory=dict)
+    initial_params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -31,16 +31,16 @@ class RAFConfig:
     """
 
     name: str = "RAF"
-    loops: Dict[str, LoopConfig] = field(default_factory=dict)
-    couplings: List[Dict[str, Any]] = field(default_factory=list)
-    analysis_settings: Dict[str, Any] = field(
+    loops: dict[str, LoopConfig] = field(default_factory=dict)
+    couplings: list[dict[str, Any]] = field(default_factory=list)
+    analysis_settings: dict[str, Any] = field(
         default_factory=lambda: {
             "bottleneck_threshold": 0.5,
             "acceleration_window": 5,
             "prediction_iterations": 10,
         }
     )
-    visualization_settings: Dict[str, Any] = field(
+    visualization_settings: dict[str, Any] = field(
         default_factory=lambda: {
             "figsize": [10, 6],
             "style": "default",
@@ -48,7 +48,7 @@ class RAFConfig:
         }
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "name": self.name,
@@ -59,7 +59,7 @@ class RAFConfig:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "RAFConfig":
+    def from_dict(cls, data: dict[str, Any]) -> "RAFConfig":
         """Create from dictionary."""
         loops = {}
         for name, config in data.get("loops", {}).items():
@@ -77,7 +77,7 @@ class RAFConfig:
         """Add or update loop configuration."""
         self.loops[name] = LoopConfig(name=name, **kwargs)
 
-    def get_loop_config(self, name: str) -> Optional[LoopConfig]:
+    def get_loop_config(self, name: str) -> LoopConfig | None:
         """Get configuration for a specific loop."""
         return self.loops.get(name)
 
@@ -92,7 +92,7 @@ def load_config(path: str) -> RAFConfig:
     Returns:
         RAFConfig instance
     """
-    with open(path, "r") as f:
+    with open(path) as f:
         data = json.load(f)
     return RAFConfig.from_dict(data)
 

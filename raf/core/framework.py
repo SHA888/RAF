@@ -8,7 +8,7 @@ dynamics between Quantum Computing and Machine Learning systems.
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from raf.core.loop import AccelerationLoop, LoopState
 from raf.core.metrics import CrossLoopCoupling, MetricsAggregator
@@ -31,13 +31,13 @@ class FrameworkAnalysis:
 
     timestamp: datetime = field(default_factory=datetime.now)
     overall_acceleration: float = 1.0
-    loop_states: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    bottlenecks: List[Dict[str, Any]] = field(default_factory=list)
-    cross_loop_effects: List[Dict[str, Any]] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
-    high_leverage_investments: List[Dict[str, Any]] = field(default_factory=list)
+    loop_states: dict[str, dict[str, Any]] = field(default_factory=dict)
+    bottlenecks: list[dict[str, Any]] = field(default_factory=list)
+    cross_loop_effects: list[dict[str, Any]] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
+    high_leverage_investments: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "timestamp": self.timestamp.isoformat(),
@@ -168,23 +168,23 @@ class ReciprocalAccelerationFramework:
             name: Identifier for this framework instance
         """
         self.name = name
-        self.loops: Dict[str, AccelerationLoop] = {}
+        self.loops: dict[str, AccelerationLoop] = {}
         self.metrics = MetricsAggregator()
-        self.couplings: List[CrossLoopCoupling] = []
-        self.analysis_history: List[FrameworkAnalysis] = []
+        self.couplings: list[CrossLoopCoupling] = []
+        self.analysis_history: list[FrameworkAnalysis] = []
 
         # Initialize default couplings
         self._init_default_couplings()
 
-    def _init_default_couplings(self):
+    def _init_default_couplings(self) -> None:
         """Initialize default cross-loop couplings."""
         for coupling_def in self.DEFAULT_COUPLINGS:
             coupling = CrossLoopCoupling(
-                source_loop=coupling_def["source"],
-                target_loop=coupling_def["target"],
-                coupling_strength=coupling_def["strength"],
-                coupling_type=coupling_def["type"],
-                description=coupling_def["description"],
+                source_loop=str(coupling_def["source"]),
+                target_loop=str(coupling_def["target"]),
+                coupling_strength=float(coupling_def["strength"]),  # type: ignore[arg-type]
+                coupling_type=str(coupling_def["type"]),
+                description=str(coupling_def["description"]),
             )
             self.couplings.append(coupling)
             self.metrics.add_coupling(coupling)
@@ -202,7 +202,7 @@ class ReciprocalAccelerationFramework:
         self.loops[loop.name] = loop
         return self
 
-    def remove_loop(self, name: str) -> Optional[AccelerationLoop]:
+    def remove_loop(self, name: str) -> AccelerationLoop | None:
         """
         Remove an acceleration loop from the framework.
 
@@ -214,7 +214,7 @@ class ReciprocalAccelerationFramework:
         """
         return self.loops.pop(name, None)
 
-    def get_loop(self, name: str) -> Optional[AccelerationLoop]:
+    def get_loop(self, name: str) -> AccelerationLoop | None:
         """
         Get a loop by name.
 
@@ -226,7 +226,7 @@ class ReciprocalAccelerationFramework:
         """
         return self.loops.get(name)
 
-    def add_coupling(self, coupling: CrossLoopCoupling):
+    def add_coupling(self, coupling: CrossLoopCoupling) -> None:
         """
         Add a custom cross-loop coupling.
 
@@ -236,7 +236,7 @@ class ReciprocalAccelerationFramework:
         self.couplings.append(coupling)
         self.metrics.add_coupling(coupling)
 
-    def iterate_all(self) -> Dict[str, LoopState]:
+    def iterate_all(self) -> dict[str, LoopState]:
         """
         Execute one iteration of all loops.
 
@@ -272,9 +272,7 @@ class ReciprocalAccelerationFramework:
         # Collect and prioritize bottlenecks
         all_bottlenecks = []
         for loop in self.loops.values():
-            bottlenecks = loop.identify_bottlenecks()
-            for b in bottlenecks:
-                all_bottlenecks.append(b.to_dict())
+            all_bottlenecks += [b.to_dict() for b in loop.identify_bottlenecks()]
 
         # Sort by priority score
         analysis.bottlenecks = sorted(
@@ -295,7 +293,7 @@ class ReciprocalAccelerationFramework:
 
         return analysis
 
-    def _analyze_cross_loop_effects(self) -> List[Dict[str, Any]]:
+    def _analyze_cross_loop_effects(self) -> list[dict[str, Any]]:
         """Analyze how loops are affecting each other."""
         effects = []
 
@@ -321,15 +319,17 @@ class ReciprocalAccelerationFramework:
 
         return sorted(effects, key=lambda e: abs(e["estimated_effect"]), reverse=True)
 
-    def _generate_recommendations(self, analysis: FrameworkAnalysis) -> List[str]:
+    def _generate_recommendations(self, analysis: FrameworkAnalysis) -> list[str]:
         """Generate prioritized recommendations based on analysis."""
         recommendations = []
 
         # Recommendations from bottlenecks
         for bottleneck in analysis.bottlenecks[:3]:  # Top 3 bottlenecks
             if bottleneck.get("is_active"):
-                for action in bottleneck.get("recommended_actions", []):
-                    recommendations.append(f"[{bottleneck['loop_name']}] {action}")
+                recommendations += [
+                    f"[{bottleneck['loop_name']}] {action}"
+                    for action in bottleneck.get("recommended_actions", [])
+                ]
 
         # Recommendations from loop states
         for name, state in analysis.loop_states.items():
@@ -353,21 +353,21 @@ class ReciprocalAccelerationFramework:
             )
 
         # Add high-leverage investment recommendations
-        for investment in self.HIGH_LEVERAGE_INVESTMENTS[:2]:
-            if float(investment["current_maturity"]) < 0.5:  # type: ignore[arg-type]
-                recommendations.append(
-                    f"[High-Leverage] Invest in {investment['name']}: {investment['rationale']}"
-                )
+        recommendations += [
+            f"[High-Leverage] Invest in {investment['name']}: {investment['rationale']}"
+            for investment in self.HIGH_LEVERAGE_INVESTMENTS[:2]
+            if float(investment["current_maturity"]) < 0.5  # type: ignore[arg-type]
+        ]
 
         return recommendations
 
-    def _identify_high_leverage_investments(self) -> List[Dict[str, Any]]:
+    def _identify_high_leverage_investments(self) -> list[dict[str, Any]]:
         """Identify investments that would accelerate multiple loops."""
         investments = []
 
         for inv in self.HIGH_LEVERAGE_INVESTMENTS:
             # Check which affected loops are actually in the framework
-            affected_loops: List[str] = inv["affected_loops"]  # type: ignore[assignment]
+            affected_loops: list[str] = inv["affected_loops"]  # type: ignore[assignment]
             active_affected = [loop for loop in affected_loops if loop in self.loops]
 
             if active_affected:
@@ -389,7 +389,7 @@ class ReciprocalAccelerationFramework:
 
         return sorted(investments, key=lambda i: i["opportunity_score"], reverse=True)
 
-    def get_loop_coupling_matrix(self) -> Dict[str, Dict[str, float]]:
+    def get_loop_coupling_matrix(self) -> dict[str, dict[str, float]]:
         """
         Get the coupling matrix between all loops.
 
@@ -397,7 +397,7 @@ class ReciprocalAccelerationFramework:
             Nested dictionary with coupling strengths
         """
         loop_names = list(self.loops.keys())
-        matrix = {name: {n: 0.0 for n in loop_names} for name in loop_names}
+        matrix = {name: dict.fromkeys(loop_names, 0.0) for name in loop_names}
 
         for coupling in self.couplings:
             if coupling.source_loop in matrix and coupling.target_loop in matrix:
@@ -405,7 +405,7 @@ class ReciprocalAccelerationFramework:
 
         return matrix
 
-    def predict_acceleration(self, iterations: int = 10) -> List[Dict[str, float]]:
+    def predict_acceleration(self, iterations: int = 10) -> list[dict[str, float]]:
         """
         Predict future acceleration based on current dynamics.
 
@@ -427,7 +427,7 @@ class ReciprocalAccelerationFramework:
 
         coupling_matrix = self.get_loop_coupling_matrix()
 
-        for i in range(iterations):
+        for _i in range(iterations):
             new_accels = {}
 
             for name in self.loops:
@@ -448,7 +448,7 @@ class ReciprocalAccelerationFramework:
 
         return predictions
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate a summary of the framework state."""
         return {
             "name": self.name,

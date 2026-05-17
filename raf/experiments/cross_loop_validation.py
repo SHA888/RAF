@@ -12,7 +12,7 @@ Key experiments:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -28,10 +28,10 @@ class LoopState:
     iteration: int
     timestamp: datetime
     primary_metric: float
-    secondary_metrics: Dict[str, float] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    secondary_metrics: dict[str, float] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "loop_name": self.loop_name,
             "iteration": self.iteration,
@@ -55,7 +55,7 @@ class CrossLoopEffect:
     confidence: float  # Statistical confidence
     description: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source_loop": self.source_loop,
             "target_loop": self.target_loop,
@@ -73,11 +73,11 @@ class IntegratedExperimentResult:
     """Results from an integrated cross-loop experiment."""
 
     # Per-iteration data
-    calibration_accuracy: List[float]
-    gate_fidelity: List[float]
-    mitigation_effectiveness: List[float]
-    max_circuit_depth: List[int]
-    error_rates: List[float]
+    calibration_accuracy: list[float]
+    gate_fidelity: list[float]
+    mitigation_effectiveness: list[float]
+    max_circuit_depth: list[int]
+    error_rates: list[float]
 
     # Cross-loop effects
     calibration_to_mitigation: CrossLoopEffect
@@ -89,7 +89,7 @@ class IntegratedExperimentResult:
     overall_improvement: float
     cascade_amplification: float  # How much cross-loop effects amplify gains
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "calibration_accuracy": self.calibration_accuracy,
             "gate_fidelity": self.gate_fidelity,
@@ -145,8 +145,8 @@ class CrossLoopValidationExperiment:
 
     def __init__(
         self,
-        noise_profile: Optional[DeviceNoiseProfile] = None,
-        random_seed: Optional[int] = None,
+        noise_profile: DeviceNoiseProfile | None = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize cross-loop validation experiment.
@@ -163,17 +163,17 @@ class CrossLoopValidationExperiment:
         self.rng = np.random.default_rng(random_seed)
 
         # State tracking
-        self.loop_states: Dict[str, List[LoopState]] = {
+        self.loop_states: dict[str, list[LoopState]] = {
             "calibration": [],
             "mitigation": [],
             "circuit_scaling": [],
         }
-        self.coupling_measurements: List[CouplingMeasurement] = []
+        self.coupling_measurements: list[CouplingMeasurement] = []
 
         # Initialize loop parameters
         self._init_loop_parameters()
 
-    def _init_loop_parameters(self):
+    def _init_loop_parameters(self) -> None:
         """Initialize parameters for each simulated loop."""
         # Calibration loop state
         self.calibration_state = {
@@ -198,9 +198,9 @@ class CrossLoopValidationExperiment:
 
     def _simulate_calibration_improvement(
         self,
-        iteration: int,
+        _iteration: int,
         base_improvement: float = 0.05,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Simulate one iteration of calibration loop improvement.
 
@@ -240,9 +240,9 @@ class CrossLoopValidationExperiment:
 
     def _simulate_mitigation_improvement(
         self,
-        iteration: int,
+        _iteration: int,
         calibration_quality: float,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Simulate one iteration of error mitigation loop.
 
@@ -286,10 +286,10 @@ class CrossLoopValidationExperiment:
 
     def _simulate_circuit_scaling(
         self,
-        iteration: int,
+        _iteration: int,
         gate_fidelity: float,
         mitigation_effectiveness: float,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Simulate circuit scaling based on fidelity and mitigation.
 
@@ -352,11 +352,11 @@ class CrossLoopValidationExperiment:
         self.coupling_measurements = []
 
         # Track metrics over iterations
-        calibration_accuracy = []
-        gate_fidelity = []
-        mitigation_effectiveness = []
-        max_circuit_depth = []
-        error_rates = []
+        calibration_accuracy: list[float] = []
+        gate_fidelity: list[float] = []
+        mitigation_effectiveness: list[float] = []
+        max_circuit_depth: list[int] = []
+        error_rates: list[float] = []
 
         for iteration in range(n_iterations):
             timestamp = datetime.now()
@@ -386,7 +386,7 @@ class CrossLoopValidationExperiment:
             calibration_accuracy.append(self.calibration_state["noise_model_accuracy"])
             gate_fidelity.append(self.calibration_state["gate_fidelity"])
             mitigation_effectiveness.append(self.mitigation_state["mitigation_effectiveness"])
-            max_circuit_depth.append(self.circuit_state["max_reliable_depth"])
+            max_circuit_depth.append(int(self.circuit_state["max_reliable_depth"]))
             error_rates.append(scale_result["mitigated_error_rate"])
 
             # Record loop states
@@ -526,8 +526,8 @@ class CrossLoopValidationExperiment:
         self,
         source_loop: str,
         target_loop: str,
-        source_values: List[float],
-        target_values: List[float],
+        source_values: list[float],
+        target_values: list[float],
     ) -> CrossLoopEffect:
         """Compute coupling effect between two loops from time series data."""
         if len(source_values) < 2 or len(target_values) < 2:
@@ -555,7 +555,7 @@ class CrossLoopValidationExperiment:
 
         # Cross-correlation to find lag
         correlation = np.correlate(source_norm, target_norm, mode="full")
-        lag = np.argmax(correlation) - len(source_values) + 1
+        lag = int(np.argmax(correlation) - len(source_values) + 1)
 
         # Coupling strength from correlation at optimal lag
         max_corr = np.max(correlation) / len(source_values)
@@ -580,7 +580,7 @@ class CrossLoopValidationExperiment:
         self,
         source_loop: str,
         target_loop: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Quantify cross-loop coupling from collected experimental data.
 
@@ -643,7 +643,7 @@ class CrossLoopValidationExperiment:
         self,
         n_trials: int = 5,
         iterations_per_trial: int = 10,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Validate that improvements in one loop benefit others.
 
@@ -661,7 +661,7 @@ class CrossLoopValidationExperiment:
         isolated_results = []
         coupled_results = []
 
-        for trial in range(n_trials):
+        for _trial in range(n_trials):
             # Run coupled experiment (normal)
             self._init_loop_parameters()
             coupled_result = self.run_integrated_experiment(
@@ -708,7 +708,7 @@ class CrossLoopValidationExperiment:
         """Run experiment with cross-loop effects disabled."""
         initial_depth = self.circuit_state["max_reliable_depth"]
 
-        for iteration in range(n_iterations):
+        for _iteration in range(n_iterations):
             # Only calibration improves, no coupling to other loops
             room = 1.0 - self.calibration_state["noise_model_accuracy"]
             improvement = 0.05 * room * (1.0 + 0.2 * self.rng.standard_normal())
@@ -761,7 +761,7 @@ class CrossLoopValidationExperiment:
                 "Consider longer experiments or different coupling mechanisms."
             )
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate experiment summary."""
         # Compute all coupling statistics
         coupling_stats = {}

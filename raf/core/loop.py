@@ -7,10 +7,11 @@ which then feeds back to further advance the first.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -63,16 +64,16 @@ class LoopState:
     efficiency: float = 0.0
     data_volume: float = 0.0
     last_update: datetime = field(default_factory=datetime.now)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
 
-    def update(self, **kwargs):
+    def update(self, **kwargs: Any) -> None:
         """Update state with new values."""
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.last_update = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "iteration": self.iteration,
@@ -97,26 +98,26 @@ class LoopMetrics:
         iteration_times: Time taken for each iteration
     """
 
-    acceleration_history: List[AccelerationMetric] = field(default_factory=list)
-    bottlenecks: List[BottleneckIndicator] = field(default_factory=list)
-    progress: Dict[str, ProgressMetric] = field(default_factory=dict)
-    iteration_times: List[float] = field(default_factory=list)
+    acceleration_history: list[AccelerationMetric] = field(default_factory=list)
+    bottlenecks: list[BottleneckIndicator] = field(default_factory=list)
+    progress: dict[str, ProgressMetric] = field(default_factory=dict)
+    iteration_times: list[float] = field(default_factory=list)
 
-    def add_acceleration(self, metric: AccelerationMetric):
+    def add_acceleration(self, metric: AccelerationMetric) -> None:
         """Record an acceleration measurement."""
         self.acceleration_history.append(metric)
 
-    def add_bottleneck(self, bottleneck: BottleneckIndicator):
+    def add_bottleneck(self, bottleneck: BottleneckIndicator) -> None:
         """Add or update a bottleneck."""
         # Replace if same name exists
         self.bottlenecks = [b for b in self.bottlenecks if b.name != bottleneck.name]
         self.bottlenecks.append(bottleneck)
 
-    def get_active_bottlenecks(self) -> List[BottleneckIndicator]:
+    def get_active_bottlenecks(self) -> list[BottleneckIndicator]:
         """Get currently active bottlenecks."""
         return [b for b in self.bottlenecks if b.is_active]
 
-    def get_acceleration_trend(self, window: int = 5) -> Optional[float]:
+    def get_acceleration_trend(self, window: int = 5) -> float | None:
         """Calculate acceleration trend over recent iterations."""
         if len(self.acceleration_history) < 2:
             return None
@@ -127,7 +128,7 @@ class LoopMetrics:
         x = np.arange(len(values))
         return float(np.polyfit(x, values, 1)[0])
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate metrics summary."""
         return {
             "total_iterations": len(self.acceleration_history),
@@ -176,7 +177,7 @@ class AccelerationLoop(ABC):
         self.description = description
         self.state = LoopState()
         self.metrics = LoopMetrics()
-        self._callbacks: Dict[str, List[Callable]] = {
+        self._callbacks: dict[str, list[Callable[[Any], None]]] = {
             "on_iteration": [],
             "on_acceleration": [],
             "on_bottleneck": [],
@@ -184,7 +185,7 @@ class AccelerationLoop(ABC):
 
     @property
     @abstractmethod
-    def stages(self) -> List[str]:
+    def stages(self) -> list[str]:
         """
         The stages of this acceleration loop.
 
@@ -197,7 +198,7 @@ class AccelerationLoop(ABC):
 
     @property
     @abstractmethod
-    def bottleneck_types(self) -> List[str]:
+    def bottleneck_types(self) -> list[str]:
         """
         Types of bottlenecks that can affect this loop.
 
@@ -216,7 +217,7 @@ class AccelerationLoop(ABC):
         pass
 
     @abstractmethod
-    def identify_bottlenecks(self) -> List[BottleneckIndicator]:
+    def identify_bottlenecks(self) -> list[BottleneckIndicator]:
         """
         Identify current bottlenecks limiting this loop.
 
@@ -226,7 +227,7 @@ class AccelerationLoop(ABC):
         pass
 
     @abstractmethod
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """
         Generate recommendations for accelerating this loop.
 
@@ -277,7 +278,7 @@ class AccelerationLoop(ABC):
 
         return self.state
 
-    def _update_status(self):
+    def _update_status(self) -> None:
         """Update loop status based on current state."""
         active_bottlenecks = self.metrics.get_active_bottlenecks()
         acceleration_trend = self.metrics.get_acceleration_trend()
@@ -295,7 +296,7 @@ class AccelerationLoop(ABC):
         else:
             self.state.status = LoopStatus.ACTIVE
 
-    def register_callback(self, event: str, callback: Callable):
+    def register_callback(self, event: str, callback: Callable[[Any], None]) -> None:
         """
         Register a callback for loop events.
 
@@ -306,7 +307,7 @@ class AccelerationLoop(ABC):
         if event in self._callbacks:
             self._callbacks[event].append(callback)
 
-    def _trigger_callbacks(self, event: str, data: Any):
+    def _trigger_callbacks(self, event: str, data: Any) -> None:
         """Trigger all callbacks for an event."""
         for callback in self._callbacks.get(event, []):
             try:
@@ -314,12 +315,12 @@ class AccelerationLoop(ABC):
             except Exception as e:
                 print(f"Callback error in {self.name}.{event}: {e}")
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the loop to initial state."""
         self.state = LoopState()
         self.metrics = LoopMetrics()
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate a summary of the loop's current state."""
         return {
             "name": self.name,

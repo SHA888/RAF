@@ -8,7 +8,7 @@ identify bottlenecks, and measure cross-loop coupling in QC-ML systems.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -62,7 +62,7 @@ class AccelerationMetric:
     baseline: float = 1.0
     timestamp: datetime = field(default_factory=datetime.now)
     iteration: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def acceleration_ratio(self) -> float:
@@ -76,7 +76,7 @@ class AccelerationMetric:
         """Whether the loop is exhibiting positive acceleration."""
         return self.acceleration_ratio > 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "name": self.name,
@@ -120,8 +120,8 @@ class BottleneckIndicator:
     current_value: float = 0.0
     threshold: float = 0.0
     addressability_score: float = 0.5
-    recommended_actions: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    recommended_actions: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def is_active(self) -> bool:
@@ -148,7 +148,7 @@ class BottleneckIndicator:
         # High severity + high addressability = high priority
         return self.severity_score * self.addressability_score
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "name": self.name,
@@ -189,7 +189,7 @@ class CrossLoopCoupling:
     coupling_type: str  # "direct", "indirect", "enabling", "amplifying"
     lag_iterations: int = 0
     description: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate coupling strength is in valid range."""
@@ -201,7 +201,7 @@ class CrossLoopCoupling:
         """Whether this represents strong coupling (>0.5)."""
         return self.coupling_strength > 0.5
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "source_loop": self.source_loop,
@@ -234,7 +234,7 @@ class ProgressMetric:
     target_value: float
     unit: str = ""
     direction: str = "lower"  # "lower" or "higher" is better
-    history: List[tuple[datetime, float]] = field(default_factory=list)
+    history: list[tuple[datetime, float]] = field(default_factory=list)
 
     @property
     def progress_ratio(self) -> float:
@@ -250,7 +250,7 @@ class ProgressMetric:
             return self.current_value / self.target_value
 
     @property
-    def trend(self) -> Optional[float]:
+    def trend(self) -> float | None:
         """Calculate trend from history (positive = improving)."""
         if len(self.history) < 2:
             return None
@@ -263,14 +263,14 @@ class ProgressMetric:
         # Adjust sign based on direction
         return -slope if self.direction == "lower" else slope
 
-    def record(self, value: float, timestamp: Optional[datetime] = None) -> None:
+    def record(self, value: float, timestamp: datetime | None = None) -> None:
         """Record a new measurement."""
         if timestamp is None:
             timestamp = datetime.now()
         self.history.append((timestamp, value))
         self.current_value = value
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         return {
             "domain": self.domain,
@@ -290,10 +290,10 @@ class MetricsAggregator:
     """
 
     def __init__(self) -> None:
-        self.acceleration_metrics: Dict[str, List[AccelerationMetric]] = {}
-        self.bottlenecks: Dict[str, List[BottleneckIndicator]] = {}
-        self.couplings: List[CrossLoopCoupling] = []
-        self.progress_metrics: Dict[str, ProgressMetric] = {}
+        self.acceleration_metrics: dict[str, list[AccelerationMetric]] = {}
+        self.bottlenecks: dict[str, list[BottleneckIndicator]] = {}
+        self.couplings: list[CrossLoopCoupling] = []
+        self.progress_metrics: dict[str, ProgressMetric] = {}
 
     def add_acceleration_metric(self, metric: AccelerationMetric) -> None:
         """Add an acceleration metric."""
@@ -315,14 +315,14 @@ class MetricsAggregator:
         """Add a progress metric."""
         self.progress_metrics[metric.domain] = metric
 
-    def get_active_bottlenecks(self) -> List[BottleneckIndicator]:
+    def get_active_bottlenecks(self) -> list[BottleneckIndicator]:
         """Get all currently active bottlenecks, sorted by priority."""
         active = []
         for loop_bottlenecks in self.bottlenecks.values():
             active.extend([b for b in loop_bottlenecks if b.is_active])
         return sorted(active, key=lambda b: b.priority_score, reverse=True)
 
-    def get_strong_couplings(self) -> List[CrossLoopCoupling]:
+    def get_strong_couplings(self) -> list[CrossLoopCoupling]:
         """Get all strong cross-loop couplings."""
         return [c for c in self.couplings if c.is_strong]
 
@@ -341,7 +341,7 @@ class MetricsAggregator:
 
         return total_acceleration / count if count > 0 else 1.0
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate summary of all metrics."""
         return {
             "overall_acceleration": self.compute_overall_acceleration(),

@@ -7,9 +7,12 @@ based on loop dynamics, bottleneck analysis, and cross-loop effects.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from raf.core.framework import ReciprocalAccelerationFramework
 
 
 class InvestmentCategory(Enum):
@@ -45,7 +48,7 @@ class InvestmentOpportunity:
     name: str
     category: InvestmentCategory
     description: str
-    affected_loops: List[str]
+    affected_loops: list[str]
     impact_score: float
     maturity: float
     effort: float
@@ -57,7 +60,7 @@ class InvestmentOpportunity:
         if self.effort > 0:
             self.roi_score = self.impact_score * (1 - self.maturity) / self.effort
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "category": self.category.value,
@@ -179,7 +182,7 @@ class ResearchPrioritizer:
 
     def __init__(self) -> None:
         """Initialize the research prioritizer."""
-        self.opportunities: List[InvestmentOpportunity] = []
+        self.opportunities: list[InvestmentOpportunity] = []
         self._init_default_opportunities()
 
     def _init_default_opportunities(self) -> None:
@@ -192,7 +195,7 @@ class ResearchPrioritizer:
         """Add a custom investment opportunity."""
         self.opportunities.append(opportunity)
 
-    def generate_roadmap(self, framework) -> Dict[str, Any]:
+    def generate_roadmap(self, framework: "ReciprocalAccelerationFramework") -> dict[str, Any]:
         """
         Generate a prioritized research roadmap.
 
@@ -227,7 +230,7 @@ class ResearchPrioritizer:
             "high_roi_count": len([o for o in ranked if o.roi_score > 0.3]),
         }
 
-    def _adjust_for_framework(self, framework: Any) -> List[InvestmentOpportunity]:
+    def _adjust_for_framework(self, framework: Any) -> list[InvestmentOpportunity]:
         """Adjust opportunity scores based on framework state."""
         adjusted = []
 
@@ -270,10 +273,10 @@ class ResearchPrioritizer:
         return adjusted
 
     def _group_by_timeline(
-        self, opportunities: List[InvestmentOpportunity]
-    ) -> Dict[str, List[str]]:
+        self, opportunities: list[InvestmentOpportunity]
+    ) -> dict[str, list[str]]:
         """Group opportunities by timeline."""
-        groups: Dict[str, List[str]] = {
+        groups: dict[str, list[str]] = {
             "short_term": [],  # < 1 year
             "medium_term": [],  # 1-2 years
             "long_term": [],  # > 2 years
@@ -290,8 +293,8 @@ class ResearchPrioritizer:
         return groups
 
     def _generate_phases(
-        self, opportunities: List[InvestmentOpportunity], framework: Any
-    ) -> List[Dict[str, Any]]:
+        self, opportunities: list[InvestmentOpportunity], _framework: Any
+    ) -> list[dict[str, Any]]:
         """Generate phased implementation plan."""
         phases = []
 
@@ -353,10 +356,10 @@ class ResearchPrioritizer:
         return phases
 
     def _compute_expected_acceleration(
-        self, top_investments: List[InvestmentOpportunity], framework: Any
-    ) -> Dict[str, float]:
+        self, top_investments: list[InvestmentOpportunity], framework: Any
+    ) -> dict[str, float]:
         """Compute expected acceleration from top investments."""
-        expected = {loop: 1.0 for loop in framework.loops}
+        expected = dict.fromkeys(framework.loops, 1.0)
 
         for opp in top_investments:
             for loop_name in opp.affected_loops:
@@ -368,8 +371,8 @@ class ResearchPrioritizer:
         return expected
 
     def compare_strategies(
-        self, framework: Any, strategies: List[List[str]]
-    ) -> List[Dict[str, Any]]:
+        self, framework: Any, strategies: list[list[str]]
+    ) -> list[dict[str, Any]]:
         """
         Compare different investment strategies.
 

@@ -27,12 +27,13 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-def check_backend_availability():
+def check_backend_availability() -> dict[str, Any]:
     """Check which backends are available."""
     from raf.backends import list_available_backends
 
@@ -45,7 +46,7 @@ def check_backend_availability():
     return backends
 
 
-def run_aer_validation(noise_profile: str = "manila"):
+def run_aer_validation(noise_profile: str = "manila") -> dict[str, Any]:
     """Run validation with Qiskit Aer simulator."""
     from raf.backends import create_backend
     from raf.experiments import ErrorMitigationExperiment
@@ -85,7 +86,7 @@ def run_aer_validation(noise_profile: str = "manila"):
     return metrics
 
 
-def run_azure_validation(target: str = "ionq.simulator"):
+def run_azure_validation(target: str = "ionq.simulator") -> dict[str, Any] | None:
     """Run validation with Azure Quantum."""
     try:
         from raf.backends import AzureQuantumBackend
@@ -128,7 +129,7 @@ def run_azure_validation(target: str = "ionq.simulator"):
         return None
 
 
-def run_braket_validation(device: str = "sv1"):
+def run_braket_validation(device: str = "sv1") -> dict[str, Any] | None:
     """Run validation with AWS Braket."""
     try:
         from raf.backends import BraketBackend
@@ -168,13 +169,13 @@ def run_braket_validation(device: str = "sv1"):
         return None
 
 
-def run_full_comparison():
+def run_full_comparison() -> dict[str, Any]:
     """Run full comparison across available backends."""
     print("\n" + "=" * 60)
     print("RAF Multi-Vendor Hardware Validation")
     print("=" * 60)
 
-    results = {
+    results: dict[str, Any] = {
         "timestamp": datetime.now().isoformat(),
         "backends": [],
     }
@@ -210,7 +211,7 @@ def run_full_comparison():
     return results
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Multi-vendor quantum validation")
     parser.add_argument(
         "--simulators-only",

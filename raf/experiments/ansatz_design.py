@@ -13,7 +13,7 @@ Key components:
 
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -30,25 +30,25 @@ class CircuitCandidate:
     # Circuit structure parameters
     num_qubits: int
     depth: int
-    gate_sequence: List[str]  # e.g., ['ry', 'cx', 'rz', 'cx']
+    gate_sequence: list[str]  # e.g., ['ry', 'cx', 'rz', 'cx']
     entanglement: str  # 'linear', 'full', 'circular'
 
     # Performance metrics (filled after evaluation)
-    performance: Optional[float] = None
-    fidelity: Optional[float] = None
-    evaluation_time_ms: Optional[float] = None
+    performance: float | None = None
+    fidelity: float | None = None
+    evaluation_time_ms: float | None = None
 
     # Metadata
     generation: int = 0
-    parent_id: Optional[int] = None
-    circuit_id: Optional[int] = None
+    parent_id: int | None = None
+    circuit_id: int | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.circuit_id is None:
             # fallback to global RNG (seeded by experiment-wide set_all_seeds)
             self.circuit_id = int(np.random.randint(0, 1_000_000))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "circuit_id": self.circuit_id,
             "num_qubits": self.num_qubits,
@@ -70,7 +70,9 @@ class NeuralSurrogate:
     enabling faster architecture search.
     """
 
-    def __init__(self, hidden_sizes: Optional[List[int]] = None, random_seed: Optional[int] = None):
+    def __init__(
+        self, hidden_sizes: list[int] | None = None, random_seed: int | None = None
+    ) -> None:
         """
         Initialize neural surrogate.
 
@@ -79,10 +81,10 @@ class NeuralSurrogate:
         """
         self.hidden_sizes = hidden_sizes or [64, 32]
         self.model: Any = None
-        self.scaler_X: Optional[tuple[Any, Any]] = None
-        self.scaler_y: Optional[tuple[Any, Any]] = None
+        self.scaler_X: tuple[Any, Any] | None = None
+        self.scaler_y: tuple[Any, Any] | None = None
         self.is_trained = False
-        self.training_history: List[Dict] = []
+        self.training_history: list[dict[str, Any]] = []
         self.rng = np.random.default_rng(random_seed)
 
     def _encode_circuit(self, candidate: CircuitCandidate) -> np.ndarray:
@@ -120,10 +122,10 @@ class NeuralSurrogate:
 
     def train(
         self,
-        candidates: List[CircuitCandidate],
+        candidates: list[CircuitCandidate],
         epochs: int = 100,
         learning_rate: float = 0.01,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Train surrogate on evaluated circuits.
 
@@ -167,15 +169,13 @@ class NeuralSurrogate:
 
         # Training loop (simple gradient descent)
         losses = []
-        for epoch in range(epochs):
+        for _epoch in range(epochs):
             # Forward pass
             activations = [X_norm]
-            for i, (w, b) in enumerate(zip(self.weights, self.biases)):
+            for i, (w, b) in enumerate(zip(self.weights, self.biases, strict=False)):
                 z = activations[-1] @ w + b
-                if i < len(self.weights) - 1:
-                    a = np.maximum(0, z)  # ReLU
-                else:
-                    a = z  # Linear output
+                # Hidden layers use ReLU; output layer is linear
+                a = np.maximum(0, z) if i < len(self.weights) - 1 else z
                 activations.append(a)
 
             # Loss
@@ -231,19 +231,16 @@ class NeuralSurrogate:
 
         # Forward pass
         a = x_norm
-        for i, (w, b) in enumerate(zip(self.weights, self.biases)):
+        for i, (w, b) in enumerate(zip(self.weights, self.biases, strict=False)):
             z = a @ w + b
-            if i < len(self.weights) - 1:
-                a = np.maximum(0, z)
-            else:
-                a = z
+            a = np.maximum(0, z) if i < len(self.weights) - 1 else z
 
         # Denormalize
         assert self.scaler_y is not None
         pred = a * self.scaler_y[1] + self.scaler_y[0]
         return float(pred)
 
-    def predict_batch(self, candidates: List[CircuitCandidate]) -> np.ndarray:
+    def predict_batch(self, candidates: list[CircuitCandidate]) -> np.ndarray:
         """Predict performance for multiple candidates."""
         return np.array([self.predict(c) for c in candidates])
 
@@ -261,8 +258,8 @@ class EvolutionaryQAS:
         population_size: int = 20,
         mutation_rate: float = 0.3,
         elite_fraction: float = 0.2,
-        random_seed: Optional[int] = None,
-    ):
+        random_seed: int | None = None,
+    ) -> None:
         self.num_qubits = num_qubits
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -272,12 +269,12 @@ class EvolutionaryQAS:
         self.gate_options = ["rx", "ry", "rz", "cx", "h"]
         self.entanglement_options = ["linear", "circular", "full"]
 
-    def initialize_population(self) -> List[CircuitCandidate]:
+    def initialize_population(self) -> list[CircuitCandidate]:
         """Create initial random population."""
         population = []
 
         for _ in range(self.population_size):
-            depth = self.rng.integers(2, 8)
+            depth = int(self.rng.integers(2, 8))
             gate_sequence = [self.rng.choice(self.gate_options) for _ in range(depth * 2)]
             entanglement = self.rng.choice(self.entanglement_options)
 
@@ -299,10 +296,9 @@ class EvolutionaryQAS:
         new_entanglement = candidate.entanglement
 
         # Mutate gate sequence
-        if self.rng.random() < self.mutation_rate:
-            if len(new_sequence) > 0:
-                idx = self.rng.integers(len(new_sequence))
-                new_sequence[idx] = self.rng.choice(self.gate_options)
+        if self.rng.random() < self.mutation_rate and len(new_sequence) > 0:
+            idx = self.rng.integers(len(new_sequence))
+            new_sequence[idx] = self.rng.choice(self.gate_options)
 
         # Mutate depth (add/remove layer)
         if self.rng.random() < self.mutation_rate * 0.5:
@@ -326,7 +322,7 @@ class EvolutionaryQAS:
             parent_id=candidate.circuit_id,
         )
 
-    def select(self, population: List[CircuitCandidate]) -> List[CircuitCandidate]:
+    def select(self, population: list[CircuitCandidate]) -> list[CircuitCandidate]:
         """Select top performers for next generation."""
         # Sort by performance (higher is better)
         evaluated = [c for c in population if c.performance is not None]
@@ -351,8 +347,8 @@ class AnsatzDesignExperiment:
         self,
         noise_profile_name: str = "manila",
         num_qubits: int = 4,
-        random_seed: Optional[int] = None,
-    ):
+        random_seed: int | None = None,
+    ) -> None:
         """
         Initialize experiment.
 
@@ -373,16 +369,16 @@ class AnsatzDesignExperiment:
         self.qas = EvolutionaryQAS(num_qubits=num_qubits, random_seed=random_seed)
         self.collector = ExperimentalMetricsCollector("ansatz_design")
 
-        self.all_candidates: List[CircuitCandidate] = []
-        self.search_history: List[Dict] = []
+        self.all_candidates: list[CircuitCandidate] = []
+        self.search_history: list[dict[str, Any]] = []
 
     def _build_circuit(self, candidate: CircuitCandidate) -> Any:
         """Build Qiskit circuit from candidate specification."""
         try:
             from qiskit import QuantumCircuit
             from qiskit.circuit import Parameter
-        except ImportError:
-            raise ImportError("qiskit required")
+        except ImportError as err:
+            raise ImportError("qiskit required") from err
 
         qc = QuantumCircuit(candidate.num_qubits)
 
@@ -466,7 +462,7 @@ class AnsatzDesignExperiment:
         self,
         num_evaluations: int = 50,
         shots: int = 512,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run random architecture search (baseline).
 
@@ -485,7 +481,7 @@ class AnsatzDesignExperiment:
 
         for i in range(num_evaluations):
             # Generate random candidate
-            depth = self.rng.integers(2, 8)
+            depth = int(self.rng.integers(2, 8))
             gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
             entanglement = self.rng.choice(self.qas.entanglement_options)
 
@@ -520,7 +516,7 @@ class AnsatzDesignExperiment:
         num_evaluations: int = 50,
         initial_samples: int = 20,
         shots: int = 512,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run surrogate-guided architecture search.
 
@@ -540,8 +536,8 @@ class AnsatzDesignExperiment:
 
         # Phase 1: Initial random sampling
         print(f"  Phase 1: Initial sampling ({initial_samples} circuits)...")
-        for i in range(initial_samples):
-            depth = self.rng.integers(2, 8)
+        for _i in range(initial_samples):
+            depth = int(self.rng.integers(2, 8))
             gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
             entanglement = self.rng.choice(self.qas.entanglement_options)
 
@@ -574,7 +570,7 @@ class AnsatzDesignExperiment:
             test_candidates = []
 
             for _ in range(batch_size):
-                depth = self.rng.integers(2, 8)
+                depth = int(self.rng.integers(2, 8))
                 gate_sequence = [self.rng.choice(self.qas.gate_options) for _ in range(depth * 2)]
                 entanglement = self.rng.choice(self.qas.entanglement_options)
 
@@ -596,7 +592,7 @@ class AnsatzDesignExperiment:
             selected = self.evaluate_candidate(selected, shots=shots)
             candidates.append(selected)
 
-            if selected.performance > best_performance:
+            if selected.performance is not None and selected.performance > best_performance:
                 best_performance = selected.performance
                 best_candidate = selected
 
@@ -622,7 +618,7 @@ class AnsatzDesignExperiment:
         self,
         num_evaluations: int = 50,
         shots: int = 512,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Compare random vs surrogate-guided search.
 
@@ -651,9 +647,9 @@ class AnsatzDesignExperiment:
         surrogate_best = surrogate_results["best_performance"]
 
         # Find evaluations to reach 90% of best
-        def evals_to_threshold(candidates, threshold):
+        def evals_to_threshold(candidates: list[CircuitCandidate], threshold: float) -> int:
             for i, c in enumerate(candidates):
-                if c.performance >= threshold:
+                if c.performance is not None and c.performance >= threshold:
                     return i + 1
             return len(candidates)
 
@@ -710,8 +706,8 @@ class AnsatzDesignExperiment:
 
     def _generate_summary(
         self,
-        random_results: Dict,
-        surrogate_results: Dict,
+        random_results: dict[str, Any],
+        surrogate_results: dict[str, Any],
         acceleration: float,
     ) -> str:
         """Generate human-readable summary."""
@@ -737,7 +733,7 @@ class AnsatzDesignExperiment:
         ]
         return "\n".join(lines)
 
-    def plot_results(self, save_path: Optional[str] = None):
+    def plot_results(self, save_path: str | None = None) -> None:
         """Plot comparison results."""
         try:
             import matplotlib.pyplot as plt
@@ -774,11 +770,11 @@ class AnsatzDesignExperiment:
         surrogate_candidates = self.all_candidates[n:]
 
         # Compute running best
-        def running_best(candidates):
-            best = 0
-            curve = []
+        def running_best(candidates: list[CircuitCandidate]) -> list[float]:
+            best = 0.0
+            curve: list[float] = []
             for c in candidates:
-                if c.performance and c.performance > best:
+                if c.performance is not None and c.performance > best:
                     best = c.performance
                 curve.append(best)
             return curve
@@ -823,7 +819,7 @@ class AnsatzDesignExperiment:
             va="center",
             fontsize=11,
             family="monospace",
-            bbox=dict(boxstyle="round", facecolor="lightgray", alpha=0.8),
+            bbox={"boxstyle": "round", "facecolor": "lightgray", "alpha": 0.8},
         )
 
         plt.tight_layout()
@@ -834,7 +830,7 @@ class AnsatzDesignExperiment:
         else:
             plt.show()
 
-    def save_results(self, filepath: str):
+    def save_results(self, filepath: str) -> None:
         """Save experiment results."""
         import json
 
@@ -862,9 +858,9 @@ class HardwareHeterogeneityStudy:
 
     def __init__(
         self,
-        noise_profiles: Optional[List[str]] = None,
+        noise_profiles: list[str] | None = None,
         num_qubits: int = 4,
-    ):
+    ) -> None:
         """
         Initialize heterogeneity study.
 
@@ -874,14 +870,14 @@ class HardwareHeterogeneityStudy:
         """
         self.noise_profiles = noise_profiles or ["manila", "kolkata", "ionq"]
         self.num_qubits = num_qubits
-        self.results: Dict[str, Any] = {}
-        self.transfer_matrix: Optional[np.ndarray] = None
+        self.results: dict[str, Any] = {}
+        self.transfer_matrix: np.ndarray | None = None
 
     def run_study(
         self,
         num_evaluations: int = 30,
         shots: int = 512,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run QAS on multiple noise profiles and measure transfer degradation.
 
@@ -981,7 +977,7 @@ class HardwareHeterogeneityStudy:
 
         return self.results
 
-    def _compute_transfer_metrics(self, transfer_matrix: np.ndarray) -> Dict[str, Any]:
+    def _compute_transfer_metrics(self, transfer_matrix: np.ndarray) -> dict[str, Any]:
         """Compute metrics quantifying transfer degradation."""
         n = len(self.noise_profiles)
 
@@ -1018,8 +1014,8 @@ class HardwareHeterogeneityStudy:
 
     def _generate_summary(
         self,
-        profile_results: Dict,
-        transfer_metrics: Dict,
+        profile_results: dict[str, Any],
+        transfer_metrics: dict[str, Any],
     ) -> str:
         """Generate human-readable summary."""
         lines = [
@@ -1062,7 +1058,7 @@ class HardwareHeterogeneityStudy:
 
         return "\n".join(lines)
 
-    def plot_results(self, save_path: Optional[str] = None):
+    def plot_results(self, save_path: str | None = None) -> None:
         """Plot heterogeneity study results."""
         try:
             import matplotlib.pyplot as plt
@@ -1148,7 +1144,7 @@ class HardwareHeterogeneityStudy:
             va="center",
             fontsize=11,
             family="monospace",
-            bbox=dict(boxstyle="round", facecolor="lightgray", alpha=0.8),
+            bbox={"boxstyle": "round", "facecolor": "lightgray", "alpha": 0.8},
         )
 
         plt.tight_layout()
@@ -1159,7 +1155,7 @@ class HardwareHeterogeneityStudy:
         else:
             plt.show()
 
-    def save_results(self, filepath: str):
+    def save_results(self, filepath: str) -> None:
         """Save study results."""
         import json
 
@@ -1169,7 +1165,7 @@ class HardwareHeterogeneityStudy:
         print(f"Results saved to {filepath}")
 
 
-def run_demo():
+def run_demo() -> tuple[AnsatzDesignExperiment, dict[str, Any]]:
     """Run demonstration of Ansatz Design experiment."""
     print("=" * 60)
     print("Ansatz Design Loop - Empirical Validation Demo")

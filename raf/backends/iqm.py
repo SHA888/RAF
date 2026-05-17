@@ -13,7 +13,7 @@ Setup:
 
 import os
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -35,7 +35,7 @@ class IQMBackend(QuantumBackend):
     def __init__(
         self,
         server_url: str = "resonance",
-        token: Optional[str] = None,
+        token: str | None = None,
     ):
         """
         Initialize IQM backend.
@@ -61,8 +61,10 @@ class IQMBackend(QuantumBackend):
         else:
             try:
                 from qiskit_iqm import IQMProvider
-            except ImportError:
-                raise ImportError("qiskit-iqm required. Install with: pip install qiskit-iqm")
+            except ImportError as err:
+                raise ImportError(
+                    "qiskit-iqm required. Install with: pip install qiskit-iqm"
+                ) from err
 
         if not self.token:
             raise ValueError(
@@ -73,7 +75,7 @@ class IQMBackend(QuantumBackend):
         provider = IQMProvider(self.server_url, token=self.token)
         self._backend = provider.get_backend()
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **_kwargs: Any) -> ExecutionResult:
         """Execute circuit on IQM hardware."""
         self._initialize()
 
@@ -109,15 +111,12 @@ class IQMBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **kwargs: Any
+    ) -> list[ExecutionResult]:
         """Execute multiple circuits."""
-        results = []
-        for circuit in circuits:
-            results.append(self.execute(circuit, shots=shots, **kwargs))
-        return results
+        return [self.execute(circuit, shots=shots, **kwargs) for circuit in circuits]
 
     @classmethod
-    def list_servers(cls) -> Dict[str, str]:
+    def list_servers(cls) -> dict[str, str]:
         """List available IQM servers."""
         return IQM_SERVERS.copy()

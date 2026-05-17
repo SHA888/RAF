@@ -8,12 +8,12 @@ configuration for replayability.
 import json
 import random
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
 
-def set_all_seeds(seed: int, *, deterministic_torch: bool = False) -> Dict[str, Any]:
+def set_all_seeds(seed: int, *, deterministic_torch: bool = False) -> dict[str, Any]:
     """
     Set seeds across Python, NumPy, (optional) PyTorch, and Qiskit defaults.
 
@@ -45,7 +45,7 @@ def set_all_seeds(seed: int, *, deterministic_torch: bool = False) -> Dict[str, 
     return qiskit_kwargs
 
 
-def persist_run_config(config: Dict[str, Any], path: str, *, mkdir: bool = True) -> str:
+def persist_run_config(config: dict[str, Any], path: str, *, mkdir: bool = True) -> str:
     """
     Persist a run configuration (including seed + params) for replayability.
 

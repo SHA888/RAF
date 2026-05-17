@@ -2,7 +2,7 @@
 Loop dynamics visualization for the Reciprocal Acceleration Framework.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -62,7 +62,7 @@ class LoopDynamicsVisualizer:
         "converged": "#1abc9c",
     }
 
-    def __init__(self, figsize: tuple = (10, 6)):
+    def __init__(self, figsize: tuple[int, int] = (10, 6)) -> None:
         """
         Initialize the visualizer.
 
@@ -74,9 +74,7 @@ class LoopDynamicsVisualizer:
         if not HAS_MATPLOTLIB:
             print("Warning: matplotlib not installed. Visualization will be limited.")
 
-    def plot_acceleration_history(
-        self, framework, save_path: Optional[str] = None
-    ) -> Optional[Any]:
+    def plot_acceleration_history(self, framework: Any, save_path: str | None = None) -> Any | None:
         """
         Plot acceleration history for all loops.
 
@@ -112,7 +110,7 @@ class LoopDynamicsVisualizer:
 
         return fig
 
-    def _text_acceleration_history(self, framework) -> str:
+    def _text_acceleration_history(self, framework: Any) -> str:
         """Text-based acceleration history when matplotlib unavailable."""
         lines = ["=== Acceleration History ===\n"]
 
@@ -127,7 +125,7 @@ class LoopDynamicsVisualizer:
 
         return "\n".join(lines)
 
-    def plot_coupling_network(self, framework, save_path: Optional[str] = None) -> Optional[Any]:
+    def plot_coupling_network(self, framework: Any, save_path: str | None = None) -> Any | None:
         """
         Plot the loop coupling network.
 
@@ -180,7 +178,7 @@ class LoopDynamicsVisualizer:
 
         return fig
 
-    def _text_coupling_network(self, framework) -> str:
+    def _text_coupling_network(self, framework: Any) -> str:
         """Text-based coupling network when libraries unavailable."""
         lines = ["=== Coupling Network ===\n"]
 
@@ -193,7 +191,7 @@ class LoopDynamicsVisualizer:
 
         return "\n".join(lines)
 
-    def plot_bottleneck_heatmap(self, framework, save_path: Optional[str] = None) -> Optional[Any]:
+    def plot_bottleneck_heatmap(self, framework: Any, save_path: str | None = None) -> Any | None:
         """
         Plot bottleneck severity heatmap.
 
@@ -245,7 +243,7 @@ class LoopDynamicsVisualizer:
 
         return fig
 
-    def _text_bottleneck_summary(self, framework) -> str:
+    def _text_bottleneck_summary(self, framework: Any) -> str:
         """Text-based bottleneck summary."""
         lines = ["=== Bottleneck Summary ===\n"]
 
@@ -261,7 +259,7 @@ class LoopDynamicsVisualizer:
 
         return "\n".join(lines)
 
-    def plot_progress_dashboard(self, framework, save_path: Optional[str] = None) -> Optional[Any]:
+    def plot_progress_dashboard(self, framework: Any, save_path: str | None = None) -> Any | None:
         """
         Plot a comprehensive progress dashboard.
 
@@ -289,7 +287,7 @@ class LoopDynamicsVisualizer:
         ax1.set_title("Loop Status")
 
         # Add status labels
-        for i, (bar, status) in enumerate(zip(bars, statuses)):
+        for i, (_bar, status) in enumerate(zip(bars, statuses, strict=False)):
             ax1.text(0.5, i, status.upper(), ha="center", va="center", fontweight="bold")
 
         # 2. Acceleration rates
@@ -330,7 +328,7 @@ class LoopDynamicsVisualizer:
 
         return fig
 
-    def _text_progress_dashboard(self, framework) -> str:
+    def _text_progress_dashboard(self, framework: Any) -> str:
         """Text-based progress dashboard."""
         lines = ["=== Progress Dashboard ===\n"]
 
@@ -345,7 +343,7 @@ class LoopDynamicsVisualizer:
 
         return "\n".join(lines)
 
-    def generate_report(self, framework) -> str:
+    def generate_report(self, framework: Any) -> str:
         """
         Generate a text-based report of loop dynamics.
 
@@ -386,8 +384,7 @@ class LoopDynamicsVisualizer:
             recs = loop.get_recommendations()
             if recs:
                 lines.append("  Recommendations:")
-                for rec in recs[:3]:
-                    lines.append(f"    • {rec}")
+                lines += [f"    • {rec}" for rec in recs[:3]]
 
         # Cross-loop effects
         lines.append("")
@@ -395,12 +392,12 @@ class LoopDynamicsVisualizer:
         lines.append("CROSS-LOOP EFFECTS")
         lines.append("-" * 40)
 
-        for effect in analysis.cross_loop_effects[:5]:
-            lines.append(
-                f"  {effect['source']} → {effect['target']}: "
-                f"strength={effect['coupling_strength']:.2f}, "
-                f"effect={effect['estimated_effect']:.3f}"
-            )
+        lines += [
+            f"  {effect['source']} → {effect['target']}: "
+            f"strength={effect['coupling_strength']:.2f}, "
+            f"effect={effect['estimated_effect']:.3f}"
+            for effect in analysis.cross_loop_effects[:5]
+        ]
 
         # Recommendations
         lines.append("")
@@ -408,8 +405,7 @@ class LoopDynamicsVisualizer:
         lines.append("TOP RECOMMENDATIONS")
         lines.append("-" * 40)
 
-        for rec in analysis.recommendations[:5]:
-            lines.append(f"  • {rec}")
+        lines += [f"  • {rec}" for rec in analysis.recommendations[:5]]
 
         lines.append("")
         lines.append("=" * 60)

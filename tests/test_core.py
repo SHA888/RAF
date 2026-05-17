@@ -19,7 +19,7 @@ from raf.core.metrics import (
 class TestAccelerationMetric:
     """Tests for AccelerationMetric."""
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         metric = AccelerationMetric(
             name="test_metric",
             value=1.5,
@@ -29,21 +29,21 @@ class TestAccelerationMetric:
         assert metric.value == 1.5
         assert metric.baseline == 1.0
 
-    def test_acceleration_ratio(self):
+    def test_acceleration_ratio(self) -> None:
         metric = AccelerationMetric(name="test", value=1.5, baseline=1.0)
         assert metric.acceleration_ratio == 1.5
 
         metric2 = AccelerationMetric(name="test", value=0.8, baseline=1.0)
         assert metric2.acceleration_ratio == 0.8
 
-    def test_is_accelerating(self):
+    def test_is_accelerating(self) -> None:
         accelerating = AccelerationMetric(name="test", value=1.2, baseline=1.0)
         assert accelerating.is_accelerating is True
 
         decelerating = AccelerationMetric(name="test", value=0.9, baseline=1.0)
         assert decelerating.is_accelerating is False
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         metric = AccelerationMetric(name="test", value=1.5, baseline=1.0)
         d = metric.to_dict()
         assert d["name"] == "test"
@@ -55,7 +55,7 @@ class TestAccelerationMetric:
 class TestBottleneckIndicator:
     """Tests for BottleneckIndicator."""
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         bottleneck = BottleneckIndicator(
             name="test_bottleneck",
             description="A test bottleneck",
@@ -68,7 +68,7 @@ class TestBottleneckIndicator:
         assert bottleneck.name == "test_bottleneck"
         assert bottleneck.severity == BottleneckSeverity.HIGH
 
-    def test_is_active(self):
+    def test_is_active(self) -> None:
         active = BottleneckIndicator(
             name="active",
             description="",
@@ -91,7 +91,7 @@ class TestBottleneckIndicator:
         )
         assert inactive.is_active is False
 
-    def test_severity_score(self):
+    def test_severity_score(self) -> None:
         low = BottleneckIndicator(
             name="low",
             description="",
@@ -110,7 +110,7 @@ class TestBottleneckIndicator:
         )
         assert critical.severity_score == 1.0
 
-    def test_priority_score(self):
+    def test_priority_score(self) -> None:
         bottleneck = BottleneckIndicator(
             name="test",
             description="",
@@ -126,7 +126,7 @@ class TestBottleneckIndicator:
 class TestCrossLoopCoupling:
     """Tests for CrossLoopCoupling."""
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         coupling = CrossLoopCoupling(
             source_loop="loop_a",
             target_loop="loop_b",
@@ -137,7 +137,7 @@ class TestCrossLoopCoupling:
         assert coupling.target_loop == "loop_b"
         assert coupling.coupling_strength == 0.7
 
-    def test_invalid_strength(self):
+    def test_invalid_strength(self) -> None:
         with pytest.raises(ValueError):
             CrossLoopCoupling(
                 source_loop="a",
@@ -146,7 +146,7 @@ class TestCrossLoopCoupling:
                 coupling_type="direct",
             )
 
-    def test_is_strong(self):
+    def test_is_strong(self) -> None:
         strong = CrossLoopCoupling(
             source_loop="a", target_loop="b", coupling_strength=0.7, coupling_type="direct"
         )
@@ -161,7 +161,7 @@ class TestCrossLoopCoupling:
 class TestProgressMetric:
     """Tests for ProgressMetric."""
 
-    def test_progress_ratio_higher_better(self):
+    def test_progress_ratio_higher_better(self) -> None:
         metric = ProgressMetric(
             domain="accuracy",
             current_value=0.8,
@@ -170,7 +170,7 @@ class TestProgressMetric:
         )
         assert metric.progress_ratio == 0.8
 
-    def test_progress_ratio_lower_better(self):
+    def test_progress_ratio_lower_better(self) -> None:
         metric = ProgressMetric(
             domain="error_rate",
             current_value=0.02,
@@ -180,7 +180,7 @@ class TestProgressMetric:
         # progress = 1 - (current / target) = 1 - 2 = -1
         assert metric.progress_ratio == -1.0
 
-    def test_record(self):
+    def test_record(self) -> None:
         metric = ProgressMetric(
             domain="test",
             current_value=0.5,
@@ -195,19 +195,19 @@ class TestProgressMetric:
 class TestLoopState:
     """Tests for LoopState."""
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         state = LoopState()
         assert state.iteration == 0
         assert state.status == LoopStatus.INACTIVE
         assert state.acceleration_rate == 1.0
 
-    def test_update(self):
+    def test_update(self) -> None:
         state = LoopState()
         state.update(iteration=5, acceleration_rate=1.3)
         assert state.iteration == 5
         assert state.acceleration_rate == 1.3
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         state = LoopState(iteration=3, status=LoopStatus.ACTIVE)
         d = state.to_dict()
         assert d["iteration"] == 3
@@ -217,16 +217,16 @@ class TestLoopState:
 class TestReciprocalAccelerationFramework:
     """Tests for the main framework."""
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         raf = ReciprocalAccelerationFramework(name="TestRAF")
         assert raf.name == "TestRAF"
         assert len(raf.loops) == 0
 
-    def test_default_couplings(self):
+    def test_default_couplings(self) -> None:
         raf = ReciprocalAccelerationFramework()
         assert len(raf.couplings) > 0
 
-    def test_add_custom_coupling(self):
+    def test_add_custom_coupling(self) -> None:
         raf = ReciprocalAccelerationFramework()
         initial_count = len(raf.couplings)
 
@@ -240,7 +240,7 @@ class TestReciprocalAccelerationFramework:
 
         assert len(raf.couplings) == initial_count + 1
 
-    def test_coupling_matrix(self):
+    def test_coupling_matrix(self) -> None:
         raf = ReciprocalAccelerationFramework()
         # Add mock loops
         from raf.loops import ErrorMitigationLoop
@@ -250,7 +250,7 @@ class TestReciprocalAccelerationFramework:
         matrix = raf.get_loop_coupling_matrix()
         assert "error_mitigation" in matrix
 
-    def test_summary(self):
+    def test_summary(self) -> None:
         raf = ReciprocalAccelerationFramework(name="TestRAF")
         summary = raf.summary()
         assert summary["name"] == "TestRAF"
@@ -260,13 +260,13 @@ class TestReciprocalAccelerationFramework:
 class TestMetricsAggregator:
     """Tests for MetricsAggregator."""
 
-    def test_add_acceleration_metric(self):
+    def test_add_acceleration_metric(self) -> None:
         agg = MetricsAggregator()
         metric = AccelerationMetric(name="test", value=1.2, baseline=1.0)
         agg.add_acceleration_metric(metric)
         assert "test" in agg.acceleration_metrics
 
-    def test_add_bottleneck(self):
+    def test_add_bottleneck(self) -> None:
         agg = MetricsAggregator()
         bottleneck = BottleneckIndicator(
             name="test",
@@ -278,7 +278,7 @@ class TestMetricsAggregator:
         agg.add_bottleneck(bottleneck)
         assert "loop1" in agg.bottlenecks
 
-    def test_get_active_bottlenecks(self):
+    def test_get_active_bottlenecks(self) -> None:
         agg = MetricsAggregator()
 
         active = BottleneckIndicator(
@@ -307,7 +307,7 @@ class TestMetricsAggregator:
         assert len(active_list) == 1
         assert active_list[0].name == "active"
 
-    def test_compute_overall_acceleration(self):
+    def test_compute_overall_acceleration(self) -> None:
         agg = MetricsAggregator()
 
         agg.add_acceleration_metric(AccelerationMetric(name="a", value=1.2, baseline=1.0))

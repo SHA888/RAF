@@ -11,7 +11,7 @@ motifs, reducing the search space for new problems.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -45,7 +45,7 @@ class AnsatzDesignState:
     evaluation_cost: float = 1.0
     hardware_platforms: int = 1
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "circuit_quality": self.circuit_quality,
             "search_efficiency": self.search_efficiency,
@@ -155,37 +155,37 @@ class AnsatzDesignLoop(AccelerationLoop):
         )
 
     @property
-    def stages(self) -> List[str]:
+    def stages(self) -> list[str]:
         return self.STAGES
 
     @property
-    def bottleneck_types(self) -> List[str]:
+    def bottleneck_types(self) -> list[str]:
         return self.BOTTLENECK_TYPES
 
-    def set_circuit_quality(self, quality: float):
+    def set_circuit_quality(self, quality: float) -> None:
         """Set the current circuit quality."""
         self.ad_state.circuit_quality = np.clip(quality, 0.0, 1.0)
         self.metrics.progress["circuit_quality"].record(quality)
 
-    def set_search_efficiency(self, efficiency: float):
+    def set_search_efficiency(self, efficiency: float) -> None:
         """Set the current search efficiency."""
         self.ad_state.search_efficiency = np.clip(efficiency, 0.0, 1.0)
         self.metrics.progress["search_efficiency"].record(efficiency)
 
-    def set_surrogate_accuracy(self, accuracy: float):
+    def set_surrogate_accuracy(self, accuracy: float) -> None:
         """Set the current surrogate model accuracy."""
         self.ad_state.surrogate_accuracy = np.clip(accuracy, 0.0, 1.0)
         self.metrics.progress["surrogate_accuracy"].record(accuracy)
 
-    def set_problem_coverage(self, coverage: int):
+    def set_problem_coverage(self, coverage: int) -> None:
         """Set the number of problem types with good ansätze."""
         self.ad_state.problem_coverage = max(1, coverage)
 
-    def set_evaluation_cost(self, cost: float):
+    def set_evaluation_cost(self, cost: float) -> None:
         """Set the current evaluation cost."""
         self.ad_state.evaluation_cost = max(0.1, cost)
 
-    def set_hardware_platforms(self, platforms: int):
+    def set_hardware_platforms(self, platforms: int) -> None:
         """Set the number of supported hardware platforms."""
         self.ad_state.hardware_platforms = max(1, platforms)
 
@@ -256,7 +256,7 @@ class AnsatzDesignLoop(AccelerationLoop):
             },
         )
 
-    def identify_bottlenecks(self) -> List[BottleneckIndicator]:
+    def identify_bottlenecks(self) -> list[BottleneckIndicator]:
         """
         Identify current bottlenecks in the loop.
 
@@ -368,7 +368,7 @@ class AnsatzDesignLoop(AccelerationLoop):
 
         return bottlenecks
 
-    def get_recommendations(self) -> List[str]:
+    def get_recommendations(self) -> list[str]:
         """Generate recommendations for accelerating this loop."""
         recommendations = []
 
@@ -444,7 +444,7 @@ class AnsatzDesignLoop(AccelerationLoop):
         # Run iteration
         return self.iterate()
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """Generate a summary including ansatz design-specific state."""
         base_summary = super().summary()
         base_summary["ad_state"] = self.ad_state.to_dict()

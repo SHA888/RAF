@@ -5,7 +5,7 @@ Experimental metrics collection for RAF validation.
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -23,11 +23,11 @@ class ExperimentRun:
     # Results
     ideal_value: float
     noisy_value: float
-    mitigated_value: Optional[float] = None
+    mitigated_value: float | None = None
 
     # Errors
     noisy_error: float = 0.0
-    mitigated_error: Optional[float] = None
+    mitigated_error: float | None = None
 
     # Overhead
     mitigation_overhead: float = 1.0  # Multiplier on shots/time
@@ -35,28 +35,28 @@ class ExperimentRun:
     # Metadata
     backend_name: str = ""
     noise_profile: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.noisy_error = abs(self.noisy_value - self.ideal_value)
         if self.mitigated_value is not None:
             self.mitigated_error = abs(self.mitigated_value - self.ideal_value)
 
     @property
-    def error_reduction(self) -> Optional[float]:
+    def error_reduction(self) -> float | None:
         """Fraction of error reduced by mitigation."""
         if self.mitigated_error is None or self.noisy_error == 0:
             return None
         return 1 - (self.mitigated_error / self.noisy_error)
 
     @property
-    def mitigation_efficiency(self) -> Optional[float]:
+    def mitigation_efficiency(self) -> float | None:
         """Error reduction per unit overhead."""
         if self.error_reduction is None:
             return None
         return self.error_reduction / self.mitigation_overhead
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp.isoformat(),
             "iteration": self.iteration,
@@ -87,7 +87,7 @@ class ExperimentalMetricsCollector:
 
     def __init__(self, experiment_name: str):
         self.experiment_name = experiment_name
-        self.runs: List[ExperimentRun] = []
+        self.runs: list[ExperimentRun] = []
         self.start_time = datetime.now()
 
     def record_run(
@@ -98,12 +98,12 @@ class ExperimentalMetricsCollector:
         num_two_qubit_gates: int,
         ideal_value: float,
         noisy_value: float,
-        mitigated_value: Optional[float] = None,
+        mitigated_value: float | None = None,
         mitigation_overhead: float = 1.0,
         backend_name: str = "",
         noise_profile: str = "",
-        **metadata,
-    ):
+        **metadata: Any,
+    ) -> None:
         """Record a single experimental run."""
         run = ExperimentRun(
             timestamp=datetime.now(),
@@ -121,7 +121,7 @@ class ExperimentalMetricsCollector:
         )
         self.runs.append(run)
 
-    def compute_acceleration_metrics(self) -> Dict[str, Any]:
+    def compute_acceleration_metrics(self) -> dict[str, Any]:
         """
         Compute RAF acceleration metrics from collected data.
 
@@ -132,7 +132,7 @@ class ExperimentalMetricsCollector:
             return {"error": "Need at least 2 runs for acceleration analysis"}
 
         # Group by iteration
-        iterations = sorted(set(r.iteration for r in self.runs))
+        iterations = sorted({r.iteration for r in self.runs})
 
         # Compute per-iteration averages
         iteration_stats = []
@@ -198,7 +198,7 @@ class ExperimentalMetricsCollector:
             ),
         }
 
-    def compute_bottleneck_indicators(self) -> Dict[str, Any]:
+    def compute_bottleneck_indicators(self) -> dict[str, Any]:
         """
         Identify bottlenecks from experimental data.
 
@@ -267,7 +267,7 @@ class ExperimentalMetricsCollector:
             "high_severity_count": len([b for b in bottlenecks if b["severity"] == "high"]),
         }
 
-    def _correlation(self, x: List[float], y: List[float]) -> float:
+    def _correlation(self, x: list[float], y: list[float]) -> float:
         """Compute Pearson correlation coefficient."""
         n = len(x)
         if n < 2:
@@ -276,7 +276,7 @@ class ExperimentalMetricsCollector:
         mean_x = sum(x) / n
         mean_y = sum(y) / n
 
-        numerator = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, y))
+        numerator = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, y, strict=False))
 
         var_x = sum((xi - mean_x) ** 2 for xi in x)
         var_y = sum((yi - mean_y) ** 2 for yi in y)
@@ -288,16 +288,16 @@ class ExperimentalMetricsCollector:
 
         return float(numerator / denominator)
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> Any:
         """Convert runs to pandas DataFrame."""
         try:
             import pandas as pd
 
             return pd.DataFrame([r.to_dict() for r in self.runs])
-        except ImportError:
-            raise ImportError("pandas is required for DataFrame export")
+        except ImportError as err:
+            raise ImportError("pandas is required for DataFrame export") from err
 
-    def save(self, filepath: str):
+    def save(self, filepath: str) -> None:
         """Save collected data to JSON file."""
         data = {
             "experiment_name": self.experiment_name,
@@ -313,7 +313,7 @@ class ExperimentalMetricsCollector:
     @classmethod
     def load(cls, filepath: str) -> "ExperimentalMetricsCollector":
         """Load from JSON file."""
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         collector = cls(data["experiment_name"])
@@ -354,7 +354,9 @@ class ExperimentalMetricsCollector:
             f"Bottlenecks identified: {bottlenecks.get('num_bottlenecks', 0)}",
         ]
 
-        for b in bottlenecks.get("bottlenecks", []):
-            lines.append(f"  - {b['name']} ({b['severity']}): {b['description']}")
+        lines += [
+            f"  - {b['name']} ({b['severity']}): {b['description']}"
+            for b in bottlenecks.get("bottlenecks", [])
+        ]
 
         return "\n".join(lines)

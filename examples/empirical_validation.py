@@ -21,6 +21,7 @@ Usage:
 
 import os
 import sys
+from typing import Any
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -30,7 +31,7 @@ from raf.experiments import ErrorMitigationExperiment
 from raf.utils import persist_run_config, set_all_seeds
 
 
-def run_quick_demo(seed: int | None = None):
+def run_quick_demo(seed: int | None = None) -> tuple[Any, Any]:
     """Run a quick demonstration (2-3 minutes)."""
     print("=" * 70)
     print("RAF Error Mitigation Loop - Quick Demo")
@@ -62,7 +63,7 @@ def run_quick_demo(seed: int | None = None):
     return experiment, results
 
 
-def run_full_study(seed: int | None = None):
+def run_full_study(seed: int | None = None) -> dict[str, Any]:
     """Run a comprehensive study (10-15 minutes)."""
     print("=" * 70)
     print("RAF Error Mitigation Loop - Full Study")
@@ -71,7 +72,7 @@ def run_full_study(seed: int | None = None):
 
     # Compare different noise profiles
     profiles = ["manila", "kolkata", "ionq"]
-    all_results = {}
+    all_results: dict[str, dict[str, Any]] = {}
 
     for profile_name in profiles:
         print(f"\n{'='*50}")
@@ -102,23 +103,23 @@ def run_full_study(seed: int | None = None):
     print("=" * 70)
 
     for profile_name, data in all_results.items():
-        results_dict = data["results"]  # type: ignore[index]
-        metrics = results_dict["acceleration_metrics"]  # type: ignore[index]
+        results_dict = data["results"]
+        metrics = results_dict["acceleration_metrics"]
         print(f"\n{profile_name}:")
-        print(f"  Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}")  # type: ignore[union-attr]
+        print(f"  Acceleration: {metrics.get('overall_acceleration', 1.0):.3f}")
         print(
             f"  Final error reduction: {metrics.get('final_error_reduction', 0):.1%}"
-            if metrics.get("final_error_reduction")  # type: ignore[union-attr]
+            if metrics.get("final_error_reduction")
             else "  Final error reduction: N/A"
         )
 
-        bottlenecks = results_dict["bottleneck_indicators"]  # type: ignore[index]
+        bottlenecks = results_dict["bottleneck_indicators"]
         print(f"  Bottlenecks: {bottlenecks.get('num_bottlenecks', 0)}")
 
     return all_results
 
 
-def demonstrate_noise_profiles():
+def demonstrate_noise_profiles() -> None:
     """Demonstrate different noise profiles."""
     print("=" * 70)
     print("Available Noise Profiles")
@@ -157,7 +158,7 @@ def demonstrate_noise_profiles():
         print(f"  Readout error: {profile.readout_error:.2e}")
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     import argparse
 

@@ -5,7 +5,7 @@ Base classes for quantum backend abstraction.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BackendType(Enum):
@@ -21,7 +21,7 @@ class ExecutionResult:
     """Result from quantum circuit execution."""
 
     # Raw measurement counts
-    counts: Dict[str, int]
+    counts: dict[str, int]
 
     # Number of shots executed
     shots: int
@@ -32,24 +32,24 @@ class ExecutionResult:
     execution_time_ms: float
 
     # Optional: expectation values if computed
-    expectation_values: Optional[Dict[str, float]] = None
+    expectation_values: dict[str, float] | None = None
 
     # Optional: raw statevector (for ideal simulation)
-    statevector: Optional[Any] = None
+    statevector: Any | None = None
 
     # Optional: error information
-    error_rate_estimate: Optional[float] = None
+    error_rate_estimate: float | None = None
 
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def probabilities(self) -> Dict[str, float]:
+    def probabilities(self) -> dict[str, float]:
         """Convert counts to probabilities."""
         total = sum(self.counts.values())
         return {k: v / total for k, v in self.counts.items()}
 
-    def get_expectation(self, observable_name: str) -> Optional[float]:
+    def get_expectation(self, observable_name: str) -> float | None:
         """Get expectation value for a named observable."""
         if self.expectation_values:
             return self.expectation_values.get(observable_name)
@@ -88,8 +88,8 @@ class QuantumBackend(ABC):
 
     @abstractmethod
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
-    ) -> List[ExecutionResult]:
+        self, circuits: list[Any], shots: int = 1024, **kwargs: Any
+    ) -> list[ExecutionResult]:
         """
         Execute multiple circuits in a batch.
 
@@ -125,7 +125,7 @@ class QuantumBackend(ABC):
         result = self.execute(circuit, shots=shots, **kwargs)
         return self._expectation_from_counts(result.counts, observable)
 
-    def _expectation_from_counts(self, counts: Dict[str, int], observable: Any) -> float:
+    def _expectation_from_counts(self, counts: dict[str, int], _observable: Any) -> float:
         """
         Compute expectation value from measurement counts.
 
@@ -145,7 +145,7 @@ class QuantumBackend(ABC):
         return expectation
 
     @property
-    def statistics(self) -> Dict[str, Any]:
+    def statistics(self) -> dict[str, Any]:
         """Get execution statistics."""
         return {
             "name": self.name,
@@ -177,7 +177,7 @@ class CircuitMetrics:
 
     num_qubits: int
     depth: int
-    gate_counts: Dict[str, int]
+    gate_counts: dict[str, int]
     two_qubit_gate_count: int
     parameter_count: int
 

@@ -10,9 +10,10 @@ Key components:
 - RecalibrationScheduler: Optimal recalibration timing
 """
 
+import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -31,13 +32,13 @@ class PredictorType(Enum):
 class PredictionResult:
     """Result from noise parameter prediction."""
 
-    predicted_params: Dict[str, float]
+    predicted_params: dict[str, float]
     confidence: float  # 0-1 confidence score
     prediction_horizon_hours: float
     model_type: PredictorType
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "predicted_params": self.predicted_params,
             "confidence": self.confidence,
@@ -58,7 +59,7 @@ class CalibrationMetrics:
     recalibration_reduction: float  # Reduction in recalibration frequency
     samples_evaluated: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "mae": self.mae,
             "rmse": self.rmse,
@@ -82,8 +83,8 @@ class DriftTrajectoryGenerator:
 
     def __init__(
         self,
-        base_profiles: Optional[List[DeviceNoiseProfile]] = None,
-        random_seed: Optional[int] = None,
+        base_profiles: list[DeviceNoiseProfile] | None = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize trajectory generator.
@@ -103,11 +104,11 @@ class DriftTrajectoryGenerator:
         self,
         duration_hours: float = 24.0,
         sample_interval_hours: float = 0.5,
-        drift_type: Optional[DriftType] = None,
-        drift_rate: Optional[float] = None,
+        drift_type: DriftType | None = None,
+        drift_rate: float | None = None,
         add_noise: bool = True,
         noise_level: float = 0.05,
-    ) -> Tuple[np.ndarray, np.ndarray, Dict[str, Any]]:
+    ) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
         """
         Generate a single drift trajectory.
 
@@ -125,14 +126,14 @@ class DriftTrajectoryGenerator:
         """
         # Select random drift type if not specified
         if drift_type is None:
-            drift_type = self.rng.choice(list(DriftType))
+            drift_type = random.choice(list(DriftType))
 
         # Select random drift rate if not specified
         if drift_rate is None:
             drift_rate = self.rng.uniform(0.05, 0.3)
 
         # Select random base profile
-        base_profile = self.rng.choice(self.base_profiles)
+        base_profile = random.choice(self.base_profiles)
 
         # Create drift config
         drift_config = DriftConfig(
@@ -198,7 +199,7 @@ class DriftTrajectoryGenerator:
         sample_interval_hours: float = 0.5,
         lookback_steps: int = 10,
         forecast_steps: int = 5,
-    ) -> Tuple[np.ndarray, np.ndarray, List[Dict[str, Any]]]:
+    ) -> tuple[np.ndarray, np.ndarray, list[dict[str, Any]]]:
         """
         Generate a dataset of trajectories for training.
 
@@ -265,9 +266,9 @@ class CalibrationPredictor:
     def __init__(
         self,
         model_type: PredictorType = PredictorType.MLP,
-        hidden_sizes: Optional[List[int]] = None,
+        hidden_sizes: list[int] | None = None,
         learning_rate: float = 0.001,
-        random_seed: Optional[int] = None,
+        random_seed: int | None = None,
     ):
         """
         Initialize calibration predictor.
@@ -285,24 +286,24 @@ class CalibrationPredictor:
         self.rng = np.random.default_rng(random_seed)
 
         # Model parameters (initialized during training)
-        self._weights: List[np.ndarray] = []
-        self._biases: List[np.ndarray] = []
+        self._weights: list[np.ndarray] = []
+        self._biases: list[np.ndarray] = []
         self._is_trained = False
 
         # Training history
-        self.training_history: List[float] = []
+        self.training_history: list[float] = []
 
         # Input/output dimensions
-        self._input_shape: Optional[Tuple[int, ...]] = None
-        self._output_shape: Optional[Tuple[int, ...]] = None
+        self._input_shape: tuple[int, ...] | None = None
+        self._output_shape: tuple[int, ...] | None = None
 
         # Normalization parameters
-        self._input_mean: Optional[np.ndarray] = None
-        self._input_std: Optional[np.ndarray] = None
-        self._output_mean: Optional[np.ndarray] = None
-        self._output_std: Optional[np.ndarray] = None
+        self._input_mean: np.ndarray | None = None
+        self._input_std: np.ndarray | None = None
+        self._output_mean: np.ndarray | None = None
+        self._output_std: np.ndarray | None = None
 
-    def _initialize_weights(self, input_dim: int, output_dim: int):
+    def _initialize_weights(self, input_dim: int, output_dim: int) -> None:
         """Initialize network weights using Xavier initialization."""
         self._weights = []
         self._biases = []
@@ -327,7 +328,7 @@ class CalibrationPredictor:
         """Derivative of ReLU."""
         return (x > 0).astype(float)
 
-    def _forward(self, X: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
+    def _forward(self, X: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
         """
         Forward pass through the network.
 
@@ -337,14 +338,10 @@ class CalibrationPredictor:
         activations = [X]
         current = X
 
-        for i, (W, b) in enumerate(zip(self._weights, self._biases)):
+        for i, (W, b) in enumerate(zip(self._weights, self._biases, strict=False)):
             z = current @ W + b
-            if i < len(self._weights) - 1:
-                # Hidden layers use ReLU
-                current = self._relu(z)
-            else:
-                # Output layer is linear
-                current = z
+            # Hidden layers use ReLU; output layer is linear
+            current = self._relu(z) if i < len(self._weights) - 1 else z
             activations.append(current)
 
         return current, activations
@@ -352,8 +349,8 @@ class CalibrationPredictor:
     def _backward(
         self,
         y_true: np.ndarray,
-        activations: List[np.ndarray],
-    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        activations: list[np.ndarray],
+    ) -> tuple[list[np.ndarray], list[np.ndarray]]:
         """
         Backward pass to compute gradients.
 
@@ -409,7 +406,7 @@ class CalibrationPredictor:
         batch_size: int = 32,
         validation_split: float = 0.1,
         verbose: bool = True,
-    ) -> Dict[str, List[float]]:
+    ) -> dict[str, list[float]]:
         """
         Train the predictor on drift trajectory data.
 
@@ -458,7 +455,7 @@ class CalibrationPredictor:
         self._initialize_weights(input_dim, output_dim)
 
         # Training loop
-        history: Dict[str, List[float]] = {"train_loss": [], "val_loss": []}
+        history: dict[str, list[float]] = {"train_loss": [], "val_loss": []}
         n_train = len(X_train)
 
         for epoch in range(epochs):
@@ -512,7 +509,7 @@ class CalibrationPredictor:
         self,
         X: np.ndarray,
         return_confidence: bool = True,
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    ) -> tuple[np.ndarray, np.ndarray | None]:
         """
         Predict future noise parameters.
 
@@ -539,16 +536,15 @@ class CalibrationPredictor:
         y_pred_flat = self._denormalize_output(y_pred_norm)
 
         # Reshape to original output shape
-        y_pred = y_pred_flat.reshape(n_samples, *self._output_shape)
+        assert self._output_shape is not None
+        y_pred = y_pred_flat.reshape((n_samples, *self._output_shape))
 
         # Compute confidence based on prediction variance
         confidence = None
-        if return_confidence:
-            # Simple confidence based on how far predictions are from training mean
-            if self._output_mean is not None:
-                assert self._output_std is not None
-                deviation = np.abs(y_pred_flat - self._output_mean) / (self._output_std + 1e-8)
-                confidence = np.exp(-np.mean(deviation, axis=1))
+        if return_confidence and self._output_mean is not None:
+            assert self._output_std is not None
+            deviation = np.abs(y_pred_flat - self._output_mean) / (self._output_std + 1e-8)
+            confidence = np.exp(-np.mean(deviation, axis=1))
 
         return y_pred, confidence
 
@@ -678,10 +674,10 @@ class RecalibrationScheduler:
 
     def should_recalibrate(
         self,
-        current_params: Dict[str, float],
-        predicted_params: Dict[str, float],
+        current_params: dict[str, float],
+        predicted_params: dict[str, float],
         confidence: float,
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """
         Determine if recalibration is needed.
 
@@ -719,7 +715,7 @@ class RecalibrationScheduler:
         history: np.ndarray,
         sample_interval_hours: float = 0.5,
         max_horizon_hours: float = 24.0,
-    ) -> Tuple[float, str]:
+    ) -> tuple[float, str]:
         """
         Estimate time until recalibration is needed.
 

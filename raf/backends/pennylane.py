@@ -21,7 +21,8 @@ Optional plugins:
 """
 
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -99,7 +100,7 @@ class PennyLaneBackend(QuantumBackend):
         self,
         device_name: str = "default.qubit",
         wires: int = 4,
-        shots: Optional[int] = None,
+        shots: int | None = None,
         **device_kwargs: Any,
     ) -> None:
         """
@@ -129,8 +130,8 @@ class PennyLaneBackend(QuantumBackend):
         """Initialize the PennyLane device."""
         try:
             import pennylane as qml
-        except ImportError:
-            raise ImportError("pennylane required. Install with: pip install pennylane")
+        except ImportError as err:
+            raise ImportError("pennylane required. Install with: pip install pennylane") from err
 
         # Create device
         self._device = qml.device(
@@ -144,7 +145,7 @@ class PennyLaneBackend(QuantumBackend):
         self,
         circuit: Any,
         shots: int = 1024,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> ExecutionResult:
         """
         Execute a quantum circuit.
@@ -202,10 +203,10 @@ class PennyLaneBackend(QuantumBackend):
 
     def execute_batch(
         self,
-        circuits: List[Any],
+        circuits: list[Any],
         shots: int = 1024,
-        **kwargs,
-    ) -> List[ExecutionResult]:
+        **kwargs: Any,
+    ) -> list[ExecutionResult]:
         """Execute multiple circuits."""
         return [self.execute(circuit, shots=shots, **kwargs) for circuit in circuits]
 
@@ -213,13 +214,13 @@ class PennyLaneBackend(QuantumBackend):
         """Convert Qiskit circuit to PennyLane QNode."""
         try:
             import pennylane as qml
-        except ImportError:
-            raise ImportError("pennylane required")
+        except ImportError as err:
+            raise ImportError("pennylane required") from err
 
         try:
             import qiskit  # noqa: F401
-        except ImportError:
-            raise ImportError("qiskit required for circuit conversion")
+        except ImportError as err:
+            raise ImportError("qiskit required for circuit conversion") from err
 
         # Extract gate operations from Qiskit circuit
         ops = []
@@ -230,7 +231,7 @@ class PennyLaneBackend(QuantumBackend):
 
             ops.append((gate_name, qubits, params))
 
-        @qml.qnode(self._device)
+        @qml.qnode(self._device)  # type: ignore
         def circuit() -> Any:
             for gate_name, qubits, params in ops:
                 if gate_name == "h":
@@ -266,7 +267,7 @@ class PennyLaneBackend(QuantumBackend):
 
         return circuit  # type: ignore[no-any-return]
 
-    def _result_to_counts(self, result: Any, shots: int) -> Dict[str, int]:
+    def _result_to_counts(self, result: Any, shots: int) -> dict[str, int]:
         """Convert PennyLane result to counts dictionary."""
         if isinstance(result, np.ndarray):
             # Probability distribution
@@ -293,7 +294,7 @@ class PennyLaneBackend(QuantumBackend):
 
     def create_qnode(
         self,
-        circuit_fn: Callable,
+        circuit_fn: Callable[..., Any],
         diff_method: str = "best",
         **qnode_kwargs: Any,
     ) -> Callable[..., Any]:
@@ -318,7 +319,11 @@ class PennyLaneBackend(QuantumBackend):
         )
 
     def compute_expectation(
-        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs: Any
+        self,
+        circuit: Any,
+        observable: Any,
+        shots: int = 1024,  # noqa: ARG002
+        **kwargs: Any,
     ) -> float:
         """
         Compute expectation value of an observable.
@@ -334,9 +339,9 @@ class PennyLaneBackend(QuantumBackend):
         """
         import pennylane as qml
 
-        params = kwargs.get("params", None)
+        params = kwargs.get("params")
 
-        @qml.qnode(self._device)
+        @qml.qnode(self._device)  # type: ignore
         def expectation_circuit(*args: Any) -> Any:
             circuit(*args) if callable(circuit) else None
             return qml.expval(observable)
@@ -348,7 +353,7 @@ class PennyLaneBackend(QuantumBackend):
 
     def compute_gradient(
         self,
-        circuit_fn: Callable,
+        circuit_fn: Callable[..., Any],
         observable: Any,
         params: np.ndarray,
         diff_method: str = "best",
@@ -367,8 +372,8 @@ class PennyLaneBackend(QuantumBackend):
         """
         import pennylane as qml
 
-        @qml.qnode(self._device, diff_method=diff_method)
-        def cost(*args):
+        @qml.qnode(self._device, diff_method=diff_method)  # type: ignore
+        def cost(*args: Any) -> Any:
             circuit_fn(*args)
             return qml.expval(observable)
 
@@ -377,15 +382,15 @@ class PennyLaneBackend(QuantumBackend):
 
     def optimize_vqe(
         self,
-        circuit_fn: Callable,
+        circuit_fn: Callable[..., Any],
         hamiltonian: Any,
         initial_params: np.ndarray,
         optimizer: str = "adam",
         max_iterations: int = 100,
         step_size: float = 0.1,
         convergence_threshold: float = 1e-6,
-        callback: Optional[Callable] = None,
-    ) -> Tuple[np.ndarray, float, List[float]]:
+        callback: Callable[..., None] | None = None,
+    ) -> tuple[np.ndarray, float, list[float]]:
         """
         Run VQE optimization.
 
@@ -405,8 +410,8 @@ class PennyLaneBackend(QuantumBackend):
         import pennylane as qml
 
         # Create cost function
-        @qml.qnode(self._device, diff_method="best")
-        def cost_fn(params):
+        @qml.qnode(self._device, diff_method="best")  # type: ignore
+        def cost_fn(params: np.ndarray) -> Any:
             circuit_fn(params)
             return qml.expval(hamiltonian)
 
@@ -448,12 +453,12 @@ class PennyLaneBackend(QuantumBackend):
         return params, energy_history[-1], energy_history
 
     @property
-    def device(self):
+    def device(self) -> Any:
         """Get the underlying PennyLane device."""
         return self._device
 
     @classmethod
-    def list_devices(cls) -> Dict[str, Dict[str, Any]]:
+    def list_devices(cls) -> dict[str, dict[str, Any]]:
         """List available PennyLane devices."""
         return PENNYLANE_DEVICES.copy()
 
@@ -472,8 +477,8 @@ class PennyLaneBackend(QuantumBackend):
 def create_pennylane_backend(
     device_name: str = "default.qubit",
     wires: int = 4,
-    shots: Optional[int] = None,
-    **kwargs,
+    shots: int | None = None,
+    **kwargs: Any,
 ) -> PennyLaneBackend:
     """
     Factory function to create PennyLane backend.

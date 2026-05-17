@@ -12,6 +12,8 @@ Supported backends:
     - IQMBackend: IQM European hardware (requires qiskit-iqm)
 """
 
+from typing import Any
+
 from .aer import AerBackend, create_backend
 from .base import BackendType, ExecutionResult, QuantumBackend
 from .noise_models import (
@@ -82,7 +84,7 @@ except ImportError:
     pass  # pennylane not installed
 
 
-def list_available_backends() -> dict:
+def list_available_backends() -> dict[str, Any]:
     """
     List all available backends and their status.
 
