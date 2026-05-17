@@ -2,292 +2,64 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Overview
+## Source of truth: read these first
 
-**Reciprocal Acceleration Framework (RAF)** — A research framework for understanding and accelerating co-evolutionary dynamics between Quantum Computing (QC) and Machine Learning (ML). The framework formalizes three primary acceleration loops:
+This project has pivoted significantly. **`README.md` and `TODO.md` are the living source of truth — consult them before acting; this file only captures what is stable across the pivot.**
 
-1. **Error Mitigation Loop** — ML-based quantum error mitigation at the output level
-2. **Ansatz Design Loop** — Quantum architecture search via neural surrogates at the circuit level
-3. **Calibration-Control Loop** — ML noise models and optimized control at the hardware level
+- **`README.md`** — current, accurate project description. The HTML comment block at the top is an intentional version changelog (v2/v3/v4); keep it, don't delete it. README v4 is the corrected backend reality (May 2026).
+- **`TODO.md`** — the active plan. Read the latest `Status` block (currently **v4**) and the **`Phase 10 v3`** (active) and **`Phase 11`** sections. Superseded sections (Goal v0, Phase 10 v1/v2) are kept verbatim for traceability — do not act on them, and do not delete them.
 
-## Quick Start
+## What this is (post-pivot framing — v3/v4)
 
-### Using `uv` (Recommended)
+**Reciprocal Acceleration Framework (RAF)** is an open-source Python **reference implementation** of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025). It is **not** a novel/competing framework — the conceptual phase of this subfield is closing; RAF fills the implementation gap by making those frameworks *runnable*: three task-based acceleration loops (Error Mitigation, Ansatz Design, Calibration-Control), explicit configurable coupling parameters, and a multi-vendor quantum backend abstraction.
 
-```bash
-# Install with all quantum extras and development tools
-uv sync --all-extras
+**Active goal: a JOSS (Journal of Open Source Software) submission (~Aug–Sep 2026).** JOSS reviewers *run the software* — usability, documentation, automated tests, and reproducibility are the actual quality gates, not empirical novelty. This shapes every decision below.
 
-# Run tests
-pytest tests/ -v
+## Scientific-honesty constraints (non-negotiable — Phase 11)
 
-# Format and lint
-uv run black raf/ && uv run isort raf/ && uv run ruff check raf/ --fix
+JOSS acceptance depends on the implementation honestly describing what it does. Do not undo or paper over these:
 
-# Or use pre-commit hooks
-uv run pre-commit run --all-files
+- **Coupling parameters are *assumed*, not measured.** `raf/experiments/cross_loop_validation.py` has hardcoded factors (e.g. `actual_improvement * 0.3`); Phase 11.1 reframes these as `assumed_coupling_strength` config (dataclass + config file, with `--coupling-strength` CLI flag), documented as assumptions drawn from prior literature. Never describe coupling results as "measured." Exposing these as configurable dials is the *intended core feature* of a reference implementation, not a flaw to hide.
+- **The error-mitigation path is an idealized upper bound, not learned ML-QEM.** `raf/experiments/error_mitigation.py` `_simulate_mitigation` uses oracle access to the ideal expectation (`noise_error = noisy_exp - ideal_exp`). The headline ~1.86× acceleration is an artifact of a deterministic schedule, not a measurement. Phase 11.2 Path B (required for JOSS) renames it `_simulated_idealized_mitigation` with an honest docstring. `CDRMitigator` is scaffolded but unused; real CDR (Path A) is deferred to v0.3.0, post-JOSS.
+- **Tests and reproducibility are submission blockers.** Coverage must reach ≥40% with a CI `--cov-fail-under` gate (Phase 11.3); reproducibility must be one-command and documented (Phase 11.4). Don't lower these bars.
 
-# Run a basic example
-python examples/basic_usage.py
+When in doubt, prefer honest, hedged language in docstrings/docs over impressive-sounding claims.
 
-# Run empirical validation with quantum simulation
-python examples/empirical_validation.py --mode quick
-```
+## Tooling
 
-### Using pip (Traditional)
+`uv` is primary (`uv.lock` committed; Python 3.12–3.13 only). Prefer `uv` over pip.
 
 ```bash
-# Install in development mode
-pip install -e ".[dev,quantum]"
-
-# Run tests
-pytest tests/ -v
-
-# Format and lint
-black raf/ && isort raf/ && ruff check raf/ --fix
-
-# Run a basic example
-python examples/basic_usage.py
-
-# Run empirical validation with quantum simulation
-python examples/empirical_validation.py --mode quick
+uv sync --all-extras                       # full dev env (quantum + braket + azure + dev + docs)
+uv run pytest tests/                       # all tests (coverage runs automatically, see gotchas)
+uv run pytest tests/test_loops.py -v       # single file
+uv run pytest tests/ -k error_mitigation   # single test by keyword
+uv run pre-commit run --all-files          # black + isort + ruff (canonical lint gate)
+uv run mypy raf/ --strict                  # type check (CONTRIBUTING expects --strict)
+uv run python examples/empirical_validation.py --mode quick   # smoke-test empirical path (<5 min)
 ```
 
-## Project Structure
+Example scripts that actually exist: `examples/basic_usage.py`, `empirical_validation.py`, `simulation_study.py`, `multi_vendor_validation.py`.
 
-```
-raf/
-├── core/              # Framework orchestration and base classes
-│   ├── framework.py   # ReciprocalAccelerationFramework (main class)
-│   ├── loop.py        # AccelerationLoop base class and LoopState/LoopMetrics
-│   └── metrics.py     # AccelerationMetric, BottleneckIndicator, CrossLoopCoupling
-├── loops/             # Three acceleration loop implementations
-│   ├── error_mitigation.py
-│   ├── ansatz_design.py
-│   └── calibration_control.py
-├── backends/          # Multi-vendor quantum backend abstraction
-│   ├── base.py        # QuantumBackend base class
-│   ├── aer.py         # Qiskit Aer local simulation
-│   └── noise_models.py # Predefined device noise profiles (manila, kolkata, ionq, sycamore)
-├── experiments/       # Empirical validation framework
-│   ├── error_mitigation.py # ErrorMitigationExperiment
-│   └── metrics_collector.py
-├── analysis/          # Analysis tools
-│   ├── bottleneck.py  # BottleneckAnalyzer
-│   ├── cross_loop.py  # CrossLoopAnalyzer
-│   └── prioritization.py # ResearchPrioritizer
-├── visualization/     # Plotting and dashboard utilities
-│   ├── loop_dynamics.py # LoopDynamicsVisualizer
-│   └── dashboard.py    # RAFDashboard (interactive)
-└── utils/             # Config and utilities
-    └── config.py      # Configuration management
-```
+## Architecture
 
-## Architecture Patterns
+Small core with an enforced extension contract:
 
-### The Framework Flow
+- **`raf/core/loop.py`** — `AccelerationLoop` (ABC). Every loop MUST implement five members: `stages`, `bottleneck_types`, `compute_acceleration()`, `identify_bottlenecks()`, `get_recommendations()`. `iterate()` is the engine (bumps iteration, computes acceleration, records bottlenecks, recomputes the `LoopStatus` state machine in `_update_status`, fires callbacks). Subclasses should not override `iterate()`.
+- **`raf/loops/`** — the three concrete loops. Add a new loop type here by subclassing `AccelerationLoop`.
+- **`raf/core/framework.py`** — `ReciprocalAccelerationFramework` orchestrates loops; `analyze()` aggregates per-loop summaries into a `FrameworkAnalysis`. **Model assumptions live here as class constants**: `DEFAULT_COUPLINGS` (6 directed loop→loop strengths from the source papers) and `HIGH_LEVERAGE_INVESTMENTS`. Changing assumptions means editing these constants, not the logic — and per the honesty constraints, document them as assumptions.
+- **`raf/core/metrics.py`** — `AccelerationMetric`, `BottleneckIndicator`, `CrossLoopCoupling`, `MetricsAggregator`. A loop is "accelerating" when `acceleration_ratio > 1`.
+- **`raf/backends/`** — quantum hardware abstraction (`QuantumBackend` base). Used only by `raf/experiments/`; core loop/analysis code has no quantum dependency. `__init__.py` imports every optional vendor under `try/except ImportError` — a missing backend degrades gracefully; never make a core import depend on a vendor SDK.
+- **`raf/experiments/`** — empirical validation harnesses (the files under the honesty constraints above live here).
+- **`raf/analysis/`, `raf/visualization/`, `raf/utils/`** — analyzers, plots/dashboard, config + reproducibility helpers.
 
-1. **Framework Creation** — `ReciprocalAccelerationFramework()` orchestrates analysis
-2. **Loop Addition** — Each loop inherits `AccelerationLoop`, implements:
-   - `compute_acceleration()` → returns `AccelerationMetric` (quantifies loop acceleration)
-   - `identify_bottlenecks()` → returns `List[BottleneckIndicator]` (what limits progress)
-   - `get_recommendations()` → prioritized action items
-3. **Cross-Loop Analysis** — `DEFAULT_COUPLINGS` define how loops affect each other
-4. **Unified Analysis** — `raf.analyze()` aggregates all loop dynamics into `FrameworkAnalysis`
+Flow: `ReciprocalAccelerationFramework()` → `add_loop(...)` (default couplings auto-wired in `__init__`) → `iterate_all()` → `analyze()`.
 
-### Key Classes
+## Project-specific gotchas
 
-- `ReciprocalAccelerationFramework` — Central orchestrator; holds loops, runs analysis
-- `AccelerationLoop` — Base class for loop implementations; defines the interface
-- `LoopState` — Dataclass tracking loop metrics across iterations (accuracy, cost, scale, etc.)
-- `FrameworkAnalysis` — Results object containing bottlenecks, recommendations, cross-loop effects
-- `QuantumBackend` — Abstract interface for quantum providers (Aer, IBM, Braket, Azure, IQM, PennyLane)
-
-### Backend Selection & Availability
-
-**Main Environment (uv sync --all-extras)**:
-- ✅ `quantum` extra: Qiskit Aer (local noisy simulation) — always available
-- ✅ `braket` extra: AWS Braket (IonQ, Rigetti, OQC, QuEra) — works in main environment
-- ✅ `azure` extra: Azure Quantum (IonQ, Quantinuum, Rigetti, PASQAL) — works in main environment
-
-**Separate Environments** (due to dependency conflicts):
-- 🔴 **IBM Quantum**: Requires separate venv due to `ibm-platform-services` build failures
-  ```bash
-  python -m venv venv-ibm
-  source venv-ibm/bin/activate
-  pip install qiskit-ibm-runtime
-  ```
-
-- 🔴 **IQM (trapped-ion)**: Requires separate venv with `qiskit<1.3` (incompatible with qiskit 2.x)
-  ```bash
-  python -m venv venv-iqm
-  source venv-iqm/bin/activate
-  pip install qiskit-iqm "qiskit<1.3"
-  ```
-
-- 🔴 **PennyLane**: Requires separate venv (transitive `ibm-platform-services` dependency)
-  ```bash
-  python -m venv venv-pennylane
-  source venv-pennylane/bin/activate
-  pip install pennylane pennylane-qiskit
-  ```
-
-**Recommended Installation**:
-```bash
-uv sync --all-extras          # Main environment (quantum + Braket + Azure + dev + docs)
-```
-
-**If IBM Quantum Needed**:
-```bash
-# In separate environment:
-python -m venv venv-ibm && source venv-ibm/bin/activate
-pip install qiskit-ibm-runtime
-```
-
-**Root Cause of Separation**:
-- `ibm-platform-services` (all versions ≥0.44) has build issues with pkg_resources
-- Affects: IBM Quantum, PennyLane (via pennylane-qiskit), and any backend using qiskit-ibm-runtime
-- Workaround: Install in isolated environment or use older qiskit-ibm-runtime with complex pinning
-
-## Common Development Tasks
-
-### Testing
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run a single test file
-pytest tests/test_loops.py -v
-
-# Run tests matching a pattern
-pytest tests/ -k "error_mitigation" -v
-
-# Run with coverage report
-pytest tests/ --cov=raf --cov-report=html
-```
-
-### Code Quality
-
-```bash
-# Format code
-black raf/ tests/
-
-# Sort imports
-isort raf/ tests/
-
-# Lint (checks and auto-fixes)
-ruff check raf/ tests/ --fix
-
-# Type checking
-mypy raf/
-
-# One-shot: format + lint
-black raf/ && isort raf/ && ruff check raf/ --fix
-```
-
-### Running Examples
-
-```bash
-# Basic framework usage (no quantum dependencies required)
-python examples/basic_example.py
-
-# Empirical validation with noisy quantum simulation (requires: pip install -e ".[quantum]")
-python examples/empirical_validation.py --mode quick
-python examples/empirical_validation.py --mode full  # Full study (~5-10 min)
-
-# Multi-vendor hardware validation (requires backend credentials)
-python examples/multi_vendor_validation.py --simulators-only
-```
-
-### Installation Variants
-
-```bash
-# Using uv (recommended):
-
-# Minimal: core framework only (no quantum simulation)
-uv sync
-
-# Recommended: includes local quantum simulation + AWS/Azure + dev tools
-uv sync --all-extras
-
-# Quantum + dev only (no cloud backends)
-uv sync --extras quantum,dev
-
-# Specific backend only
-uv sync --extra quantum   # Local simulation (Qiskit Aer)
-uv sync --extra braket    # AWS Braket (IonQ, Rigetti, OQC, QuEra)
-uv sync --extra azure     # Azure Quantum (IonQ, Quantinuum, Rigetti, PASQAL)
-
-# Using pip (traditional):
-
-# Minimal: core framework only (no quantum simulation)
-pip install -e "."
-
-# Recommended: includes local quantum simulation + AWS/Azure + dev tools
-pip install -e ".[all]"
-
-# Quantum + dev only (no cloud backends)
-pip install -e ".[quantum,dev]"
-
-# IBM Quantum in separate environment (dependency conflicts)
-python -m venv venv-ibm && source venv-ibm/bin/activate && pip install -e ".[quantum]" qiskit-ibm-runtime
-
-# IQM in separate environment (Qiskit version constraints)
-python -m venv venv-iqm && source venv-iqm/bin/activate && pip install "qiskit<1.3" qiskit-iqm
-```
-
-## Error Handling & Debugging
-
-- **Missing backend** — Framework gracefully skips unavailable backends. Check `raf.backends.list_available_backends()`
-
-- **IBM Quantum installation fails** — `ibm-platform-services` has build issues in main environment
-  - Solution: Use separate venv as documented in Backend Selection above
-  - Test: `python -m venv venv-ibm && source venv-ibm/bin/activate && pip install qiskit-ibm-runtime`
-
-- **IQM hardware unavailable** — Requires `qiskit<1.3` (incompatible with core qiskit 2.x backends)
-  - Solution: Create separate environment: `python -m venv venv-iqm && pip install qiskit<1.3 qiskit-iqm`
-  - Cannot coexist with qiskit 2.x in same environment
-
-- **PennyLane import fails** — Pulls in ibm-platform-services transitively
-  - Solution: Use separate environment or test without PennyLane integration
-
-- **Quantum execution failures** — Examples catch and report cleanly
-  - Hardware errors are device-specific (verify provider credentials)
-  - Simulation errors usually indicate circuit/backend incompatibility
-
-## Pre-Commit & CI
-
-The repository uses pre-commit hooks (see `.pre-commit-config.yaml`):
-```bash
-pre-commit run --all-files  # Run all hooks
-```
-
-Hooks enforce:
-- Trailing whitespace removal
-- EOF fixes
-- YAML validation
-- Black formatting
-- isort import sorting
-- Ruff linting with auto-fix
-
-## Key Dependencies
-
-Core: `numpy`, `scipy`, `matplotlib`, `networkx`, `pandas`, `pydantic`, `rich`
-
-Optional (per-backend):
-- **quantum** → `qiskit 2.0`, `qiskit-aer`
-- **ibm** → `qiskit-ibm-runtime`
-- **braket** → `amazon-braket-sdk`
-- **azure** → `azure-quantum`
-- **iqm** → `qiskit-iqm` (note: requires `qiskit<1.3`)
-- **pennylane** → `pennylane`, `pennylane-qiskit`
-
-Development: `pytest`, `pytest-cov`, `black`, `isort`, `mypy`, `ruff`
-
-## Testing Strategy
-
-- Unit tests in `tests/` cover core framework, loop implementations, analysis tools
-- Integration tests run loops and backends end-to-end
-- Empirical validation examples serve as acceptance tests (verify real quantum simulation)
-- Backend tests skip gracefully if provider not installed
+- **Backend extras are NOT all in `pyproject.toml`.** Defined extras: only `quantum`, `braket`, `azure`, `dev`, `docs`, `all` (= quantum+braket+azure+dev+docs). README's `uv sync --extra ibm|iqm|pennylane` / `raf[all-backends]` will fail — those backends have hard dependency conflicts (`ibm-platform-services` build failure; IQM needs `qiskit<1.3` vs. repo's `qiskit>=2.0`) and **must be installed in separate venvs**.
+- **README ↔ backend-code drift is a known, tracked issue.** README v4 corrected device strings (Brisbane/Kyoto/Osaka retired; OQC removed from Braket; `ionq_harmony`→`ionq_forte`; etc.), but `raf/backends/*.py` has *not* yet been reconciled (Phase 10 v3 .1 "Backend currency audit"). If you touch backends, expect stale device strings and align code to README v4, not the reverse.
+- **`uv run pytest` always runs coverage.** `addopts` forces `--cov=raf --cov-report=term-missing`; expect coverage output even on a single-test run.
+- **`raf` console script is broken.** `pyproject.toml` declares `raf = "raf.cli:main"` but `raf/cli.py` does not exist. Use example scripts, not a `raf` CLI, unless you're adding that module.
+- **Tooling target-version mismatch.** `requires-python` is `>=3.12`, but black/ruff/mypy are configured for `py39` while pre-commit's black pins `python3.12`. CONTRIBUTING mandates 3.12+ syntax (`dict[K,V]`, `T | None`). Match existing code; don't downgrade syntax to satisfy the stale `py39` config.
+- **Reproducibility is explicit and required.** Experiment scripts use `raf.utils.set_all_seeds` and `persist_run_config`; seeded run configs live in `run_configs/`. Preserve seeding when touching experiment code.
