@@ -1,8 +1,20 @@
 """
 Error Mitigation Loop empirical validation experiment.
 
-Demonstrates the acceleration dynamics of ML-based error mitigation
-using realistic noisy simulation.
+Demonstrates the acceleration dynamics of error mitigation using realistic
+noisy simulation.
+
+**Important**: This module uses oracle-access error mitigation as an idealized
+upper bound on what learned methods (CDR, neural network mitigation) could
+theoretically achieve. The error values used for correction are computed from
+the ideal (noiseless) expectation value, which is not available in real quantum
+experiments. This represents an optimistic scenario with perfect knowledge of
+the noise error structure. For realistic ML-based error mitigation, the actual
+error correction must be learned from training data (see CDRMitigator).
+
+The acceleration metrics in this experiment represent an idealized upper bound,
+not a measurement of a practical learned mitigation method. See
+_simulated_idealized_mitigation() for implementation details.
 """
 
 from collections.abc import Callable
@@ -350,6 +362,45 @@ class ErrorMitigationExperiment:
 
         return qc
 
+    def _simulated_idealized_mitigation(
+        self,
+        noisy_exp: float,
+        ideal_exp: float,
+        mitigation_strength: float,
+    ) -> tuple[float, float]:
+        """
+        Apply simulated idealized error mitigation using oracle access.
+
+        This method represents an optimistic upper bound on error mitigation
+        performance. It uses oracle access to the ideal (noiseless) expectation
+        value to compute and correct the noise error. This is NOT achievable
+        in real quantum experiments, where the ideal value is unknown.
+
+        In practice, learned mitigation methods (CDR, neural network mitigation)
+        must estimate the noise error from training data. This implementation
+        directly uses the true noise error (noisy_exp - ideal_exp) scaled by
+        a strength parameter to simulate improving mitigation.
+
+        Args:
+            noisy_exp: Noisy expectation value from quantum execution
+            ideal_exp: Ideal (noiseless) expectation value (oracle access)
+            mitigation_strength: Fraction of noise error to correct [0, 1]
+                                Higher values represent "better-learned" models
+
+        Returns:
+            Tuple of (mitigated_expectation, overhead_factor)
+            Overhead represents computational cost from mitigation infrastructure
+        """
+        # Compute true noise error (oracle access to ideal)
+        noise_error = noisy_exp - ideal_exp
+        correction = noise_error * mitigation_strength
+        mitigated_exp = noisy_exp - correction
+
+        # Overhead: cost of running multiple circuits for mitigation
+        overhead = 1.0 + mitigation_strength * 2
+
+        return mitigated_exp, overhead
+
     def run_single_experiment(
         self,
         circuit: Any,
@@ -389,19 +440,9 @@ class ErrorMitigationExperiment:
         overhead = 1.0
 
         if apply_mitigation:
-            # Simple learned mitigation: interpolate toward ideal
-            # This simulates an ML model that learns the noise characteristics
-            # and corrects toward the ideal value
-            # In practice, this would be CDR, neural network mitigation, etc.
-
-            # The mitigation_strength represents how well the ML model has learned
-            # Higher strength = better correction toward ideal
-            noise_error = noisy_exp - ideal_exp
-            correction = noise_error * mitigation_strength
-            mitigated_exp = noisy_exp - correction
-
-            # Overhead from running multiple circuits for training/inference
-            overhead = 1.0 + mitigation_strength * 2  # More sophisticated = more overhead
+            mitigated_exp, overhead = self._simulated_idealized_mitigation(
+                noisy_exp, ideal_exp, mitigation_strength
+            )
 
         return {
             "circuit_depth": metrics.depth,

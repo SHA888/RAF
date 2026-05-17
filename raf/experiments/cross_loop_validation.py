@@ -2,12 +2,19 @@
 Cross-loop validation experiments for the Reciprocal Acceleration Framework.
 
 This module implements integrated experiments that demonstrate and quantify
-how improvements in one acceleration loop benefit other loops.
+how improvements in one acceleration loop benefit other loops under ASSUMED
+coupling parameters. The coupling strengths and improvement rates documented
+here are assumptions drawn from prior literature (Maes 2025, Shukla 2025)
+and are NOT measured from empirical data.
+
+The integrated experiment demonstrates RAF framework dynamics under these
+assumed coupling regimes. Results illustrate cascade effects for the assumed
+parameter set rather than measured coupling strengths.
 
 Key experiments:
 1. Integrated experiment: better calibration → better mitigation → larger circuits
 2. Cross-loop coupling quantification from experimental data
-3. Validation that improvements cascade across loops
+3. Validation that improvements cascade across loops (under assumed couplings)
 """
 
 from dataclasses import dataclass, field
@@ -18,6 +25,7 @@ import numpy as np
 
 from raf.backends.noise_models import DeviceNoiseProfile
 from raf.utils import set_all_seeds
+from raf.utils.config import CrossLoopValidationConfig, load_cross_loop_config
 
 
 @dataclass
@@ -131,6 +139,12 @@ class CrossLoopValidationExperiment:
     This experiment demonstrates the core RAF hypothesis:
     improvements in one loop cascade to benefit other loops.
 
+    **Important**: This experiment uses ASSUMED coupling parameters, not measured
+    values. The coupling strengths are drawn from prior literature (Maes 2025,
+    Shukla 2025) and reflect domain assumptions about how loops interact.
+    Results illustrate cascade dynamics for the assumed parameter set. See
+    CrossLoopValidationConfig for the documented assumptions.
+
     The integrated experiment flow:
     1. Calibration Loop: Better noise characterization → higher gate fidelity
     2. Error Mitigation Loop: Better fidelity → more effective mitigation
@@ -140,6 +154,7 @@ class CrossLoopValidationExperiment:
         >>> experiment = CrossLoopValidationExperiment(random_seed=42)
         >>> result = experiment.run_integrated_experiment(n_iterations=10)
         >>> print(f"Cascade amplification: {result.cascade_amplification:.2f}x")
+        >>> # Coupling values below reflect assumed parameters, not measurements:
         >>> print(f"Calibration→Mitigation coupling: {result.calibration_to_mitigation.coupling_strength:.2f}")
     """
 
@@ -147,6 +162,7 @@ class CrossLoopValidationExperiment:
         self,
         noise_profile: DeviceNoiseProfile | None = None,
         random_seed: int | None = None,
+        config: CrossLoopValidationConfig | None = None,
     ):
         """
         Initialize cross-loop validation experiment.
@@ -154,6 +170,8 @@ class CrossLoopValidationExperiment:
         Args:
             noise_profile: Device noise profile (default: IBM Manila-like)
             random_seed: For reproducibility
+            config: CrossLoopValidationConfig with assumed coupling parameters.
+                   If None, loads from default TOML config or uses hardcoded defaults.
         """
         self.seed = random_seed
         if random_seed is not None:
@@ -161,6 +179,15 @@ class CrossLoopValidationExperiment:
 
         self.noise_profile = noise_profile or DeviceNoiseProfile.ibm_manila_like()
         self.rng = np.random.default_rng(random_seed)
+
+        # Load configuration
+        if config is None:
+            try:
+                self.config = load_cross_loop_config()
+            except Exception:
+                self.config = CrossLoopValidationConfig()
+        else:
+            self.config = config
 
         # State tracking
         self.loop_states: dict[str, list[LoopState]] = {
@@ -199,19 +226,27 @@ class CrossLoopValidationExperiment:
     def _simulate_calibration_improvement(
         self,
         _iteration: int,
-        base_improvement: float = 0.05,
+        base_improvement: float | None = None,
     ) -> dict[str, float]:
         """
         Simulate one iteration of calibration loop improvement.
 
+        The coupling parameters used here are ASSUMED values from prior literature,
+        not measured empirical data. See CrossLoopValidationConfig for documentation.
+
         Returns updated calibration metrics.
         """
+        if base_improvement is None:
+            base_improvement = self.config.calibration_base_improvement
+
         # Diminishing returns as we approach perfect calibration
         room_for_improvement = 1.0 - self.calibration_state["noise_model_accuracy"]
         actual_improvement = base_improvement * room_for_improvement
 
-        # Add some noise
-        actual_improvement *= 1.0 + 0.2 * self.rng.standard_normal()
+        # Add stochastic noise (assumed parameter)
+        actual_improvement *= (
+            1.0 + self.config.calibration_noise_factor * self.rng.standard_normal()
+        )
         actual_improvement = max(0, actual_improvement)
 
         # Update state
@@ -219,18 +254,21 @@ class CrossLoopValidationExperiment:
             0.99, self.calibration_state["noise_model_accuracy"] + actual_improvement
         )
 
-        # Better noise models → better gate fidelity
-        fidelity_improvement = actual_improvement * 0.3  # Coupling factor
+        # Better noise models → better gate fidelity (assumed coupling)
+        fidelity_improvement = (
+            actual_improvement * self.config.calibration_to_gate_fidelity_coupling
+        )
         self.calibration_state["gate_fidelity"] = min(
             0.9999,
             self.calibration_state["gate_fidelity"]
             + fidelity_improvement * (0.9999 - self.calibration_state["gate_fidelity"]),
         )
 
-        # Drift tracking improves with better models
+        # Drift tracking improves with better models (assumed coupling)
         self.calibration_state["drift_tracking_accuracy"] = min(
             0.95,
-            self.calibration_state["drift_tracking_accuracy"] + actual_improvement * 0.5,
+            self.calibration_state["drift_tracking_accuracy"]
+            + actual_improvement * self.config.calibration_to_drift_tracking_coupling,
         )
 
         return {
@@ -246,21 +284,24 @@ class CrossLoopValidationExperiment:
         """
         Simulate one iteration of error mitigation loop.
 
-        Mitigation effectiveness depends on calibration quality.
+        Mitigation effectiveness depends on calibration quality via an ASSUMED
+        coupling parameter. See CrossLoopValidationConfig for documentation of
+        how this coupling strength (mitigation_calibration_coupling) affects the
+        results. These are NOT measured values but domain assumptions.
         """
         # Base improvement from more training data
-        base_improvement = 0.04
+        base_improvement = self.config.mitigation_base_improvement
 
-        # Calibration quality boosts mitigation effectiveness
+        # Calibration quality boosts mitigation effectiveness (assumed coupling)
         # This is the key cross-loop coupling!
-        calibration_boost = calibration_quality * 0.5
+        calibration_boost = calibration_quality * self.config.calibration_to_mitigation_coupling
 
         # Diminishing returns
         room_for_improvement = 1.0 - self.mitigation_state["mitigation_effectiveness"]
         actual_improvement = (base_improvement + calibration_boost) * room_for_improvement
 
-        # Add noise
-        actual_improvement *= 1.0 + 0.15 * self.rng.standard_normal()
+        # Add stochastic noise (assumed parameter)
+        actual_improvement *= 1.0 + self.config.mitigation_noise_factor * self.rng.standard_normal()
         actual_improvement = max(0, actual_improvement)
 
         # Update state
@@ -268,15 +309,19 @@ class CrossLoopValidationExperiment:
             0.95, self.mitigation_state["mitigation_effectiveness"] + actual_improvement
         )
 
-        # Better mitigation → can reduce overhead
+        # Better mitigation → can reduce overhead (assumed coupling)
         self.mitigation_state["overhead_factor"] = max(
-            1.5, self.mitigation_state["overhead_factor"] - actual_improvement * 2
+            1.5,
+            self.mitigation_state["overhead_factor"]
+            - actual_improvement * self.config.mitigation_to_overhead_coupling,
         )
 
         # Training data quality improves with better calibration
         self.mitigation_state["training_data_quality"] = min(
             0.95,
-            0.5 * calibration_quality + 0.5 * self.mitigation_state["training_data_quality"],
+            self.config.training_data_weight_calibration * calibration_quality
+            + self.config.training_data_weight_history
+            * self.mitigation_state["training_data_quality"],
         )
 
         return {
@@ -294,6 +339,8 @@ class CrossLoopValidationExperiment:
         Simulate circuit scaling based on fidelity and mitigation.
 
         Max circuit depth depends on both gate fidelity and mitigation.
+        The smoothing factors (depth_momentum_factor, depth_target_factor) are
+        ASSUMED parameters to avoid sudden depth jumps.
         """
         # Compute effective error rate after mitigation
         base_error_rate = 1.0 - gate_fidelity
@@ -308,9 +355,12 @@ class CrossLoopValidationExperiment:
         else:
             max_depth = 1000
 
-        # Smooth update (don't jump instantly)
+        # Smooth update using exponential smoothing (assumed parameters)
         old_depth = self.circuit_state["max_reliable_depth"]
-        self.circuit_state["max_reliable_depth"] = int(0.7 * old_depth + 0.3 * max_depth)
+        self.circuit_state["max_reliable_depth"] = int(
+            self.config.depth_momentum_factor * old_depth
+            + self.config.depth_target_factor * max_depth
+        )
 
         # Effective qubits also scale with fidelity
         self.circuit_state["effective_qubits"] = min(

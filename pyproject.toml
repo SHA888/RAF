@@ -127,4 +127,4 @@ ignore_missing_imports = true
 minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=raf --cov-report=term-missing --cov-report=html"
+addopts = "-v --cov=raf --cov-report=term-missing --cov-report=html --cov-fail-under=40"

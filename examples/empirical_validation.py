@@ -27,8 +27,9 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from raf.backends import DeviceNoiseProfile
-from raf.experiments import ErrorMitigationExperiment
+from raf.experiments import CrossLoopValidationExperiment, ErrorMitigationExperiment
 from raf.utils import persist_run_config, set_all_seeds
+from raf.utils.config import CrossLoopValidationConfig
 
 
 def run_quick_demo(seed: int | None = None) -> tuple[Any, Any]:
@@ -119,6 +120,61 @@ def run_full_study(seed: int | None = None) -> dict[str, Any]:
     return all_results
 
 
+def run_cross_loop_validation(
+    seed: int | None = None,
+    coupling_strength: float | None = None,
+) -> tuple[Any, Any]:
+    """
+    Run cross-loop validation experiment with configurable coupling strength.
+
+    Args:
+        seed: Random seed for reproducibility
+        coupling_strength: Optional scaling factor for all coupling parameters.
+                          If provided, all assumed couplings are multiplied by this value.
+                          For example, 0.5 reduces all couplings to 50% of their defaults.
+
+    Returns:
+        Tuple of (experiment, result)
+    """
+    print("=" * 70)
+    print("RAF Cross-Loop Validation Experiment")
+    print("=" * 70)
+    print()
+
+    # Create config with optional coupling strength adjustment
+    config = CrossLoopValidationConfig()
+
+    if coupling_strength is not None:
+        # Scale all coupling parameters
+        config.calibration_to_gate_fidelity_coupling *= coupling_strength
+        config.calibration_to_drift_tracking_coupling *= coupling_strength
+        config.calibration_to_mitigation_coupling *= coupling_strength
+        config.mitigation_to_overhead_coupling *= coupling_strength
+
+        print(f"Coupling strength adjustment: {coupling_strength:.1%}")
+        print(f"  Calibration → Gate fidelity: {config.calibration_to_gate_fidelity_coupling:.3f}")
+        print(f"  Calibration → Mitigation: {config.calibration_to_mitigation_coupling:.3f}")
+        print()
+
+    # Create and run experiment
+    experiment = CrossLoopValidationExperiment(random_seed=seed, config=config)
+
+    print("Running integrated experiment (10 iterations)...")
+    result = experiment.run_integrated_experiment(n_iterations=10, verbose=False)
+
+    print()
+    print("Results:")
+    print(f"  Cascade amplification: {result.cascade_amplification:.3f}x")
+    print(f"  Overall improvement: {result.overall_improvement:.1%}")
+    print(
+        f"  Calibration → Mitigation coupling: {result.calibration_to_mitigation.coupling_strength:.3f}"
+    )
+    print(f"  Mitigation → Depth coupling: {result.mitigation_to_depth.coupling_strength:.3f}")
+    print(f"  Calibration → Depth coupling: {result.calibration_to_depth.coupling_strength:.3f}")
+
+    return experiment, result
+
+
 def demonstrate_noise_profiles() -> None:
     """Demonstrate different noise profiles."""
     print("=" * 70)
@@ -165,9 +221,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="RAF Empirical Validation Example")
     parser.add_argument(
         "--mode",
-        choices=["quick", "full", "profiles"],
+        choices=["quick", "full", "profiles", "cross-loop"],
         default="quick",
-        help="Run mode: quick (2-3 min), full (10-15 min), or profiles (info only)",
+        help="Run mode: quick (2-3 min), full (10-15 min), profiles (info only), or cross-loop (cross-loop validation)",
     )
     parser.add_argument(
         "--save-plots", action="store_true", help="Save plots to files instead of displaying"
@@ -184,6 +240,13 @@ def main() -> None:
         default=None,
         help="Optional path to persist run configuration (JSON)",
     )
+    parser.add_argument(
+        "--coupling-strength",
+        type=float,
+        default=None,
+        help="Scaling factor for all assumed coupling parameters (e.g., 0.5 reduces all couplings to 50%%). "
+        "Only used with --mode cross-loop.",
+    )
 
     args = parser.parse_args()
 
@@ -193,6 +256,23 @@ def main() -> None:
 
     if args.mode == "profiles":
         demonstrate_noise_profiles()
+    elif args.mode == "cross-loop":
+        experiment, result = run_cross_loop_validation(
+            seed=args.seed,
+            coupling_strength=args.coupling_strength,
+        )
+
+        if args.save_config:
+            persist_run_config(
+                {
+                    "mode": "cross-loop",
+                    "seed": args.seed,
+                    "coupling_strength": args.coupling_strength,
+                    "cascade_amplification": result.cascade_amplification,
+                    "overall_improvement": result.overall_improvement,
+                },
+                args.save_config,
+            )
     elif args.mode == "quick":
         experiment, results = run_quick_demo(seed=args.seed)
 

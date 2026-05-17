@@ -474,13 +474,27 @@ pytest tests/ --cov=raf --cov-report=term-missing --cov-report=html
    - Test backend abstractions
    - **Timeline**: Week 5
 
-3. **Validate All Coupling Strengths** (5 hours)
-   - Explain in paper why DEFAULT_COUPLINGS values chosen
-   - Cite prior work or empirical support
-   - Acknowledge heuristic nature in limitations
-   - **Timeline**: Week 2 (during writing)
+3. **Document Coupling Parameter Assumptions** (COMPLETED - Phase 11.1)
+   - ✅ Renamed hardcoded factors to `assumed_coupling_strength` config
+   - ✅ Created CrossLoopValidationConfig dataclass with all assumptions
+   - ✅ Loaded from configs/cross_loop_validation.toml with documentation
+   - ✅ Added `--coupling-strength` CLI flag for sensitivity studies
+   - Docstrings explicitly state coupling is assumed, not measured
+   - Assumptions drawn from prior literature (Maes 2025, Shukla 2025)
+   - In paper: present results as "framework dynamics under assumed coupling parameters"
+   - **Timeline**: ✅ Completed
 
-4. **Fix Dependencies** (2 hours)
+4. **Rename Oracle-Access Mitigation to Idealized Method** (COMPLETED - Phase 11.2 Path B)
+   - ✅ Extracted oracle-access mitigation to `_simulated_idealized_mitigation()` method
+   - ✅ Updated module docstring to state oracle access is not achievable in real experiments
+   - ✅ Comprehensive docstring explains: ideal value oracle, difference from learned mitigation (CDR)
+   - ✅ Clarified acceleration metrics are idealized upper bound, not measurements
+   - ✅ Updated method docstring to be explicit about assumptions
+   - In paper: present error mitigation results with clear caveat about oracle knowledge
+   - Real learned mitigation (CDR) deferred to v0.3.0 post-JOSS
+   - **Timeline**: ✅ Completed
+
+5. **Fix Dependencies** (2 hours)
    - Update pyproject.toml tool configs (Phase 9.2)
    - Broaden Qiskit constraint if possible
    - Test all extras: `uv sync --all-extras`

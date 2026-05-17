@@ -1,0 +1,68 @@
+# Cross-Loop Validation Experiment Configuration
+#
+# This configuration file documents ASSUMED coupling parameters used in the
+# cross-loop validation experiment. These parameters are drawn from prior
+# literature (Maes 2025, Shukla 2025) and are NOT measured from empirical data.
+#
+# The integrated experiment demonstrates RAF framework dynamics under these
+# assumed coupling strengths. Adjusting these parameters allows sensitivity
+# studies to explore how cascade effects respond to different coupling regimes.
+#
+# Coupling strengths in [0, 1] represent relative influence:
+#   0.0 = no coupling (independent loops)
+#   0.5 = moderate coupling (50% of source improvement propagates)
+#   1.0 = full coupling (source improvement fully propagates)
+
+# Calibration Loop Assumptions
+[calibration]
+# Base per-iteration improvement in noise characterization accuracy
+base_improvement = 0.05
+
+# Coupling strength: calibration improvements → gate fidelity improvement
+# A 5% improvement in noise characterization yields a 1.5% gate fidelity improvement
+# (0.05 * 0.3 = 0.015)
+to_gate_fidelity_coupling = 0.3
+
+# Coupling strength: calibration improvements → drift tracking improvement
+# A 5% improvement in calibration yields a 2.5% drift tracking improvement
+to_drift_tracking_coupling = 0.5
+
+# Stochastic noise factor: adds random variation to simulated improvements
+# Multiplicative noise: improvement *= 1.0 + noise_factor * N(0,1)
+noise_factor = 0.2
+
+# Error Mitigation Loop Assumptions
+[mitigation]
+# Base per-iteration improvement in mitigation effectiveness
+base_improvement = 0.04
+
+# Coupling strength: calibration quality → mitigation effectiveness improvement
+# Better calibrated noise models enable more effective error mitigation.
+# A fully characterized noise profile (quality=1) yields 4% + (1.0 * 0.5 * room)
+# additional mitigation improvement per iteration.
+calibration_coupling = 0.5
+
+# Coupling strength: mitigation improvements → computational overhead reduction
+# Better mitigation reduces the overhead factor (lower is better).
+# A 10% effectiveness improvement reduces overhead by 20%.
+to_overhead_coupling = 2.0
+
+# Stochastic noise factor
+noise_factor = 0.15
+
+# Circuit Scaling Assumptions
+[circuit_scaling]
+# Momentum factor for circuit depth updates (exponential smoothing).
+# Max depth = 0.7 * old_depth + 0.3 * newly_reachable_depth
+# This avoids sudden jumps in reachable circuit depth as fidelity/mitigation improve.
+depth_momentum_factor = 0.7
+
+# Target factor for circuit depth updates (complement of momentum)
+depth_target_factor = 0.3
+
+# Training data quality: weight of calibration quality vs. historical data
+# training_quality = 0.5 * calibration_quality + 0.5 * old_training_quality
+training_data_weight_calibration = 0.5
+
+# Historical weight for training data quality
+training_data_weight_history = 0.5
