@@ -100,8 +100,8 @@ class PennyLaneBackend(QuantumBackend):
         device_name: str = "default.qubit",
         wires: int = 4,
         shots: Optional[int] = None,
-        **device_kwargs,
-    ):
+        **device_kwargs: Any,
+    ) -> None:
         """
         Initialize PennyLane backend.
 
@@ -125,7 +125,7 @@ class PennyLaneBackend(QuantumBackend):
         self._device = None
         self._initialize_device()
 
-    def _initialize_device(self):
+    def _initialize_device(self) -> None:
         """Initialize the PennyLane device."""
         try:
             import pennylane as qml
@@ -144,7 +144,7 @@ class PennyLaneBackend(QuantumBackend):
         self,
         circuit: Any,
         shots: int = 1024,
-        **kwargs,
+        **kwargs: Any,
     ) -> ExecutionResult:
         """
         Execute a quantum circuit.

@@ -46,7 +46,7 @@ class AerBackend(QuantumBackend):
 
         self._initialize_backend()
 
-    def _initialize_backend(self):
+    def _initialize_backend(self) -> None:
         """Initialize the Qiskit Aer backend."""
         try:
             from qiskit_aer import AerSimulator
@@ -65,7 +65,7 @@ class AerBackend(QuantumBackend):
         if self.use_gpu:
             self._backend.set_options(device="GPU")
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """
         Execute a quantum circuit on Aer simulator.
 
@@ -123,7 +123,7 @@ class AerBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """
         Execute multiple circuits in a batch.
@@ -218,7 +218,7 @@ class AerBackend(QuantumBackend):
         return result.get_statevector()
 
     def compute_expectation(
-        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs
+        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs: Any
     ) -> float:
         """
         Compute expectation value of an observable.
@@ -255,7 +255,7 @@ class AerBackend(QuantumBackend):
 
         return float(result.values[0])
 
-    def set_noise_profile(self, profile: DeviceNoiseProfile):
+    def set_noise_profile(self, profile: DeviceNoiseProfile) -> None:
         """
         Update the noise profile and rebuild noise model.
 
@@ -267,7 +267,7 @@ class AerBackend(QuantumBackend):
         self.backend_type = BackendType.NOISY_SIMULATOR
         self._initialize_backend()
 
-    def clear_noise(self):
+    def clear_noise(self) -> None:
         """Remove noise model for ideal simulation."""
         self.noise_profile = None
         self._noise_model = None

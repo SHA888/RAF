@@ -73,7 +73,7 @@ class RAFConfig:
             visualization_settings=data.get("visualization_settings", {}),
         )
 
-    def add_loop_config(self, name: str, **kwargs):
+    def add_loop_config(self, name: str, **kwargs: Any) -> None:
         """Add or update loop configuration."""
         self.loops[name] = LoopConfig(name=name, **kwargs)
 
@@ -97,7 +97,7 @@ def load_config(path: str) -> RAFConfig:
     return RAFConfig.from_dict(data)
 
 
-def save_config(config: RAFConfig, path: str):
+def save_config(config: RAFConfig, path: str) -> None:
     """
     Save configuration to a JSON file.
 

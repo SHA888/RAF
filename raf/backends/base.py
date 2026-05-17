@@ -72,7 +72,7 @@ class QuantumBackend(ABC):
         self._total_time_ms = 0.0
 
     @abstractmethod
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """
         Execute a quantum circuit.
 
@@ -88,7 +88,7 @@ class QuantumBackend(ABC):
 
     @abstractmethod
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """
         Execute multiple circuits in a batch.
@@ -104,7 +104,7 @@ class QuantumBackend(ABC):
         pass
 
     def compute_expectation(
-        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs
+        self, circuit: Any, observable: Any, shots: int = 1024, **kwargs: Any
     ) -> float:
         """
         Compute expectation value of an observable.
@@ -158,13 +158,13 @@ class QuantumBackend(ABC):
             ),
         }
 
-    def reset_statistics(self):
+    def reset_statistics(self) -> None:
         """Reset execution statistics."""
         self._execution_count = 0
         self._total_shots = 0
         self._total_time_ms = 0.0
 
-    def _record_execution(self, shots: int, time_ms: float):
+    def _record_execution(self, shots: int, time_ms: float) -> None:
         """Record execution for statistics."""
         self._execution_count += 1
         self._total_shots += shots

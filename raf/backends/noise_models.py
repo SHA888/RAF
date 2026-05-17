@@ -6,6 +6,7 @@ hardware specifications.
 """
 
 import math
+import random
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -466,7 +467,7 @@ class NoiseModelBuilder:
             NoiseModelBuilder with published specifications
         """
         # Published specifications from vendor documentation and papers
-        published_specs = {
+        published_specs: Dict[str, Dict[str, Any]] = {
             # IonQ published specs (from ionq.com and papers)
             "ionq_harmony": {
                 "num_qubits": 11,
@@ -579,10 +580,8 @@ class DriftConfig:
     jump_probability: float = 0.1  # Probability of jump per hour (telegraph)
     random_seed: Optional[int] = None  # For reproducibility
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.random_seed is not None:
-            import random
-
             random.seed(self.random_seed)
 
 
@@ -612,7 +611,7 @@ class DriftingNoiseModel:
         self,
         base_profile: DeviceNoiseProfile,
         drift_config: Optional[DriftConfig] = None,
-    ):
+    ) -> None:
         """
         Initialize drifting noise model.
 
@@ -622,17 +621,11 @@ class DriftingNoiseModel:
         """
         self.base_profile = base_profile
         self.drift_config = drift_config or DriftConfig()
-        self._rng = None
+        self._rng: random.Random = random.Random()
         self._telegraph_state = 0  # For telegraph noise
 
         if self.drift_config.random_seed is not None:
-            import random
-
             self._rng = random.Random(self.drift_config.random_seed)
-        else:
-            import random
-
-            self._rng = random.Random()
 
     def _compute_drift_factor(self, time_hours: float) -> float:
         """
@@ -795,12 +788,10 @@ class DriftingNoiseModel:
             / base.readout_error,
         }
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset internal state (for telegraph noise)."""
         self._telegraph_state = 0
         if self.drift_config.random_seed is not None:
-            import random
-
             self._rng = random.Random(self.drift_config.random_seed)
 
 

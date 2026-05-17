@@ -90,7 +90,7 @@ class AzureQuantumBackend(QuantumBackend):
         self._workspace = None
         self._backend = None
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         """Lazy initialization of Azure Quantum workspace."""
         if self._workspace is not None:
             return
@@ -121,7 +121,7 @@ class AzureQuantumBackend(QuantumBackend):
         provider = AzureQuantumProvider(workspace=self._workspace)
         self._backend = provider.get_backend(self.target)
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """Execute circuit on Azure Quantum target."""
         self._initialize()
 
@@ -157,7 +157,7 @@ class AzureQuantumBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """Execute multiple circuits."""
         results = []

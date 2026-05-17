@@ -51,7 +51,7 @@ class IBMQuantumBackend(QuantumBackend):
         self._service = None
         self._backend = None
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         """Lazy initialization of IBM Quantum service."""
         if self._service is not None:
             return
@@ -76,7 +76,7 @@ class IBMQuantumBackend(QuantumBackend):
         )
         self._backend = self._service.backend(self.backend_name)
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """Execute circuit on IBM Quantum hardware."""
         self._initialize()
 
@@ -114,7 +114,7 @@ class IBMQuantumBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """Execute multiple circuits in a batch."""
         self._initialize()

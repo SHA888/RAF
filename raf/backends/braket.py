@@ -81,7 +81,7 @@ class BraketBackend(QuantumBackend):
         self._device = None
         self._s3_location = None
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         """Lazy initialization of Braket device."""
         if self._device is not None:
             return
@@ -154,7 +154,7 @@ class BraketBackend(QuantumBackend):
 
             return braket_circuit
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """Execute circuit on AWS Braket device."""
         self._initialize()
 
@@ -195,7 +195,7 @@ class BraketBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """Execute multiple circuits."""
         # Braket supports batch execution for some devices

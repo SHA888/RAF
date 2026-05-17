@@ -51,7 +51,7 @@ class IQMBackend(QuantumBackend):
 
         self._backend = None
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         """Lazy initialization of IQM backend."""
         if self._backend is not None:
             return
@@ -73,7 +73,7 @@ class IQMBackend(QuantumBackend):
         provider = IQMProvider(self.server_url, token=self.token)
         self._backend = provider.get_backend()
 
-    def execute(self, circuit: Any, shots: int = 1024, **kwargs) -> ExecutionResult:
+    def execute(self, circuit: Any, shots: int = 1024, **kwargs: Any) -> ExecutionResult:
         """Execute circuit on IQM hardware."""
         self._initialize()
 
@@ -109,7 +109,7 @@ class IQMBackend(QuantumBackend):
         )
 
     def execute_batch(
-        self, circuits: List[Any], shots: int = 1024, **kwargs
+        self, circuits: List[Any], shots: int = 1024, **kwargs: Any
     ) -> List[ExecutionResult]:
         """Execute multiple circuits."""
         results = []

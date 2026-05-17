@@ -191,7 +191,7 @@ class CrossLoopCoupling:
     description: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate coupling strength is in valid range."""
         if not 0 <= self.coupling_strength <= 1:
             raise ValueError(f"coupling_strength must be in [0, 1], got {self.coupling_strength}")
@@ -234,7 +234,7 @@ class ProgressMetric:
     target_value: float
     unit: str = ""
     direction: str = "lower"  # "lower" or "higher" is better
-    history: List[tuple] = field(default_factory=list)  # [(timestamp, value), ...]
+    history: List[tuple[datetime, float]] = field(default_factory=list)
 
     @property
     def progress_ratio(self) -> float:
@@ -263,7 +263,7 @@ class ProgressMetric:
         # Adjust sign based on direction
         return -slope if self.direction == "lower" else slope
 
-    def record(self, value: float, timestamp: Optional[datetime] = None):
+    def record(self, value: float, timestamp: Optional[datetime] = None) -> None:
         """Record a new measurement."""
         if timestamp is None:
             timestamp = datetime.now()
@@ -289,29 +289,29 @@ class MetricsAggregator:
     Aggregates and analyzes metrics across the framework.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.acceleration_metrics: Dict[str, List[AccelerationMetric]] = {}
         self.bottlenecks: Dict[str, List[BottleneckIndicator]] = {}
         self.couplings: List[CrossLoopCoupling] = []
         self.progress_metrics: Dict[str, ProgressMetric] = {}
 
-    def add_acceleration_metric(self, metric: AccelerationMetric):
+    def add_acceleration_metric(self, metric: AccelerationMetric) -> None:
         """Add an acceleration metric."""
         if metric.name not in self.acceleration_metrics:
             self.acceleration_metrics[metric.name] = []
         self.acceleration_metrics[metric.name].append(metric)
 
-    def add_bottleneck(self, bottleneck: BottleneckIndicator):
+    def add_bottleneck(self, bottleneck: BottleneckIndicator) -> None:
         """Add a bottleneck indicator."""
         if bottleneck.loop_name not in self.bottlenecks:
             self.bottlenecks[bottleneck.loop_name] = []
         self.bottlenecks[bottleneck.loop_name].append(bottleneck)
 
-    def add_coupling(self, coupling: CrossLoopCoupling):
+    def add_coupling(self, coupling: CrossLoopCoupling) -> None:
         """Add a cross-loop coupling."""
         self.couplings.append(coupling)
 
-    def add_progress_metric(self, metric: ProgressMetric):
+    def add_progress_metric(self, metric: ProgressMetric) -> None:
         """Add a progress metric."""
         self.progress_metrics[metric.domain] = metric
 
