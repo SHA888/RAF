@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ "3.12", "3.13" ]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+
+    - name: Sync dependencies
+      run: uv sync --all-extras
+
+    - name: Type check with mypy
+      run: uv run mypy raf/ --strict
+
+    - name: Lint with ruff
+      run: uv run ruff check raf/
+
+    - name: Format check with black
+      run: uv run black --check raf/
+
+    - name: Run tests with coverage
+      run: uv run pytest tests/ -v --cov=raf --cov-report=term-missing --cov-report=xml --cov-fail-under=40
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Verify reproducibility (quick validation)
+      run: uv run python examples/empirical_validation.py --mode quick
+      continue-on-error: true
