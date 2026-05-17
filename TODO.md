@@ -499,15 +499,15 @@ pip install -e ".[docs]" && sphinx-build docs/ build/
 
 #### 9.4.1 Syntax Updates
 
-- [ ] Review critical files for `typing.Dict`/`typing.List` usage:
-  - [ ] `/raf/core/metrics.py` - Replace type imports with built-in generics
-  - [ ] `/raf/core/loop.py` - Update base class type hints
-  - [ ] `/raf/backends/base.py` - Update abstract interface types
-  - [ ] `/raf/experiments/*.py` - Update experimental code types
-- [ ] Replace `Dict[K, V]` → `dict[K, V]`
-- [ ] Replace `List[T]` → `list[T]`
-- [ ] Replace `Optional[T]` → `T | None`
-- [ ] Replace `Union[A, B]` → `A | B`
+- [x] Review critical files for `typing.Dict`/`typing.List` usage:
+  - [x] `/raf/core/metrics.py` - Replace type imports with built-in generics
+  - [x] `/raf/core/loop.py` - Update base class type hints
+  - [x] `/raf/backends/base.py` - Update abstract interface types
+  - [x] `/raf/experiments/*.py` - Update experimental code types
+- [x] Replace `Dict[K, V]` → `dict[K, V]`
+- [x] Replace `List[T]` → `list[T]`
+- [x] Replace `Optional[T]` → `T | None`
+- [x] Replace `Union[A, B]` → `A | B`
 
 #### 9.4.2 Type Aliases & Advanced Patterns
 

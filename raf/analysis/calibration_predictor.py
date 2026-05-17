@@ -13,7 +13,7 @@ Key components:
 import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -322,7 +322,7 @@ class CalibrationPredictor:
 
     def _relu(self, x: np.ndarray) -> np.ndarray:
         """ReLU activation function."""
-        return np.maximum(0, x)
+        return cast(np.ndarray, np.maximum(0, x))
 
     def _relu_derivative(self, x: np.ndarray) -> np.ndarray:
         """Derivative of ReLU."""
@@ -360,8 +360,8 @@ class CalibrationPredictor:
         batch_size = y_true.shape[0]
         n_layers = len(self._weights)
 
-        weight_grads = [None] * n_layers
-        bias_grads = [None] * n_layers
+        weight_grads: list[np.ndarray | None] = [None] * n_layers
+        bias_grads: list[np.ndarray | None] = [None] * n_layers
 
         # Output layer gradient (MSE loss)
         delta = (activations[-1] - y_true) / batch_size
@@ -375,28 +375,31 @@ class CalibrationPredictor:
                 # Propagate gradient through ReLU
                 delta = (delta @ self._weights[i].T) * self._relu_derivative(activations[i])
 
-        return weight_grads, bias_grads
+        return [g for g in weight_grads if g is not None], [g for g in bias_grads if g is not None]
 
     def _normalize_input(self, X: np.ndarray) -> np.ndarray:
         """Normalize input data."""
         if self._input_mean is None:
             return X
         assert self._input_std is not None
-        return (X - self._input_mean) / (self._input_std + 1e-8)
+        result = (X - self._input_mean) / (self._input_std + 1e-8)
+        return cast(np.ndarray, result)
 
     def _normalize_output(self, y: np.ndarray) -> np.ndarray:
         """Normalize output data."""
         if self._output_mean is None:
             return y
         assert self._output_std is not None
-        return (y - self._output_mean) / (self._output_std + 1e-8)
+        result = (y - self._output_mean) / (self._output_std + 1e-8)
+        return cast(np.ndarray, result)
 
     def _denormalize_output(self, y: np.ndarray) -> np.ndarray:
         """Denormalize output data."""
         if self._output_mean is None:
             return y
         assert self._output_std is not None
-        return y * (self._output_std + 1e-8) + self._output_mean
+        result = y * (self._output_std + 1e-8) + self._output_mean
+        return cast(np.ndarray, result)
 
     def train(
         self,
