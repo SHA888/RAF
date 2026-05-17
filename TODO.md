@@ -1,82 +1,169 @@
 # RAF Project TODO
 
-## Active Goal & Timeline (v3 — 2026-05-17)
+# <!--
+
+CHANGELOG (most recent first)
+Historical version content is preserved in HTML comments throughout this
+document, co-located with the active version of each section.
+============================================================
+v4 (2026-05-17 PM): Coherence pass — code-first sequencing made explicit
+(Stage 1 codebase completion before Stage 2 meta-prep before Stage 3 paper
+drafting). Backend currency audit incorporated as Phase 10.1 Stage A.
+Zenodo deposit removed from active plan (v2-era arXiv-substitute, not
+needed for JOSS DOI). Quantum backend availability audited against May
+2026 reality (IBM Brisbane/Kyoto/Osaka retired; Braket dropped OQC, added
+IQM/AQT; Azure added Atom Computing; IonQ Harmony / Quantinuum H1
+retirements reflected). Historical version content moved into HTML
+comments; only latest decision visible in rendered view.
+v3 (2026-05-17 PM): Positioning pivot to "open-source reference implementation
+of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025)."
+Venue: JOSS only. Singh demoted from primary Related Work to "Concurrent
+and recent work" subsection (low-quality OA journal). Phase 11.2 Path B
+sufficient for JOSS; Path A (real CDR) deferred to v0.3.0.
+v2 (2026-05-17 AM): Prior-art reckoning (Maes 2025 Zenodo, Shukla 2025
+TechRxiv, Alexeev 2025 Nat Commun, Acampora 2025 arXiv:2505.23860).
+Methodology blockers identified (oracle-access mitigation, hardcoded
+coupling, test coverage). NeurIPS workshops considered as venue.
+v1 (Jan 2026): arXiv + Nature MI + AAAI 2027 plan. Blocked by arXiv
+endorsement policy update (Jan 21, 2026; institutional email no longer
+sufficient alone).
+v0 (Dec 2025): IEEE WCCI 2026 deadline missed.
+============================================================
+-->
+
+## Active Goal & Timeline
 
 **Goal**: Submit RAF to the Journal of Open Source Software (JOSS) as an open-source reference implementation of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025).
 
-**Timeline**: ~3-4 months (May 17, 2026 → JOSS submission August 2026 → DOI assigned Sep-Oct 2026).
+**Timeline**: ~3-4 months (May 17, 2026 → JOSS submission ~Aug 28, 2026 → DOI assigned Sep-Oct 2026).
 
-See `Status (v3)` block below for full rationale, and `Phase 10 v3` for the active plan. See also Phase 11 (methodology prerequisites for JOSS submission).
+See Status and Execution Order below.
 
----
-
-## Goal & Timeline v0 (SUPERSEDED 2026-05-17 — kept for traceability)
-
-> Superseded first by Phase 10 v1 (arXiv + Nature MI, Jan 2026), then by Phase 10 v2 (NeurIPS workshops, May 2026 morning), then by Phase 10 v3 (JOSS, May 2026 afternoon). Original framing preserved verbatim below per `keep verbatim reserved` rule.
-
-**Goal**: Transform RAF from a conceptual framework to an empirically-grounded paper suitable for IEEE WCCI 2026.
-
-**Timeline**: 2 weeks (Target completion: Dec 19, 2025)
+<!--
+HISTORICAL: Goal v0 (Dec 2025, SUPERSEDED)
+==========================================
+Goal: Transform RAF from a conceptual framework to an empirically-grounded paper suitable for IEEE WCCI 2026.
+Timeline: 2 weeks (Target completion: Dec 19, 2025)
+Supersession chain: v0 → v1 (arXiv + Nature MI + AAAI 2027) → v2 (NeurIPS workshops) → v3 (JOSS) → v4 (JOSS, re-sequenced for code-first).
+-->
 
 ---
 
-## Status (v2 — 2026-05-17)
+## Status
 
-**Pivot rationale**: Prior-art reckoning revealed that the QC-ML feedback-loop framing is now shared territory rather than novel. Specifically:
+**Positioning**: RAF is an open-source Python reference implementation of QC-ML co-evolutionary frameworks already established in the literature. The conceptual phase of this subfield is closing (Singh, Shukla, Maes, Alexeev, Acampora all converging in 2025); the implementation phase is opening. RAF fills that gap by providing runnable Python code, explicit coupling parameters exposed as config, and multi-backend abstraction. No novel framework claim is made — RAF makes existing frameworks testable.
 
-- **Maes (May 2025)** — Adaptive Co-Design of QML and QEC via RL (Zenodo DOI 10.5281/zenodo.15428357) has priority on the closed feedback-loop architecture between QML ansatz and error management.
-- **Shukla (Dec 2025)** — Co-Evolutionary Co-Design Framework (TechRxiv DOI 10.36227/techrxiv.176704915.54945198/v1) has priority on the three-layer (hardware/algorithmic/application) co-evolutionary framing, though it is conceptual rather than operational.
-- **Alexeev et al. (Dec 2025)** — Nature Communications review on "AI for quantum computing" (DOI 10.1038/s41467-025-65836-3) is the authoritative review of the field that any RAF paper must cite.
-- **Acampora et al. (May 2025)** — Quantum Community Network white paper (arXiv:2505.23860) establishes the long-term research agenda.
+**Venue**: JOSS (Journal of Open Source Software). Single-venue strategy. Conference workshops (IEEE QCE 2027, NeurIPS 2027) deferred until after JOSS acceptance.
 
-**Remaining novelty for RAF**: (a) functional task-based decomposition (Error Mitigation × Ansatz × Calibration-Control) versus stack-layer decomposition; (b) explicit coupling parameters enabling structural sensitivity studies; (c) open-source runnable implementation (none of the above prior art has code).
+**Methodology blockers** (must address before JOSS submission):
 
-**Venue pivot**: arXiv access remains blocked by the January 2026 endorsement policy update (institutional email no longer sufficient alone; no prior arXiv authorship to claim). Nature MI and AAAI 2027 are premature given current methodology state. **New target: NeurIPS 2026 workshops** (likely ML4PS or similar; CFPs typically open Aug-Sep 2026, deadlines Sep-Oct 2026). 4-5 months runway permits actual methodology fixes rather than just reframing.
+1. `raf/experiments/error_mitigation.py` `_simulate_mitigation` uses ideal expectation as oracle access. Not ML-QEM — simulated idealized mitigation. **Fix**: Phase 11.2 Path B — rename to `_simulated_idealized_mitigation` with honest docstring. Path A (real CDR) deferred to v0.3.0.
+2. `raf/experiments/cross_loop_validation.py` hardcodes coupling factors. **Fix**: Phase 11.1 — expose as `assumed_coupling_strength` config. Under reference-implementation framing this is a core feature, not damage control.
+3. Test coverage ~6.4% (~820/12,884 lines). **Fix**: Phase 11.3 — raise to 40%+ (JOSS criterion).
+4. `raf/backends/*` modules reference retired devices. **Fix**: Phase 10.1 Stage A — backend currency audit (IBM Brisbane/Kyoto/Osaka retired 2024-2025; IonQ Harmony retired 2024; Quantinuum H1 retirement notice July 2025; OQC removed from Braket June 2024).
 
-**Methodology blockers that must be fixed before submission**:
+**Singh citation status**: Kept in citation block with DOI 10.63721/25JPAIR0118 added, but demoted from primary Related Work to "Concurrent and recent work" subsection. The journal shows hallmarks of low-quality OA (3-day submission-to-acceptance, broken citation chains where in-text refs go to [97]/[171] but reference list ends at [74], unverified "500+ problem validation" claim). Singh's contribution is a _decision_ framework (whether to use quantum), orthogonal to RAF's _implementation_ of _dynamics_ frameworks.
 
-1. `raf/experiments/error_mitigation.py` uses ideal expectation as oracle access (`noise_error = noisy_exp - ideal_exp; correction = noise_error * mitigation_strength`). This is not ML-QEM; it is simulated idealized mitigation. The 1.86× acceleration figure is an artifact of the deterministic schedule, not a measurement.
-2. `raf/experiments/cross_loop_validation.py` hardcodes coupling factors (`fidelity_improvement = actual_improvement * 0.3`). The cross-correlation analysis "measures" precisely what was inserted.
-3. Test coverage at ~6.4% (~820/12,884 lines) is below publication threshold.
+<!--
+HISTORICAL STATUS BLOCKS (preserved for traceability)
+=====================================================
 
-**Phase 10 v1 superseded by Phase 10 v2 + Phase 11** (added below). Phase 10 v1 content preserved verbatim for traceability.
+== Status v2 (2026-05-17 AM) ==
 
----
+Pivot rationale: Prior-art reckoning revealed that the QC-ML feedback-loop framing is now shared territory rather than novel:
+- Maes (May 2025) — Adaptive Co-Design of QML and QEC via RL (Zenodo DOI 10.5281/zenodo.15428357) has priority on the closed feedback-loop architecture between QML ansatz and error management.
+- Shukla (Dec 2025) — Co-Evolutionary Co-Design Framework (TechRxiv DOI 10.36227/techrxiv.176704915.54945198/v1) has priority on the three-layer (hardware/algorithmic/application) co-evolutionary framing, though conceptual rather than operational.
+- Alexeev et al. (Dec 2025) — Nature Communications review on "AI for quantum computing" (DOI 10.1038/s41467-025-65836-3) is the authoritative review of the field.
+- Acampora et al. (May 2025) — Quantum Community Network white paper (arXiv:2505.23860) establishes the long-term research agenda.
 
-## Status (v3 — 2026-05-17, addendum to v2)
+Remaining novelty for RAF (carried into v3 as positioning): (a) functional task-based decomposition (Error Mitigation × Ansatz × Calibration-Control) versus stack-layer decomposition; (b) explicit coupling parameters enabling structural sensitivity studies; (c) open-source runnable implementation (none of the above prior art has code).
 
-**Positioning pivot**: After review of the Singh (2025) framework paper, recognized that RAF's strongest position is as a _reference implementation_ of QC-ML co-evolutionary frameworks already well-established in the literature, rather than as a competing framework. The conceptual phase of this subfield is closing (Singh, Shukla, Maes, Alexeev, Acampora all converging in 2025); the implementation phase is opening. RAF fills that gap. This eliminates the "differentiation argument" — RAF no longer needs to argue against prior work, only to honestly implement what prior work described.
+Venue pivot v1→v2: arXiv access blocked by Jan 2026 endorsement policy update (institutional email no longer sufficient alone; no prior arXiv authorship). Nature MI and AAAI 2027 premature given methodology state. NeurIPS 2026 workshops chosen (likely ML4PS or similar; CFPs ~Aug-Sep 2026, deadlines ~Sep-Oct 2026).
 
-**Venue change**: **JOSS (Journal of Open Source Software) becomes the primary target**. JOSS accepts open-source software with novel research value; review criteria focus on usability, documentation, and tests rather than empirical novelty claims. JOSS papers are short (250-1000 words) summary papers that point to the repo where the substance lives. Fast review cycle (typically 4-8 weeks), peer-reviewed, real DOI (10.21105/joss.NNNNN), indexed in CrossRef. **Single-venue strategy: JOSS only**; NeurIPS workshops and conference venues deferred until after JOSS acceptance.
+Methodology blockers identified (all carried into v3/v4):
+1. raf/experiments/error_mitigation.py uses ideal expectation as oracle access. Not ML-QEM; simulated idealized mitigation. The 1.86× acceleration figure is an artifact of the deterministic schedule.
+2. raf/experiments/cross_loop_validation.py hardcodes coupling factors. The cross-correlation analysis "measures" precisely what was inserted.
+3. Test coverage ~6.4% — below publication threshold.
 
-**Methodology blockers re-prioritized under reference-implementation framing**:
+Phase 10 v1 superseded by Phase 10 v2 + Phase 11. Phase 10 v1 content preserved verbatim for traceability.
 
-- **Phase 11.1** (rename hardcoded coupling factors to `assumed_coupling_strength` config) becomes the _core feature_ of the reference implementation, not damage control. **Highest priority.** Under the new framing, "coupling parameters drawn from prior literature, exposed as configurable so users can vary them" is the correct behavior for a reference implementation. RAF is not claiming to have measured the coupling; it provides the dials so researchers can test alternative coupling assumptions from Singh/Shukla/Maes against each other.
-- **Phase 11.2** (real CDR mitigation replacing oracle-access mitigation) **demoted to v0.3.0 goal**, not a JOSS prerequisite. JOSS reviewers will check that the implementation is honestly documented, not that empirical claims are validated. If we rename `_simulate_mitigation` to `_simulated_idealized_mitigation` with clear docstrings (Phase 11.2 Path B), JOSS acceptance is unblocked. Path A (real CDR) becomes a post-JOSS enhancement that strengthens the next version.
-- **Phase 11.3** (test coverage 40%+) **still required**. JOSS explicitly requires "automated tests" with reasonable coverage as a submission criterion.
-- **Phase 11.4** (reproducibility hardening) **still required**. JOSS reviewers run the software; reproducibility is checked.
+== Status v3 (2026-05-17 PM, addendum to v2) ==
 
-**Singh demoted to concurrent work** (per Option B agreed in conversation): Verified the Singh (2025) paper exists with DOI 10.63721/25JPAIR0118, but the journal shows hallmarks of low-quality open-access publishing (3-day submission-to-acceptance, broken citation chains where in-text refs go to [97] and [171] but reference list ends at [74], unverified "validation across 500+ real-world problems" claim with no methods or data). Citing Singh as a _foundational_ reference in a JOSS submission risks reviewer skepticism. Singh's actual contribution is a _decision_ framework (whether to use quantum), which is orthogonal to RAF's _implementation_ of _dynamics_ frameworks. Singh moves from primary Related Work to Concurrent and recent work in README v3; bibtex retained with DOI added for completeness.
+Positioning pivot: After review of the Singh (2025) framework paper, recognized that RAF's strongest position is as a *reference implementation* of QC-ML co-evolutionary frameworks already well-established in the literature, rather than as a competing framework. This eliminates the differentiation argument — RAF no longer needs to argue against prior work, only to honestly implement what prior work described.
 
-**Active plan**: Phase 10 v3 (JOSS submission, below) replaces Phase 10 v2 (NeurIPS workshops, marked superseded below). Phase 11 priorities re-ordered per v3 addendum at top of that phase.
+Venue change v2→v3: JOSS (Journal of Open Source Software) becomes the primary target. JOSS accepts open-source software with novel research value; review criteria focus on usability, documentation, and tests rather than empirical novelty claims. JOSS papers are short (250-1000 words) summary papers. Fast review cycle (typically 4-8 weeks), peer-reviewed, real DOI (10.21105/joss.NNNNN), indexed in CrossRef. Single-venue strategy: JOSS only.
 
----
+Methodology blockers re-prioritized under reference-implementation framing:
+- Phase 11.1 (rename hardcoded coupling factors to assumed_coupling_strength config) becomes the *core feature* of the reference implementation, not damage control. Highest priority.
+- Phase 11.2 (real CDR mitigation) demoted to v0.3.0 goal, not a JOSS prerequisite. Phase 11.2 Path B (honest rename) sufficient for JOSS.
+- Phase 11.3 (test coverage 40%+) still required (JOSS criterion).
+- Phase 11.4 (reproducibility hardening) still required (JOSS reviewers run software).
 
-## Status (v4 — 2026-05-17, factual-correction addendum to v3)
+Singh demoted to concurrent work (per Option B agreed in conversation): Verified the Singh (2025) paper exists with DOI 10.63721/25JPAIR0118, but journal shows hallmarks of low-quality OA publishing. Singh's actual contribution is a *decision* framework (whether to use quantum), orthogonal to RAF's *implementation* of *dynamics* frameworks. Moves from primary Related Work to Concurrent and recent work in README v3.
 
-**Backend availability audit performed**: README "Supported Quantum Backends" section was verified against May 2026 cloud provider reality. Five concrete factual errors discovered and corrected in README v4 (see README v4 changelog comment for full diff):
+== Status v4 (2026-05-17 PM, factual-correction addendum to v3) ==
 
-- IBM Quantum row listed Brisbane, Kyoto, Osaka — all three are retired (Aug 2024, Aug 2024, Nov 2025). Current fleet is Heron r1/r2/r3 (e.g., `ibm_aachen`, `ibm_boston`, `ibm_torino`) and Nighthawk (`ibm_miami`).
-- AWS Braket row listed OQC — OQC's Lucy access via Braket ended June 2024. Current Braket QPU providers are AQT, IonQ, IQM, QuEra, Rigetti.
+Backend availability audit performed: README "Supported Quantum Backends" section was verified against May 2026 cloud provider reality. Five concrete factual errors discovered and corrected in README v4 (see README v4 changelog comment for full diff):
+- IBM Quantum row listed Brisbane, Kyoto, Osaka — all three retired (Aug 2024, Aug 2024, Nov 2025). Current fleet is Heron r1/r2/r3 (ibm_aachen, ibm_boston, ibm_torino) and Nighthawk (ibm_miami).
+- AWS Braket row listed OQC — access ended June 2024. Current Braket QPU providers: AQT, IonQ, IQM, QuEra, Rigetti.
 - Azure Quantum row was missing Atom Computing.
-- IQM row understated capability — Emerald (54-qubit, July 2025) joins Garnet (20-qubit).
-- Three code examples used retired/invalid device strings: `ionq_harmony` (retired 2024), `quantinuum.qpu.h1-1` (H1 retirement notice July 2025), `IQMBackend("resonance")` ("Resonance" is the cloud platform name, not a device).
+- IQM row understated — Emerald (54-qubit, July 2025) joins Garnet (20-qubit).
+- Three code examples used retired/invalid device strings: ionq_harmony (retired 2024), quantinuum.qpu.h1-1 (H1 retirement notice July 2025), IQMBackend("resonance") (platform name, not device).
 
-**Implication for Phase 10 v3**: The README is now accurate, but the `raf/backends/` code modules have not yet been verified against the corrected device strings. JOSS reviewers run the software — if `BraketBackend("ionq_forte")` raises a NameError because the code still expects `"ionq_harmony"`, review will stall. New checklist items added to **Phase 10 v3 .1** ("Backend currency audit") to track the parallel code-side work. These items become JOSS-submission prerequisites.
+Implication for Phase 10 v3: README accurate, but raf/backends/ code modules not yet verified against corrected device strings. New checklist items added to Phase 10 v3 .1 ("Backend currency audit") to track parallel code-side work. These items become JOSS-submission prerequisites.
 
-**Open decision** flagged for `docs/SCIENTIFIC_REVIEW.md`: keep `ionq` noise profile as "IonQ Harmony-like" (well-characterized historical baseline) or update to Forte-1-like (current generation, ~36 #AQ). Either is defensible; document the choice.
+Open decision flagged for docs/SCIENTIFIC_REVIEW.md: keep `ionq` noise profile as "IonQ Harmony-like" (well-characterized historical baseline) or update to Forte-1-like (current generation, ~36 #AQ).
 
-**No strategic pivot**: v4 is factual correction only. Active goal (JOSS submission), positioning (reference implementation), and Phase 11 priorities are unchanged from v3.
+No strategic pivot: v4 is factual correction only. Active goal (JOSS submission), positioning (reference implementation), and Phase 11 priorities unchanged from v3.
+-->
+
+---
+
+## Execution Order
+
+The active plan is **strictly linear**: codebase complete first, paper drafted second. Verifications against incomplete code are not honest verifications.
+
+```
+STAGE 1 — CODEBASE COMPLETION  (May 17 → ~July 31, 2026, ~10 weeks)
+    ├── Phase 11.1  Coupling as core feature (`assumed_coupling_strength`)
+    ├── Phase 11.2 Path B  Honest rename of oracle-access mitigation
+    ├── Phase 11.3  Test coverage 40%+ (JOSS criterion)
+    ├── Phase 11.4  Reproducibility hardening (JOSS criterion)
+    └── Phase 10.1 Stage A  Backend currency audit (raf/backends/*)
+                ↓
+                ↓ ┌─ GATE: every Stage-1 box ticked, CI green, fresh-container reproduction passes ─┐
+                ↓ └────────────────────────────────────────────────────────────────────────────────┘
+                ↓
+STAGE 2 — JOSS META-PREP & VERIFICATIONS  (~2-3 weeks)
+    └── Phase 10.1 Stage B  License, version tag, ORCID, statement of need,
+                             install/example/API/test/CI verifications,
+                             community guidelines, issue templates, benchmarks
+                ↓
+                ↓ ┌─ GATE: repo meets all JOSS submission criteria ────────────────────────────────┐
+                ↓ └────────────────────────────────────────────────────────────────────────────────┘
+                ↓
+STAGE 3 — PAPER DRAFTING  (~1-2 weeks)
+    └── Phase 10.2  paper.md + paper.bib (250-1000 words, JOSS format)
+                ↓
+STAGE 4 — SUBMISSION  (1 week)
+    └── Phase 10.3  Submit via joss.theoj.org/papers/new
+                ↓
+STAGE 5 — REVIEW RESPONSE  (4-8 weeks)
+    └── Phase 10.4  Respond to reviewer issues in GitHub thread
+                ↓
+STAGE 6 — POST-ACCEPTANCE  (ongoing, optional)
+    └── Phase 10.5  Workshop expansion, v0.3.0 development (real CDR, Phase 11.2 Path A)
+```
+
+**Load-bearing rule**: Stage 3 (paper drafting) does **not** begin before Stage 1 (codebase) is complete. Paper text that describes what the code does is wasted effort if the code is going to change. Statement of Need can be partially sketched during Stage 1 because the framing is positioning-driven, not code-state-driven; but the rest of paper.md waits for working code.
+
+**What "Stage 1 complete" means concretely**:
+
+- `pytest --cov=raf --cov-fail-under=40` passes on a fresh container.
+- `examples/empirical_validation.py --mode quick` runs end-to-end and produces reproducible output (Phase 11.4 `REPRODUCIBILITY.md` validated).
+- All `raf/backends/*` modules accept the device strings shown in README (or README is updated to match what the code accepts — either direction is fine, but they must agree).
+- `_simulate_mitigation` renamed to `_simulated_idealized_mitigation` with honest docstring (Phase 11.2 Path B).
+- All coupling factors exposed as `assumed_coupling_strength` config (Phase 11.1).
 
 ---
 
@@ -249,14 +336,13 @@ See `Status (v3)` block below for full rationale, and `Phase 10 v3` for the acti
 - [x] Write cover letter → Need for Nature MI submission (Phase 10)
 - [x] IEEE WCCI 2026 → ❌ MISSED (Jan 31 deadline passed)
 
-**New Path**: arXiv + Nature MI + AAAI 2027 (see Phase 10)
+**New Path**: Phase 10 (JOSS submission). See active plan below.
 
 ---
 
 ## Phase 8: Multi-Vendor Hardware Validation (DEFERRED - Future Work)
 
-> **Status**: Deferred due to vendor account access issues. Current simulation-based
-> validation is scientifically valid. Real hardware validation planned for future work.
+> **Status**: Deferred due to vendor account access issues. Current simulation-based validation is scientifically valid. Real hardware validation planned for future work.
 
 ### 8.1 Azure Quantum Setup (Deferred)
 
@@ -283,641 +369,6 @@ See `Status (v3)` block below for full rationale, and `Phase 10 v3` for the acti
 - [ ] Add Figure: Hardware heterogeneity impact on loop dynamics
 - [ ] Update Section V.D with real hardware results
 - [ ] Strengthen "hardware-agnostic" claims with empirical evidence
-
----
-
-## Phase 10 v1 (SUPERSEDED 2026-05-17 — kept for traceability): arXiv + Journal Submission (PRIORITY - START NOW)
-
-> **Supersession rationale**: arXiv endorsement policy update of Jan 21, 2026 blocks submission path; Nature MI / AAAI 2027 premature given prior-art reckoning. See `Status (v2)` at top of file. Active plan now in Phase 10 v2 and Phase 11 below.
-
-**Goal**: Publish preprint on arXiv by June 1, 2026 + formal venue submission by July 1, 2026
-
-**Timeline**: 3 weeks (May 15 - Jun 5, 2026)
-
----
-
-### Phase 10.1: Manuscript Finalization (Week 1-2, May 15-29)
-
-**Deliverables**: Publication-ready manuscript + figures
-
-- [ ] Extract quantitative results from experiments
-  - [ ] Run: `python examples/empirical_validation.py --mode full`
-  - [ ] Collect all outputs to `results/`
-  - [ ] Extract: mitigation_accuracy, experiment_scale, acceleration_metrics
-
-- [ ] Generate publication-quality figures (5-7 total)
-  - [ ] Figure 1: The Three Acceleration Loops (diagram)
-  - [ ] Figure 2: Error Mitigation Loop acceleration dynamics (line plot)
-  - [ ] Figure 3: Cross-loop coupling matrix (heatmap)
-  - [ ] Figure 4: Bottleneck validation results (bar chart)
-  - [ ] Table 1: Empirical results summary (acceleration_rate, bottleneck_type, recommendation)
-  - [ ] Table 2: Hardware heterogeneity impact (loop_name, device, acceleration_rate, bottleneck)
-
-- [ ] Write manuscript sections
-  - [ ] Abstract (max 250 words) — state 3 main findings
-  - [ ] Introduction (1 page) — motivation, problem, contributions
-  - [ ] Related Work (1 page) — Singh 2025, AlphaQubit, GP-QML, position of RAF
-  - [ ] Framework (2-3 pages) — loop formalization, metrics, coupling, bottlenecks
-  - [ ] Empirical Validation (2-3 pages) — experimental setup, results by loop, cross-loop findings
-  - [ ] Discussion (1-2 pages) — findings summary, limitations (simulation-only, 5-qubit scale), future work
-  - [ ] Conclusion (0.5 page)
-  - [ ] References (1 page) — verify all DOIs/URLs
-
-- [ ] Format for submission
-  - [ ] Choose format: IEEE 2-column OR NIPS format
-  - [ ] Use Overleaf.com (free, no install) OR local LaTeX
-  - [ ] Compile to PDF with all figures embedded
-  - [ ] Page limit: 6-12 pages (depending on venue)
-
-**Effort**: ~40 hours (writing) + 10 hours (figures) = 50 hours total
-
-**Validation**:
-
-```bash
-# Verify empirical data is ready
-python examples/empirical_validation.py --mode quick
-# Manual check: all figures are high-res (300+ dpi)
-# Manual check: all citations have DOIs
-```
-
----
-
-### Phase 10.2: arXiv Submission (Week 2, May 22-29)
-
-**Deliverables**: Preprint on arXiv with public GitHub link
-
-- [ ] Create arXiv account: https://arxiv.org/user/register
-- [ ] Prepare arXiv submission package
-  - [ ] `paper.pdf` (compiled, all figures embedded)
-  - [ ] `source.tar.gz` (LaTeX source, figures, bib file)
-  - [ ] Verify: No author names if anonymized (arXiv allows names for this)
-
-- [ ] Select categories
-  - [ ] Primary: cs.LG (Machine Learning)
-  - [ ] Secondary: quant-ph (Quantum Physics)
-  - [ ] Tertiary: cs.SY (Systems & Control)
-
-- [ ] Submit to arXiv via https://arxiv.org/submit
-  - [ ] Get arXiv ID (format: 2605.xxxxx)
-  - [ ] Expected publication: 24-48 hours
-
-- [ ] Post-publication
-  - [ ] Update GitHub README.md with arXiv link
-
-    ```markdown
-    ## Preprint
-
-    This work is available on arXiv: [arXiv:2605.xxxxx](https://arxiv.org/abs/2605.xxxxx)
-    ```
-
-  - [ ] Tweet/announce: "RAF paper available at arXiv:2605.xxxxx"
-  - [ ] Share on Reddit r/quantum, r/MachineLearning, Quantum Computing Slack
-  - [ ] Solicit feedback from quantum computing community
-
-**Effort**: ~5 hours (formatting + upload)
-
-**Timeline**: arXiv ID in hand by **June 1, 2026**
-
----
-
-### Phase 10.3: Formal Journal Submission (Week 3-4, May 29 - Jun 12)
-
-**Deliverables**: Submitted manuscript to Nature Machine Intelligence OR Quantum Science & Technology
-
-#### 10.3.1 Nature Machine Intelligence (PRIMARY TARGET)
-
-- [ ] Create author account at https://www.nature.com/natmachintell/
-- [ ] Reformat as perspective piece (3-4k words)
-  - [ ] Shorten to 3,500 words (perspective format)
-  - [ ] Focus on "why this matters" over experimental details
-  - [ ] Remove some empirical results, emphasize insights
-
-- [ ] Write cover letter
-  - [ ] 1-2 paragraphs explaining significance
-  - [ ] Highlight: novel framework, multiple acceleration loops, cross-loop coupling
-  - [ ] Mention arXiv preprint for full details
-
-- [ ] Submit via https://www.nature.com/natmachintell/
-  - [ ] Include: manuscript PDF, figures, author info, suggested reviewers
-  - [ ] Expected review time: 2-3 months
-  - [ ] Expected decision: **October-November 2026**
-
-**Effort**: ~10 hours (reformat + cover letter)
-
-#### 10.3.2 Backup: Quantum Science & Technology (if Nature rejects)
-
-- [ ] Create author account at https://iopscience.iop.org/journal/2058-9565
-- [ ] Keep full technical manuscript (6-8 pages)
-- [ ] Write cover letter (same as Nature MI)
-- [ ] Submit with same figures + tables
-- [ ] Expected review time: 2-3 months
-- [ ] Expected decision: **December 2026** (faster track available)
-
-**Effort**: ~2 hours (already formatted)
-
----
-
-### Phase 10.4: Conference Submission (Week 4, Jun 5-12)
-
-**Deliverables**: Submitted manuscript to AAAI 2027
-
-#### 10.4.1 AAAI 2027 (RECOMMENDED CONFERENCE)
-
-- [ ] Create AAAI 2027 account (opens ~June 2026)
-- [ ] Reformat as technical conference paper
-  - [ ] Shorten to 8 pages + references
-  - [ ] Focus on empirical validation results
-  - [ ] Include all figures + tables
-
-- [ ] Write cover letter
-  - [ ] Position as "framework for understanding QC-ML acceleration"
-  - [ ] Mention prior work (Singh 2025, etc.)
-  - [ ] Highlight novelty: first empirical validation of cross-loop coupling
-
-- [ ] Submit before deadline (assumed **August 15, 2026**)
-  - [ ] Early submission (by June-July) may get faster review
-  - [ ] Expected decision: **October-November 2026**
-
-**Timeline**:
-
-- Deadline: ~Aug 15, 2026
-- Review period: Aug-Oct 2026
-- Decision: Late October 2026
-- Conference: Feb 2027
-
-**Effort**: ~5 hours (reformat + cover letter)
-
----
-
-### Phase 10.5: Parallel Actions (During Review)
-
-**While waiting for responses (Jun-Oct 2026)**:
-
-- [ ] GitHub engagement
-  - [ ] Create GitHub Issues for extension ideas
-  - [ ] Ask for Stars/citations in README
-  - [ ] Welcome community contributions
-
-- [ ] Community outreach
-  - [ ] Post on quantum computing forums (Reddit, Slack, Discourse)
-  - [ ] Link to arXiv preprint
-  - [ ] Solicit feedback for revision
-
-- [ ] Code improvements (if time allows)
-  - [ ] Increase test coverage to 85%+
-  - [ ] Complete Phase 9.4 (type hints modernization)
-  - [ ] Add interactive dashboard for experiments
-
-**Effort**: ~10 hours (optional, flexibility based on review feedback)
-
----
-
-## Phase 10 v2 (SUPERSEDED 2026-05-17 by Phase 10 v3 — kept for traceability): NeurIPS 2026 Workshops Target
-
-> **Supersession rationale**: Positioning pivot to reference implementation (see `Status (v3)`) makes JOSS a stronger venue match than NeurIPS workshops. JOSS reviewers explicitly evaluate open-source software with research value; NeurIPS workshops still require framework-novelty claims that RAF doesn't make under v3 framing. Active plan now in Phase 10 v3 below.
-
-**Goal**: Submit to a NeurIPS 2026 workshop (likely ML4PS, "Machine Learning and the Physical Sciences") with a manuscript reframed around RAF's actual contribution: an operational structural model with explicit coupling parameters, complementing prior conceptual frameworks (Maes 2025, Shukla 2025).
-
-**Timeline**: ~5 months (May 17, 2026 → Oct ~10, 2026 estimated workshop deadline). NeurIPS 2026 main conference is December; workshop CFPs typically open Aug-Sep with deadlines Sep-Oct. Conservative planning assumes ~Oct 10, 2026 deadline.
-
-**Sequencing**: Phase 11 (Methodology Fixes) is a prerequisite. Without it, the paper cannot honestly claim measured acceleration or measured cross-loop coupling. Phase 11 estimated 6-10 weeks; manuscript drafting estimated 4-6 weeks; together fits comfortably in 5-month window.
-
----
-
-### Phase 10 v2 .1: CFP Monitoring & Venue Selection (June-August 2026)
-
-**Deliverables**: Confirmed target workshop with verified deadline
-
-- [ ] Watch ML4PS website (https://ml4physicalsciences.github.io/) for NeurIPS 2026 CFP
-- [ ] Watch NeurIPS 2026 workshops list (https://neurips.cc/Conferences/2026) once posted
-- [ ] Candidate workshops to monitor (in priority order):
-  - [ ] **ML4PS** (Machine Learning and the Physical Sciences) — primary target; QC-ML is a natural fit
-  - [ ] **AI4Science** (AI for Science) — broader scope; check if held at NeurIPS 2026
-  - [ ] **Quantum AI / Quantum ML workshops** — check if NeurIPS 2026 has one
-- [ ] Backup workshops outside NeurIPS:
-  - [ ] AAAI 2027 workshops (deadlines typically Oct-Nov 2026)
-  - [ ] ICLR 2027 workshops (deadlines typically Jan 2027)
-- [ ] When CFP is posted: record exact deadline, page limit, format requirements, archival status (NeurIPS workshops are typically non-archival OpenReview; some have archival proceedings)
-- [ ] Decision deadline: select target workshop by **Sep 1, 2026**
-
----
-
-### Phase 10 v2 .2: Manuscript Drafting (August-September 2026)
-
-**Deliverables**: Workshop-format manuscript (typically 4-9 pages depending on venue)
-
-- [ ] Confirm Phase 11 is complete or substantially complete before drafting empirical sections
-- [ ] Manuscript structure (NeurIPS workshop format, 4-pg, 6-pg, or 9-pg variants):
-  - [ ] **Abstract** (~150-200 words): operational three-loop structural model with explicit coupling parameters; not a novel framework concept but a novel operationalization; sensitivity study of cascade dynamics under varied coupling assumptions
-  - [ ] **§1 Introduction**: motivation, RAF as operational instantiation, explicit citation of Maes/Shukla/Alexeev/Acampora prior work in the intro itself (not just Related Work)
-  - [ ] **§2 Related Work**: explicit positioning relative to (a) Maes' two-loop RL co-design, (b) Shukla's three-layer taxonomy, (c) Alexeev's stack-wide review, (d) Acampora's research agenda; clearly state what RAF adds
-  - [ ] **§3 Framework**: three operational loops with task-based decomposition; metric definitions; coupling matrix as parameterized structural model
-  - [ ] **§4 Simulated Dynamics under Assumed Coupling**: HONEST reframing — present the simulation as exploring sensitivity to coupling assumptions drawn from prior literature, not as measurement of empirical coupling
-  - [ ] **§5 Discussion & Limitations**: name limitations first (simulated coupling, idealized mitigation if not replaced in Phase 11, small qubit scale, simulation-only)
-  - [ ] **§6 Conclusion & Future Work**: real-hardware validation, learned coupling estimation, integration with Maes-style RL co-design
-- [ ] If Phase 11.2 (real CDR) succeeds, paper can claim "learned error mitigation integrated into the structural model" as additional contribution
-- [ ] If Phase 11.2 does not succeed, paper claims only "structural sensitivity analysis with explicit coupling parameters"
-
----
-
-### Phase 10 v2 .3: Zenodo Deposit as Priority Substitute (after manuscript drafted, ~Sept 2026)
-
-**Deliverables**: Versioned Zenodo deposit with DOI (substitute for arXiv since arXiv access blocked)
-
-- [ ] Confirm Zenodo deposit policy with GitHub integration (https://zenodo.org/account/settings/github/)
-- [ ] Tag a GitHub release of RAF (e.g., `v0.2.0-preprint`)
-- [ ] Trigger Zenodo deposit via GitHub release hook
-- [ ] Record Zenodo DOI; reference it in the workshop submission cover letter as "preprint available at DOI: 10.5281/zenodo.xxxxxxx"
-- [ ] Update README citation block to include Zenodo DOI
-
----
-
-### Phase 10 v2 .4: Workshop Submission (Sep-Oct 2026)
-
-**Deliverables**: Submitted manuscript to selected NeurIPS 2026 workshop
-
-- [ ] Reformat to workshop-required template (typically NeurIPS LaTeX style)
-- [ ] Compile final PDF; check page limit
-- [ ] Prepare cover letter referencing Zenodo deposit
-- [ ] Submit via OpenReview (standard NeurIPS workshop platform) before deadline
-- [ ] Track reviewer feedback in OpenReview; respond during rebuttal period if applicable
-- [ ] Expected decision: typically 4-6 weeks after deadline (~Nov 2026)
-- [ ] If accepted: prepare camera-ready, plan workshop attendance (Dec 2026)
-- [ ] If rejected: incorporate reviewer feedback, retarget AAAI 2027 workshops or ICLR 2027 workshops
-
----
-
-## Phase 10 v3: JOSS Submission Target (ACTIVE — added 2026-05-17)
-
-**Goal**: Submit RAF to the Journal of Open Source Software (JOSS) as an open-source reference implementation of QC-ML co-evolutionary frameworks. Single-venue strategy: fast, clean, low-risk. Conference workshops deferred until after JOSS acceptance.
-
-**Why JOSS**: JOSS publishes short summary papers about scholarly open-source software. Review criteria are explicit and software-focused: license, installation, examples, automated tests, community guidelines, documentation, statement of need. There is no empirical-novelty pressure — implementation papers about established frameworks are exactly the type of contribution JOSS exists to recognize. Fast review cycle (typically 4-8 weeks), peer-reviewed, real DOI (`10.21105/joss.NNNNN`), indexed in CrossRef. JOSS reviewers run the software, so reproducibility and tests are the actual quality gates.
-
-**Timeline**: ~3-4 months (May 17, 2026 → Aug-Sep 2026 submission window), with Phase 11.1, 11.3, 11.4 as prerequisites. Phase 11.2 (real CDR) deferred to v0.3.0, post-JOSS.
-
----
-
-### Phase 10 v3 .1: Repo Preparation for JOSS Submission Criteria (June 2026, ~2 weeks)
-
-**Deliverables**: RAF repo meets all JOSS submission criteria before drafting paper
-
-JOSS submission criteria reference: https://joss.readthedocs.io/en/latest/submitting.html
-
-- [ ] **License**: Verify MIT license file present and SPDX header in source files (already MIT — verify completeness)
-- [ ] **Version**: Tag a clear release version on GitHub before submission (e.g., `v0.2.0-joss`)
-- [ ] **Authors**: ORCID for every listed author (required for JOSS)
-- [ ] **Statement of need**: Required JOSS section; must answer "what problem does this software solve, for whom, in a way that distinguishes it from existing tools?" Draft this section first since it forces clarity
-- [ ] **Installation instructions**: Verify `uv sync` and `pip install -e .` both work from a fresh clone
-- [ ] **Example usage**: At least one runnable example that demonstrates core functionality (existing `examples/empirical_validation.py --mode quick` qualifies; verify it runs end-to-end in <5 min)
-- [ ] **API documentation**: Public API documented in docstrings; consider Sphinx build for site (optional but improves review)
-- [ ] **Automated tests**: Required by JOSS. Phase 11.3 brings coverage to 40%+. Verify `pytest` passes cleanly on a fresh checkout
-- [ ] **Continuous integration**: GitHub Actions workflow that runs tests on push (already exists per Phase 7.1; verify still passing on `main`)
-- [ ] **Community guidelines**: `CONTRIBUTING.md` (already exists) and `CODE_OF_CONDUCT.md` (verify present; add if missing — JOSS requires this)
-- [ ] **Issue templates**: Bug report and feature request templates in `.github/ISSUE_TEMPLATE/`
-- [ ] **Performance/benchmarks** (optional, strengthens submission): One reproducible benchmark output committed to `benchmarks/` showing example sensitivity-study results
-- [ ] **Backend currency audit** (added v4, 2026-05-17 — see README v4 changelog for the data behind these items):
-  - [ ] `raf/backends/ibm.py`: device-name strings reflect May 2026 IBM fleet. Brisbane/Kyoto/Osaka are retired (Aug 2024 / Aug 2024 / Nov 2025); active fleet is Heron r1/r2/r3 (e.g., `ibm_aachen`, `ibm_boston`, `ibm_torino`) and Nighthawk (`ibm_miami`). Remove or alias retired-device references; add Heron/Nighthawk handling.
-  - [ ] `raf/backends/braket.py`: remove OQC support (access ended June 2024); add IQM and AQT (current Braket providers as of May 2026). Verify IonQ device strings: `ionq_forte`, `ionq_forte_enterprise`, `ionq_aria_1`, `ionq_aria_2` (Harmony retired). Update ARN mapping table accordingly.
-  - [ ] `raf/backends/azure_quantum.py`: add Atom Computing partner. Default Quantinuum target should be `quantinuum.qpu.h2-1` not `h1-1` (H1 retirement notice issued July 2025; H2 currently 56 qubits).
-  - [ ] `raf/backends/iqm.py`: accept `garnet` (20-qubit Crystal 20) and `emerald` (54-qubit Crystal 54, July 2025) as device strings. "Resonance" is the IQM cloud platform name, NOT a device — should not be a valid `IQMBackend(...)` argument.
-  - [ ] Reconcile README v4 examples against actual `raf.backends` accepted strings. Either align README examples to existing code, or update code to accept README v4 strings. The README v4 strings are illustrative of what users would _expect_ to pass given current device names.
-  - [ ] **Decide (open question)**: `Supported Noise Profiles` table in README currently lists `ionq` profile as "IonQ Harmony-like" (11 qubits). Harmony being retired doesn't invalidate the simulation profile (it's a calibrated approximation of a documented device), but a Forte-1-like profile (~36 #AQ) would track current generation. Keep Harmony as historical baseline, or update to Forte? Document the decision in `docs/SCIENTIFIC_REVIEW.md`.
-  - [ ] Add a regression test: instantiating each backend with a "known good" device string should succeed; instantiating with a retired device string should raise a clear error pointing to the current alternative (e.g., `BraketBackend("ionq_harmony")` → `DeviceRetiredError("ionq_harmony retired 2024; use ionq_forte or ionq_aria_1")`).
-  - [ ] Add a CI job (monthly or on-demand) that fetches each cloud provider's current device list and flags drift against `raf/backends/`. Optional but valuable for long-term maintenance.
-
----
-
-### Phase 10 v3 .2: JOSS Paper Drafting (July 2026, ~1-2 weeks)
-
-**Deliverables**: `paper.md` and `paper.bib` in repo root, ready for `whedon`/`editorialbot` to compile
-
-JOSS paper format reference: https://joss.readthedocs.io/en/latest/paper.html
-
-- [ ] Create `paper.md` at repo root with required YAML front matter:
-  ```yaml
-  ---
-  title: 'RAF: A Python Reference Implementation of QC-ML Co-Evolutionary Frameworks'
-  tags:
-    - Python
-    - quantum computing
-    - machine learning
-    - quantum machine learning
-    - error mitigation
-    - variational quantum algorithms
-  authors:
-    - name: [Author Name]
-      orcid: 0000-0000-0000-0000
-      affiliation: 1
-  affiliations:
-    - name: [Affiliation]
-      index: 1
-  date: [submission date]
-  bibliography: paper.bib
-  ---
-  ```
-- [ ] Write **Summary** section (~150-200 words): what RAF does, what scientific use case it serves, what audience it targets
-- [ ] Write **Statement of need** section (~200-400 words): why this software is needed, what gap it fills relative to Singh/Shukla/Maes/Alexeev/Acampora (conceptual frameworks without code) and existing quantum libraries (Qiskit, PennyLane, etc. — which provide primitives but not the co-evolutionary feedback-loop abstraction)
-- [ ] Write **Functionality and design** section (~200-400 words): three-loop decomposition, coupling parameter configuration, multi-backend abstraction, sensitivity study workflow
-- [ ] Write **Example usage** section (~100-200 words): one minimal code block showing a complete sensitivity study
-- [ ] **Acknowledgments** section
-- [ ] **References** section (bibtex in `paper.bib`): cite Singh 2025, Shukla 2025, Maes 2025, Alexeev 2025, Acampora 2025, plus Qiskit, PennyLane, AlphaQubit, GP-QML
-- [ ] Total length target: 250-1000 words (JOSS short paper requirement)
-- [ ] Local compile check: clone https://github.com/openjournals/inara to test paper renders correctly
-
----
-
-### Phase 10 v3 .3: JOSS Submission via openjournals (Late July - Aug 2026)
-
-**Deliverables**: Active JOSS review at https://joss.theoj.org/papers/
-
-- [ ] Register at JOSS submission portal: https://joss.theoj.org/papers/new
-- [ ] Submit: provide repo URL, branch with `paper.md`, software version tag
-- [ ] Pre-review check by `editorialbot`: automated checks on repo (license file present, tests pass, paper compiles)
-- [ ] Editor assignment (~1 week)
-- [ ] Reviewers assigned (typically 2 reviewers, open-source practitioners in the domain)
-- [ ] Reviewers conduct review _on the repo itself_ via GitHub issue checklist (this is unique to JOSS — reviewers run the software, file issues, and check items off a list)
-
----
-
-### Phase 10 v3 .4: Review Response (Aug-Sep 2026, ~4-8 weeks total cycle)
-
-**Deliverables**: Address all reviewer issues; achieve acceptance
-
-- [ ] Respond promptly to each reviewer issue in the JOSS review thread
-- [ ] Typical issues to expect (based on JOSS reviewer patterns):
-  - Requests for additional examples or notebook tutorials
-  - Improvements to documentation clarity
-  - Test coverage suggestions (Phase 11.3 should already address this)
-  - Clarification of statement of need
-  - Suggestions for additional benchmarks or comparisons
-- [ ] Iterate paper.md based on reviewer suggestions
-- [ ] When reviewers approve: editor performs final check, paper is accepted
-- [ ] JOSS assigns DOI (format `10.21105/joss.NNNNN`) upon acceptance
-- [ ] Update README citation block with final DOI
-- [ ] Tag Zenodo release with same version for archival redundancy
-
----
-
-### Phase 10 v3 .5: Post-Acceptance (Sep-Oct 2026 onward, optional)
-
-**Deliverables**: Leverage JOSS publication for downstream venues
-
-- [ ] Announce JOSS publication on GitHub release notes, social channels
-- [ ] Consider expanding to a longer conference paper for IEEE QCE 2027, NeurIPS 2027 workshops, or similar — building on the JOSS-published version as the canonical reference implementation
-- [ ] Continue v0.3.0 development incorporating Phase 11.2 (real CDR) for a future version
-
----
-
-## Phase 11: Methodology Fixes (PREREQUISITE for Phase 10 v3 / JOSS submission — added 2026-05-17, re-targeted for v3)
-
-> **v3 priority re-ordering (2026-05-17)** — under JOSS-first strategy (Phase 10 v3 supersedes Phase 10 v2):
->
-> - **Phase 11.1** (rename to `assumed_coupling_strength` config): **promoted to core feature** of the reference implementation. Highest priority. Under reference-implementation framing, exposing coupling as configurable is the _correct design_, not damage control.
-> - **Phase 11.2** (real CDR mitigation): **demoted to v0.3.0 goal**, post-JOSS. For JOSS submission, executing Path B only (rename `_simulate_mitigation` → `_simulated_idealized_mitigation` with honest docstring) is sufficient. Path A (full CDR implementation) becomes a next-version enhancement.
-> - **Phase 11.3** (test coverage 40%+): **still required** — JOSS explicitly requires automated tests.
-> - **Phase 11.4** (reproducibility hardening): **still required** — JOSS reviewers run the software.
->
-> The original Phase 11 content below remains accurate; only the priority and the "Definition of Done" change.
-
-**Goal**: Fix three concrete methodology issues so that the JOSS submission (and any future paper) can honestly claim what it presents. Without these, no submission is defensible.
-
-**Timeline**: ~6-10 weeks (May 17, 2026 → ~July 31, 2026), running in parallel with Phase 10 v3 .1 repo preparation.
-
-**Owner**: This is the most important code work before any paper drafting begins.
-
----
-
-### Phase 11.1: Reframe `cross_loop_validation.py` coupling factors (Week 1-2, ~5 hours)
-
-**Current state**: `raf/experiments/cross_loop_validation.py` contains hardcoded coupling factors such as `fidelity_improvement = actual_improvement * 0.3  # Coupling factor` and matching schedules in `_simulate_mitigation_improvement`. The cross-correlation analysis "measures" precisely what was inserted.
-
-**Required changes**:
-
-- [ ] Rename all such factors to `assumed_coupling_strength` with clear naming throughout
-- [ ] Expose them as explicit config parameters (e.g., via `CrossLoopValidationConfig` dataclass) loaded from a YAML/TOML file in `configs/`
-- [ ] Provide default values matching the previously hardcoded ones but document them as "assumptions drawn from prior literature" with citations (Maes 2025; Shukla 2025) in docstrings and config file comments
-- [ ] Add a `--coupling-strength` CLI flag to `examples/empirical_validation.py` to allow sensitivity studies
-- [ ] Update docstrings to explicitly state: "this function models cross-loop coupling under the stated assumption; results illustrate cascade dynamics for the assumed parameter set rather than measured coupling"
-- [ ] Update `docs/SCIENTIFIC_REVIEW.md` to reflect the renaming
-
-**Validation**: A reviewer reading the code or docstring should immediately understand that coupling is assumed, not measured.
-
----
-
-### Phase 11.2: Replace oracle-access mitigation with real CDR OR rename explicitly (Week 2-6, ~30-60 hours)
-
-**Current state**: `raf/experiments/error_mitigation.py` `_simulate_mitigation` uses ideal expectation: `noise_error = noisy_exp - ideal_exp; correction = noise_error * mitigation_strength`. This is oracle access to ground truth, not mitigation. The `CDRMitigator` class is scaffolded but unused.
-
-**Two paths, pick one**:
-
-**Path A (preferred if time permits, ~30-60 hours)**: Wire up real CDR.
-
-- [ ] Implement training-circuit generation via near-Clifford substitutions on the VQE ansatz (Clifford gates allow classical simulation for ideal expectation values)
-- [ ] Train `CDRMitigator` on the generated training set per device noise profile
-- [ ] Replace `_simulate_mitigation` calls in `error_mitigation.py` with calls to the trained `CDRMitigator`
-- [ ] Validate: compare CDR-mitigated values to ideal values on held-out test circuits (this is legitimate; held-out test does not leak ideal into training)
-- [ ] Replace the deterministic 0.30→0.80 schedule with measured per-iteration error reduction from real CDR
-- [ ] Expected outcome: mitigation accuracy depends on noise profile and training-set size, no longer deterministic
-- [ ] Add unit tests for `CDRMitigator` training and inference
-
-**Path B (fallback if Path A is too costly, ~5-10 hours)**: Rename and disclose.
-
-- [ ] Rename `_simulate_mitigation` → `_simulated_idealized_mitigation`
-- [ ] Update docstring to explicitly state: "This function models the _upper bound_ of what a perfect mitigator could achieve given oracle access to the ideal expectation. It is a structural placeholder for benchmarking framework dynamics, NOT a learned ML-QEM method."
-- [ ] Update all callers to use the renamed function
-- [ ] In the paper, present results as "framework dynamics under idealized mitigation upper bound"
-- [ ] This path is defensible but weaker; reviewers will note the limitation
-
-**Recommendation**: Attempt Path A first; fall back to Path B if blocked by week 4.
-
----
-
-### Phase 11.3: Raise test coverage 6.4% → 40-50% (Week 3-7, ~15-25 hours)
-
-**Current state**: Test coverage estimated ~6.4% (~820/12,884 lines). Far below publication threshold for a code-contribution paper.
-
-**Required changes**:
-
-- [ ] Run `pytest --cov=raf --cov-report=term-missing` and confirm current baseline
-- [ ] Prioritize modules to test in this order:
-  - [ ] `raf/core/metrics.py` — metric computation correctness
-  - [ ] `raf/core/loop.py` — loop base class behavior
-  - [ ] `raf/core/framework.py` — framework integration
-  - [ ] `raf/loops/error_mitigation.py`, `ansatz_design.py`, `calibration_control.py` — each loop's correctness
-  - [ ] `raf/analysis/bottleneck.py`, `cross_loop.py`, `prioritization.py` — analysis correctness
-  - [ ] `raf/backends/aer.py`, `noise_models.py` — backend basics
-- [ ] Add property-based tests via `hypothesis` for metric monotonicity, coupling parameter bounds, etc.
-- [ ] Add reproducibility tests: same seed → same output (across SimulatedLoop, CrossLoop, ControlOptimization)
-- [ ] Target: 40-50% coverage by Week 7; 85% (Phase 9.5 target) deferred until after submission
-- [ ] Add coverage gate to `pyproject.toml`: `[tool.coverage.report]` fail_under = 40
-
-**Validation**: `pytest --cov=raf --cov-fail-under=40` passes.
-
----
-
-### Phase 11.4: Reproducibility hardening (Week 7-8, ~8 hours)
-
-**Current state**: Phase 7.1 added seed plumbing; Phase 9.3 will pin deps. Need a one-command reproducibility validation.
-
-**Required changes**:
-
-- [ ] Pin all direct dependencies in `pyproject.toml` with `==` for the preprint snapshot (loosen to `>=` for ongoing development on a `dev` branch)
-- [ ] Commit a `uv.lock` snapshot under a `preprint/` git tag
-- [ ] Verify on a fresh container: `uv sync && python examples/empirical_validation.py --mode quick` reproduces published numbers byte-for-byte
-- [ ] Write `REPRODUCIBILITY.md` at repo root: exact commands, expected outputs, environment specs (OS, Python version, key dependency versions), seed values used, runtime expectations
-- [ ] Add a `make reproduce` target (or `uv` task equivalent) wrapping the canonical reproduction command
-- [ ] CI: add a GitHub Actions job that runs the reproduction on every push to `main`
-
-**Validation**: A new collaborator can clone, `uv sync`, run one command, and get identical numbers to those in the paper.
-
----
-
-### Phase 11 — Definition of Done (updated 2026-05-17 for v3 / JOSS)
-
-- [ ] Phase 11.1 complete: coupling exposed as `assumed_coupling_strength` config — **REQUIRED for JOSS** (core feature of reference implementation)
-- [ ] Phase 11.2 Path B complete: oracle-access mitigation renamed to `_simulated_idealized_mitigation` with honest docstring — **REQUIRED for JOSS** (Path A may be deferred to v0.3.0)
-- [ ] Phase 11.3 complete: test coverage ≥ 40%, `pytest --cov-fail-under=40` in CI — **REQUIRED for JOSS** (automated tests are a JOSS criterion)
-- [ ] Phase 11.4 complete: reproducibility validated, `REPRODUCIBILITY.md` present, deps pinned — **REQUIRED for JOSS** (reviewers run the software)
-- [ ] `docs/SCIENTIFIC_REVIEW.md` updated to reflect what changed and what remains as assumed
-- [ ] JOSS paper claim, with full honesty: "open-source Python reference implementation of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025) with explicit coupling parameters, multi-backend abstraction, and structural sensitivity studies"
-
----
-
-## Resource Requirements
-
-### Accounts Needed (Choose One)
-
-- [x] **Qiskit Aer** (default): No account needed - local simulation with device-calibrated noise models ✓ USING THIS
-- [ ] **Azure Quantum**: $500 free credits, access to IonQ + Quantinuum (portal.azure.com) - deferred
-- [ ] **AWS Braket**: Free credits for new users, access to IonQ + Rigetti (aws.amazon.com/braket) - deferred
-- [ ] **IBM Quantum**: 10 min/month free tier (quantum.cloud.ibm.com) - login issues encountered
-
-> **Note**: Simulation with device-calibrated noise models is scientifically valid and commonly
-> accepted in quantum computing literature. Real hardware validation deferred to future work.
-
-### Compute Resources
-
-- Local machine with GPU (for surrogate training)
-- ~10-20 hours of IBM Quantum credits (free tier provides ~10 min/month real hardware)
-
-### Fallback Strategy
-
-If real hardware access is limited:
-
-1. Use Qiskit Aer with `FakeBackendV2` (device-calibrated noise)
-2. Clearly state "simulated with realistic noise models" in paper
-3. Add "Future Work" section for full hardware validation
-
----
-
-## Success Criteria
-
-### Minimum Viable (Must Have)
-
-- [x] Qiskit integration with noise simulation
-- [x] One complete Error Mitigation loop experiment
-- [x] Measured acceleration metrics (not just simulated)
-- [x] Fixed references in paper
-- [x] Validation roadmap section added
-
-### Target (Should Have)
-
-- [x] All three loops with simulation experiments
-- [x] Cross-loop coupling validation
-- [x] Validation with device-calibrated noise models (real hardware deferred)
-- [x] Publication-quality figures
-
-### Stretch (Nice to Have)
-
-- [x] PennyLane integration
-- [ ] Multiple hardware backends comparison (see Phase 8 below)
-- [ ] Interactive dashboard for experiments
-- [ ] Pre-trained surrogate models included
-
----
-
-## Phase 8: Multi-Vendor Hardware Validation (DEFERRED - Future Work)
-
-> **Status**: Deferred due to vendor account access issues. Current simulation-based
-> validation is scientifically valid. Real hardware validation planned for future work.
-
-### 8.1 Azure Quantum Setup (Deferred)
-
-- [ ] Create Azure account and Quantum workspace
-- [ ] Configure `azure-quantum` credentials
-- [ ] Test connection with IonQ simulator
-
-### 8.2 AWS Braket Setup (Deferred)
-
-- [ ] Create AWS account with Braket access
-- [ ] Configure AWS credentials
-- [ ] Test connection with IonQ/Rigetti simulators
-
-### 8.3 Cross-Vendor Validation Experiments (Deferred)
-
-- [ ] Run Error Mitigation loop on IonQ (trapped-ion)
-- [ ] Run Error Mitigation loop on Rigetti (superconducting)
-- [ ] Compare acceleration dynamics across hardware types
-- [ ] Measure hardware-specific bottleneck effects
-
-### 8.4 Paper Enhancement (Deferred)
-
-- [ ] Add Table: Cross-vendor acceleration comparison
-- [ ] Add Figure: Hardware heterogeneity impact on loop dynamics
-- [ ] Update Section V.D with real hardware results
-- [ ] Strengthen "hardware-agnostic" claims with empirical evidence
-
----
-
-## Revised Publication Timeline v1 (Post-WCCI) — SUPERSEDED 2026-05-17
-
-> Superseded by Phase 10 v2 timeline below; kept for traceability.
-
-| Week  | Dates        | Focus                   | Deliverables                         |
-| ----- | ------------ | ----------------------- | ------------------------------------ |
-| 1     | May 15-22    | Manuscript finalization | Draft + figures complete             |
-| 2     | May 22-29    | arXiv submission        | Preprint online (arXiv ID obtained)  |
-| 3     | May 29-Jun 5 | Journal submission      | Submitted to Nature MI + AAAI 2027   |
-| 4-10  | Jun-Aug      | Review phase            | Community feedback on preprint       |
-| 11-14 | Aug-Oct      | Revision phase          | Address reviewer comments            |
-| 15+   | Oct-Dec 2026 | Publication             | Expected acceptance + publication ✅ |
-
----
-
-## Revised Publication Timeline v2 (NeurIPS 2026 Workshops) — SUPERSEDED 2026-05-17 by v3
-
-> Superseded by Timeline v3 below; kept for traceability.
-
-| Phase  | Dates           | Focus                     | Deliverables                                                              |
-| ------ | --------------- | ------------------------- | ------------------------------------------------------------------------- |
-| 11.1   | May 17-31       | Cross-loop reframing      | `assumed_coupling_strength` config; sensitivity-study framing             |
-| 11.2   | Jun 1 - Jul 15  | Real CDR (or rename)      | CDR-mitigated values OR explicit `_simulated_idealized_mitigation` rename |
-| 11.3   | Jun 15 - Jul 31 | Test coverage 40%+        | Coverage gate in CI; property-based tests                                 |
-| 11.4   | Jul 15 - Jul 31 | Reproducibility hardening | `REPRODUCIBILITY.md`; pinned `uv.lock`; CI reproduction job               |
-| 10v2.1 | Jun - Aug       | CFP monitoring            | Target workshop confirmed by Sep 1, 2026                                  |
-| 10v2.2 | Aug - Sep       | Manuscript drafting       | Workshop-format draft with revised framing                                |
-| 10v2.3 | Sep             | Zenodo deposit            | DOI assigned as preprint substitute                                       |
-| 10v2.4 | Sep - Oct       | Workshop submission       | Submitted via OpenReview                                                  |
-| —      | Nov             | Review decision           | Accept / revise / reject                                                  |
-| —      | Dec 2026        | NeurIPS attendance        | Workshop presentation (if accepted)                                       |
-
----
-
-## Revised Publication Timeline v3 (JOSS) — ACTIVE
-
-| Phase             | Dates               | Focus                       | Deliverables                                                              |
-| ----------------- | ------------------- | --------------------------- | ------------------------------------------------------------------------- |
-| 11.1              | May 17-31           | Coupling as core feature    | `assumed_coupling_strength` config (JOSS prereq)                          |
-| 11.2 Path B       | Jun 1-15            | Honest rename               | `_simulated_idealized_mitigation` with disclosure docstring (JOSS prereq) |
-| 11.3              | Jun 1 - Jul 15      | Test coverage 40%+          | Coverage gate in CI (JOSS prereq)                                         |
-| 11.4              | Jul 1 - Jul 31      | Reproducibility hardening   | `REPRODUCIBILITY.md`; pinned `uv.lock`; CI reproduction job (JOSS prereq) |
-| 10v3.1            | Jun 2026            | Repo prep for JOSS criteria | ORCID, license, CoC, issue templates, CI green                            |
-| 10v3.2            | Jul 2026            | JOSS paper drafting         | `paper.md` + `paper.bib` in repo root, 250-1000 words                     |
-| 10v3.3            | Late Jul - Aug 2026 | JOSS submission             | Active review at joss.theoj.org/papers                                    |
-| 10v3.4            | Aug - Sep 2026      | Review response             | Address reviewer issues via GitHub thread                                 |
-| —                 | Sep - Oct 2026      | Acceptance                  | JOSS DOI assigned (10.21105/joss.NNNNN)                                   |
-| 10v3.5            | Oct 2026 onward     | Post-acceptance             | Optional expansion to IEEE QCE 2027 / NeurIPS 2027                        |
-| Phase 11.2 Path A | Sep 2026 onward     | Real CDR for v0.3.0         | Post-JOSS enhancement                                                     |
 
 ---
 
@@ -1163,7 +614,7 @@ python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 
 ---
 
-## Implementation Order & Risk Assessment
+### Phase 9 Implementation Order & Risk Assessment
 
 | Phase            | Risk       | Effort  | Validation Time | Dependencies |
 | ---------------- | ---------- | ------- | --------------- | ------------ |
@@ -1185,7 +636,7 @@ python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 
 ---
 
-## Validation Checklist
+### Phase 9 Validation Checklist
 
 - [ ] `requires-python` in pyproject.toml updated
 - [ ] `pre-commit run --all-files` passes with zero errors
@@ -1203,7 +654,7 @@ python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 
 ---
 
-## Notes
+### Phase 9 Implementation Notes
 
 - **Qiskit 2.x Compatibility**: All changes maintain compatibility with existing qiskit 2.0-2.2 constraints
 - **Separate venvs** (IBM Quantum, IQM) are unaffected by Python 3.12 upgrade
@@ -1214,91 +665,495 @@ python -m build --sdist && tar -tzf dist/raf-*.tar.gz | head -20
 
 ---
 
-## Timeline Summary v1: arXiv + Multi-Venue Strategy — SUPERSEDED 2026-05-17
+## Phase 10: JOSS Submission Target
 
-> Superseded by Timeline Summary v2 below; kept for traceability.
+<!--
+HISTORICAL PHASE 10 PLANS (preserved for traceability)
+======================================================
 
-**Immediate Priority** (Weeks 1-2):
+== Phase 10 v1 (Jan 2026, SUPERSEDED): arXiv + Journal Submission ==
 
-- Finalize manuscript with empirical results
-- Generate publication-quality figures
-- Submit to arXiv by June 1, 2026
+Goal: Publish preprint on arXiv by June 1, 2026 + formal venue submission by July 1, 2026.
+Timeline: 3 weeks (May 15 - Jun 5, 2026).
 
-**Secondary Priority** (Week 3):
+Phase 10.1: Manuscript Finalization (Week 1-2, May 15-29)
+- Extract quantitative results from experiments (python examples/empirical_validation.py --mode full)
+- Generate publication-quality figures (5-7 total): three-loop diagram, error mitigation acceleration dynamics, cross-loop coupling heatmap, bottleneck validation bars, empirical results summary table, hardware heterogeneity impact table
+- Write manuscript sections (abstract ≤250 words, introduction 1 page, related work 1 page, framework 2-3 pages, empirical validation 2-3 pages, discussion 1-2 pages, conclusion 0.5 page, references 1 page)
+- Format for submission (IEEE 2-column OR NIPS format, Overleaf compile, 6-12 pages)
+Effort: ~50 hours total.
 
-- Prepare journal submission (Nature MI perspective)
-- Prepare conference submission (AAAI 2027)
-- Both in parallel for coverage
+Phase 10.2: arXiv Submission (Week 2, May 22-29) — BLOCKED by arXiv endorsement policy update Jan 21, 2026
+- Create arXiv account, prepare submission package (paper.pdf + source.tar.gz)
+- Categories: cs.LG primary, quant-ph secondary, cs.SY tertiary
+- Submit via arxiv.org/submit, get arXiv ID 2605.xxxxx
+- Post-publication: update README, social announce, solicit feedback
+Effort: ~5 hours. Timeline target: arXiv ID by June 1, 2026.
 
-**Expected Publication** (Q4 2026):
+Phase 10.3: Formal Journal Submission (Week 3-4, May 29 - Jun 12)
+- Phase 10.3.1: Nature Machine Intelligence (PRIMARY) — perspective piece 3,500 words, cover letter, expected decision Oct-Nov 2026
+- Phase 10.3.2: Backup Quantum Science & Technology — full technical manuscript 6-8 pages
+Effort: ~12 hours.
 
-- arXiv preprint: June 2026 ✅
-- Nature MI/journal decision: Oct-Dec 2026
-- AAAI 2027 decision: Oct-Nov 2026
-- Formal publication: **Dec 2026 or Q1 2027**
+Phase 10.4: Conference Submission (Week 4, Jun 5-12) — AAAI 2027
+- Reformat as 8-page conference paper, cover letter, submit before ~Aug 15 2026 deadline
+- Expected decision Late October 2026, conference Feb 2027
+Effort: ~5 hours.
 
----
+Phase 10.5: Parallel Actions (Jun-Oct 2026) — community outreach, code improvements during review
+Effort: ~10 hours.
 
-## Timeline Summary v2: NeurIPS 2026 Workshops Strategy — SUPERSEDED 2026-05-17 by v3
+Supersession: arXiv access blocked, Nature MI/AAAI 2027 premature given methodology state. Replaced by Phase 10 v2 (NeurIPS workshops) + Phase 11 (methodology fixes).
 
-> Superseded by Timeline Summary v3 below; kept for traceability.
+== Phase 10 v2 (May 2026 AM, SUPERSEDED): NeurIPS 2026 Workshops Target ==
 
-**Immediate Priority** (Weeks 1-10, May-July 2026):
+Goal: Submit to NeurIPS 2026 workshop (likely ML4PS) by ~Oct 10, 2026.
+Timeline: ~5 months (May 17, 2026 → Oct 10, 2026).
+Sequencing: Phase 11 (methodology fixes) is a prerequisite. ~6-10 weeks code + 4-6 weeks drafting fits 5-month window.
 
-- Phase 11.1: reframe coupling factors as `assumed_coupling_strength` config (Week 1-2)
-- Phase 11.2: real CDR mitigation or honest rename (Week 2-6)
-- Phase 11.3: test coverage 40%+ (Week 3-7)
-- Phase 11.4: reproducibility hardening (Week 7-8)
+Phase 10 v2 .1: CFP Monitoring & Venue Selection (June-August 2026)
+- Watch ML4PS website, NeurIPS 2026 workshops list, AI4Science, Quantum ML workshops
+- Backup: AAAI 2027 workshops, ICLR 2027 workshops
+- Decision deadline: select target workshop by Sep 1, 2026.
 
-**Secondary Priority** (Weeks 11-20, Aug-Sep 2026):
+Phase 10 v2 .2: Manuscript Drafting (August-September 2026)
+- Workshop format (4-pg, 6-pg, or 9-pg variants)
+- Abstract ~150-200 words: operational three-loop structural model with explicit coupling parameters
+- Sections: §1 Introduction with explicit Maes/Shukla/Alexeev/Acampora citations, §2 Related Work positioning, §3 Framework, §4 Simulated Dynamics under Assumed Coupling (HONEST reframing), §5 Discussion & Limitations, §6 Conclusion & Future Work
 
-- Phase 10 v2 .1: CFP monitoring + workshop selection
-- Phase 10 v2 .2: manuscript drafting with revised framing (cite Maes/Shukla/Alexeev/Acampora prominently)
-- Phase 10 v2 .3: Zenodo deposit as arXiv substitute
+Phase 10 v2 .3: Zenodo Deposit as Priority Substitute (~Sept 2026)
+- Confirm Zenodo deposit policy with GitHub integration
+- Tag v0.2.0-preprint, trigger Zenodo deposit, record DOI
+- Reference DOI in workshop submission cover letter
 
-**Final Push** (Weeks 21-22, Sep-Oct 2026):
+Phase 10 v2 .4: Workshop Submission (Sep-Oct 2026)
+- Reformat to NeurIPS LaTeX style, submit via OpenReview before deadline
+- Expected decision ~Nov 2026; if accepted, prepare camera-ready, plan Dec 2026 attendance
 
-- Phase 10 v2 .4: workshop submission via OpenReview
+Supersession: Positioning pivot to reference implementation makes JOSS a stronger venue match than NeurIPS workshops. JOSS reviewers explicitly evaluate open-source software with research value; non-archival workshops still require framework-novelty claims that RAF doesn't make under v3 framing. Replaced by Phase 10 v3 (renamed Phase 10 below).
+-->
 
-**Expected Outcome** (Q4 2026 - Q1 2027):
+**Goal**: Submit RAF to the Journal of Open Source Software (JOSS) as an open-source reference implementation. Single-venue strategy: fast, clean, low-risk. Conference workshops deferred until after JOSS acceptance.
 
-- Workshop submission: ~Oct 10, 2026 (estimated; depends on CFP)
-- Decision: ~Nov 2026
-- NeurIPS 2026 workshop presentation: Dec 2026 (if accepted)
-- Alternative venues if rejected: AAAI 2027 workshops (Nov 2026 deadline) or ICLR 2027 workshops (Jan 2027 deadline)
+**Why JOSS**: JOSS publishes short summary papers about scholarly open-source software. Review criteria are explicit and software-focused: license, installation, examples, automated tests, community guidelines, documentation, statement of need. There is no empirical-novelty pressure — implementation papers about established frameworks are exactly the type of contribution JOSS exists to recognize. Fast review cycle (typically 4-8 weeks), peer-reviewed, real DOI (`10.21105/joss.NNNNN`), indexed in CrossRef. JOSS reviewers run the software, so reproducibility and tests are the actual quality gates.
 
----
-
-## Timeline Summary v3: JOSS Strategy — ACTIVE
-
-**Immediate Priority** (Weeks 1-10, May-July 2026):
-
-- Phase 11.1: coupling as core feature (Week 1-2) — JOSS prereq
-- Phase 11.2 Path B: honest rename (Week 3-4) — JOSS prereq (Path A deferred to v0.3.0)
-- Phase 11.3: test coverage 40%+ (Week 3-7) — JOSS prereq
-- Phase 11.4: reproducibility hardening (Week 7-8) — JOSS prereq
-
-**Secondary Priority** (Weeks 10-12, July-early Aug 2026):
-
-- Phase 10 v3 .1: repo prep for JOSS criteria (ORCID, license, CoC, CI green)
-- Phase 10 v3 .2: JOSS paper drafting (`paper.md` 250-1000 words, `paper.bib`)
-
-**Submission Push** (Weeks 13-14, late July - Aug 2026):
-
-- Phase 10 v3 .3: submit via https://joss.theoj.org/papers/new
-
-**Expected Outcome** (Q3 - Q4 2026):
-
-- JOSS submission: late July - August 2026
-- Review cycle: 4-8 weeks
-- JOSS DOI assigned: September - October 2026 ✅
-- Optional follow-on: IEEE QCE 2027 / NeurIPS 2027 workshop expansion (post-acceptance)
+**Timeline**: ~3-4 months (May 17, 2026 → Aug-Sep 2026 submission window). Phase 11 (methodology fixes) is a prerequisite for the code-side checklist items.
 
 ---
 
-## Critical Path Dependencies (v2 — updated 2026-05-17)
+### Phase 10.1: Repo Preparation for JOSS Submission Criteria (June 2026, ~2 weeks)
+
+**Deliverables**: RAF repo meets all JOSS submission criteria before drafting paper
+
+JOSS submission criteria reference: https://joss.readthedocs.io/en/latest/submitting.html
+
+This phase splits into Stage A (code-side, runs alongside Phase 11) and Stage B (meta-prep & verifications, runs AFTER Stage A + Phase 11 complete). Stage B verifications ("install works", "examples run", "tests pass", "CI green") are not honest checks until the code work is done.
+
+#### Stage A — Code-side work (parallel with Phase 11, blocks Stage B)
+
+- [ ] **Backend currency audit** (verified against May 2026 cloud-provider reality — see README v4 changelog comment for the data behind these items):
+  - [ ] `raf/backends/ibm.py`: device-name strings reflect May 2026 IBM fleet. Brisbane/Kyoto/Osaka are retired (Aug 2024 / Aug 2024 / Nov 2025); active fleet is Heron r1/r2/r3 (e.g., `ibm_aachen`, `ibm_boston`, `ibm_torino`) and Nighthawk (`ibm_miami`). Remove or alias retired-device references; add Heron/Nighthawk handling.
+  - [ ] `raf/backends/braket.py`: remove OQC support (access ended June 2024); add IQM and AQT (current Braket providers as of May 2026). Verify IonQ device strings: `ionq_forte`, `ionq_forte_enterprise`, `ionq_aria_1`, `ionq_aria_2` (Harmony retired). Update ARN mapping table accordingly.
+  - [ ] `raf/backends/azure_quantum.py`: add Atom Computing partner. Default Quantinuum target should be `quantinuum.qpu.h2-1` not `h1-1` (H1 retirement notice issued July 2025; H2 currently 56 qubits).
+  - [ ] `raf/backends/iqm.py`: accept `garnet` (20-qubit Crystal 20) and `emerald` (54-qubit Crystal 54, July 2025) as device strings. "Resonance" is the IQM cloud platform name, NOT a device — should not be a valid `IQMBackend(...)` argument.
+  - [ ] Reconcile README examples against actual `raf.backends` accepted strings. Either align README examples to existing code, or update code to accept README strings. The README strings are illustrative of what users would _expect_ to pass given current device names.
+  - [ ] **Decide (open question)**: `Supported Noise Profiles` table in README currently lists `ionq` profile as "IonQ Harmony-like" (11 qubits). Harmony being retired doesn't invalidate the simulation profile (it's a calibrated approximation of a documented device), but a Forte-1-like profile (~36 #AQ) would track current generation. Keep Harmony as historical baseline, or update to Forte? Document the decision in `docs/SCIENTIFIC_REVIEW.md`.
+  - [ ] Add a regression test: instantiating each backend with a "known good" device string should succeed; instantiating with a retired device string should raise a clear error pointing to the current alternative (e.g., `BraketBackend("ionq_harmony")` → `DeviceRetiredError("ionq_harmony retired 2024; use ionq_forte or ionq_aria_1")`).
+  - [ ] Add a CI job (monthly or on-demand) that fetches each cloud provider's current device list and flags drift against `raf/backends/`. Optional but valuable for long-term maintenance.
+
+#### Stage B — Meta-prep & verifications (AFTER Stage A + Phase 11 complete)
+
+Verifications below depend on the code being stable. Pure paperwork items (license, ORCID, CoC, issue templates) can technically be drafted earlier, but there's no benefit to doing them before Stage A — they're cheap and fast once code is settled.
+
+- [ ] **License**: Verify MIT license file present and SPDX header in source files (already MIT — verify completeness)
+- [ ] **Version**: Tag a clear release version on GitHub before submission (e.g., `v0.2.0-joss`)
+- [ ] **Authors**: ORCID for every listed author (required for JOSS)
+- [ ] **Statement of need**: Required JOSS section; must answer "what problem does this software solve, for whom, in a way that distinguishes it from existing tools?" Draft this section first since it forces clarity
+- [ ] **Installation instructions**: Verify `uv sync` and `pip install -e .` both work from a fresh clone
+- [ ] **Example usage**: At least one runnable example that demonstrates core functionality (existing `examples/empirical_validation.py --mode quick` qualifies; verify it runs end-to-end in <5 min)
+- [ ] **API documentation**: Public API documented in docstrings; consider Sphinx build for site (optional but improves review)
+- [ ] **Automated tests**: Required by JOSS. Phase 11.3 brings coverage to 40%+. Verify `pytest` passes cleanly on a fresh checkout
+- [ ] **Continuous integration**: GitHub Actions workflow that runs tests on push (already exists per Phase 7.1; verify still passing on `main`)
+- [ ] **Community guidelines**: `CONTRIBUTING.md` (already exists) and `CODE_OF_CONDUCT.md` (verify present; add if missing — JOSS requires this)
+- [ ] **Issue templates**: Bug report and feature request templates in `.github/ISSUE_TEMPLATE/`
+- [ ] **Performance/benchmarks** (optional, strengthens submission): One reproducible benchmark output committed to `benchmarks/` showing example sensitivity-study results
+
+---
+
+### Phase 10.2: JOSS Paper Drafting (July 2026, ~1-2 weeks)
+
+**Deliverables**: `paper.md` and `paper.bib` in repo root, ready for `editorialbot` to compile
+
+JOSS paper format reference: https://joss.readthedocs.io/en/latest/paper.html
+
+- [ ] Create `paper.md` at repo root with required YAML front matter:
+  ```yaml
+  ---
+  title: 'RAF: A Python Reference Implementation of QC-ML Co-Evolutionary Frameworks'
+  tags:
+    - Python
+    - quantum computing
+    - machine learning
+    - quantum machine learning
+    - error mitigation
+    - variational quantum algorithms
+  authors:
+    - name: [Author Name]
+      orcid: 0000-0000-0000-0000
+      affiliation: 1
+  affiliations:
+    - name: [Affiliation]
+      index: 1
+  date: [submission date]
+  bibliography: paper.bib
+  ---
+  ```
+- [ ] Write **Summary** section (~150-200 words): what RAF does, what scientific use case it serves, what audience it targets
+- [ ] Write **Statement of need** section (~200-400 words): why this software is needed, what gap it fills relative to Singh/Shukla/Maes/Alexeev/Acampora (conceptual frameworks without code) and existing quantum libraries (Qiskit, PennyLane, etc. — which provide primitives but not the co-evolutionary feedback-loop abstraction)
+- [ ] Write **Functionality and design** section (~200-400 words): three-loop decomposition, coupling parameter configuration, multi-backend abstraction, sensitivity study workflow
+- [ ] Write **Example usage** section (~100-200 words): one minimal code block showing a complete sensitivity study
+- [ ] **Acknowledgments** section
+- [ ] **References** section (bibtex in `paper.bib`): cite Singh 2025, Shukla 2025, Maes 2025, Alexeev 2025, Acampora 2025, plus Qiskit, PennyLane, AlphaQubit, GP-QML
+- [ ] Total length target: 250-1000 words (JOSS short paper requirement)
+- [ ] Local compile check: clone https://github.com/openjournals/inara to test paper renders correctly
+
+---
+
+### Phase 10.3: JOSS Submission via openjournals (Late July - Aug 2026)
+
+**Deliverables**: Active JOSS review at https://joss.theoj.org/papers/
+
+- [ ] Register at JOSS submission portal: https://joss.theoj.org/papers/new
+- [ ] Submit: provide repo URL, branch with `paper.md`, software version tag
+- [ ] Pre-review check by `editorialbot`: automated checks on repo (license file present, tests pass, paper compiles)
+- [ ] Editor assignment (~1 week)
+- [ ] Reviewers assigned (typically 2 reviewers, open-source practitioners in the domain)
+- [ ] Reviewers conduct review _on the repo itself_ via GitHub issue checklist (this is unique to JOSS — reviewers run the software, file issues, and check items off a list)
+
+---
+
+### Phase 10.4: Review Response (Aug-Sep 2026, ~4-8 weeks total cycle)
+
+**Deliverables**: Address all reviewer issues; achieve acceptance
+
+- [ ] Respond promptly to each reviewer issue in the JOSS review thread
+- [ ] Typical issues to expect (based on JOSS reviewer patterns):
+  - Requests for additional examples or notebook tutorials
+  - Improvements to documentation clarity
+  - Test coverage suggestions (Phase 11.3 should already address this)
+  - Clarification of statement of need
+  - Suggestions for additional benchmarks or comparisons
+- [ ] Iterate paper.md based on reviewer suggestions
+- [ ] When reviewers approve: editor performs final check, paper is accepted
+- [ ] JOSS assigns DOI (format `10.21105/joss.NNNNN`) upon acceptance
+- [ ] Update README citation block with final DOI
+
+> Optional belt-and-suspenders archival: if desired, tag a Zenodo release with the JOSS version as a one-line item in Phase 10.5 (post-acceptance). JOSS DOI is the canonical citable artifact.
+
+---
+
+### Phase 10.5: Post-Acceptance (Sep-Oct 2026 onward, optional)
+
+**Deliverables**: Leverage JOSS publication for downstream venues
+
+- [ ] Announce JOSS publication on GitHub release notes, social channels
+- [ ] Consider expanding to a longer conference paper for IEEE QCE 2027, NeurIPS 2027 workshops, or similar — building on the JOSS-published version as the canonical reference implementation
+- [ ] Continue v0.3.0 development incorporating Phase 11.2 Path A (real CDR) for a future version
+- [ ] Optional: Zenodo deposit of the same version for archival redundancy alongside JOSS DOI
+
+---
+
+## Phase 11: Methodology Fixes (Prerequisite for Phase 10)
+
+**Priority order** (under JOSS-first strategy):
+
+- **Phase 11.1** (rename hardcoded coupling factors to `assumed_coupling_strength` config) is a **core feature** of the reference implementation. Highest priority. Under reference-implementation framing, exposing coupling as configurable is the correct design — not damage control.
+- **Phase 11.2** (real CDR mitigation) is **deferred to v0.3.0**, post-JOSS. For JOSS submission, Path B only (rename `_simulate_mitigation` → `_simulated_idealized_mitigation` with honest docstring) is sufficient.
+- **Phase 11.3** (test coverage 40%+) is **required** (JOSS criterion).
+- **Phase 11.4** (reproducibility hardening) is **required** (JOSS reviewers run the software).
+
+**Goal**: Fix three concrete methodology issues so that the JOSS submission (and any future paper) can honestly claim what it presents. Without these, no submission is defensible.
+
+**Timeline**: ~6-10 weeks (May 17, 2026 → ~July 31, 2026). **Must complete before Phase 10.1 Stage B meta-prep begins** — Stage B's "verify install works," "verify examples," "tests pass," and "CI green" items all depend on Phase 11 being substantially complete.
+
+**Owner**: This is the most important code work before any paper drafting begins.
+
+---
+
+### Phase 11.1: Reframe `cross_loop_validation.py` coupling factors (Week 1-2, ~5 hours)
+
+**Current state**: `raf/experiments/cross_loop_validation.py` contains hardcoded coupling factors such as `fidelity_improvement = actual_improvement * 0.3  # Coupling factor` and matching schedules in `_simulate_mitigation_improvement`. The cross-correlation analysis "measures" precisely what was inserted.
+
+**Required changes**:
+
+- [ ] Rename all such factors to `assumed_coupling_strength` with clear naming throughout
+- [ ] Expose them as explicit config parameters (e.g., via `CrossLoopValidationConfig` dataclass) loaded from a YAML/TOML file in `configs/`
+- [ ] Provide default values matching the previously hardcoded ones but document them as "assumptions drawn from prior literature" with citations (Maes 2025; Shukla 2025) in docstrings and config file comments
+- [ ] Add a `--coupling-strength` CLI flag to `examples/empirical_validation.py` to allow sensitivity studies
+- [ ] Update docstrings to explicitly state: "this function models cross-loop coupling under the stated assumption; results illustrate cascade dynamics for the assumed parameter set rather than measured coupling"
+- [ ] Update `docs/SCIENTIFIC_REVIEW.md` to reflect the renaming
+
+**Validation**: A reviewer reading the code or docstring should immediately understand that coupling is assumed, not measured.
+
+---
+
+### Phase 11.2: Replace oracle-access mitigation with real CDR OR rename explicitly (Week 2-6, ~30-60 hours)
+
+**Current state**: `raf/experiments/error_mitigation.py` `_simulate_mitigation` uses ideal expectation: `noise_error = noisy_exp - ideal_exp; correction = noise_error * mitigation_strength`. This is oracle access to ground truth, not mitigation. The `CDRMitigator` class is scaffolded but unused.
+
+**Two paths, pick one**:
+
+**Path A (preferred long-term, deferred to v0.3.0, ~30-60 hours)**: Wire up real CDR.
+
+- [ ] Implement training-circuit generation via near-Clifford substitutions on the VQE ansatz (Clifford gates allow classical simulation for ideal expectation values)
+- [ ] Train `CDRMitigator` on the generated training set per device noise profile
+- [ ] Replace `_simulate_mitigation` calls in `error_mitigation.py` with calls to the trained `CDRMitigator`
+- [ ] Validate: compare CDR-mitigated values to ideal values on held-out test circuits (this is legitimate; held-out test does not leak ideal into training)
+- [ ] Replace the deterministic 0.30→0.80 schedule with measured per-iteration error reduction from real CDR
+- [ ] Expected outcome: mitigation accuracy depends on noise profile and training-set size, no longer deterministic
+- [ ] Add unit tests for `CDRMitigator` training and inference
+
+**Path B (sufficient for JOSS, ~5-10 hours) — JOSS-PREREQUISITE**: Rename and disclose.
+
+- [ ] Rename `_simulate_mitigation` → `_simulated_idealized_mitigation`
+- [ ] Update docstring to explicitly state: "This function models the _upper bound_ of what a perfect mitigator could achieve given oracle access to the ideal expectation. It is a structural placeholder for benchmarking framework dynamics, NOT a learned ML-QEM method."
+- [ ] Update all callers to use the renamed function
+- [ ] In the paper, present results as "framework dynamics under idealized mitigation upper bound"
+- [ ] This path is defensible but weaker; reviewers will note the limitation
+
+**Decision**: Path B for JOSS submission (sufficient under reference-implementation framing). Path A deferred to v0.3.0 post-JOSS.
+
+---
+
+### Phase 11.3: Raise test coverage 6.4% → 40-50% (Week 3-7, ~15-25 hours)
+
+**Current state**: Test coverage estimated ~6.4% (~820/12,884 lines). Far below publication threshold for a code-contribution paper.
+
+**Required changes**:
+
+- [ ] Run `pytest --cov=raf --cov-report=term-missing` and confirm current baseline
+- [ ] Prioritize modules to test in this order:
+  - [ ] `raf/core/metrics.py` — metric computation correctness
+  - [ ] `raf/core/loop.py` — loop base class behavior
+  - [ ] `raf/core/framework.py` — framework integration
+  - [ ] `raf/loops/error_mitigation.py`, `ansatz_design.py`, `calibration_control.py` — each loop's correctness
+  - [ ] `raf/analysis/bottleneck.py`, `cross_loop.py`, `prioritization.py` — analysis correctness
+  - [ ] `raf/backends/aer.py`, `noise_models.py` — backend basics
+- [ ] Add property-based tests via `hypothesis` for metric monotonicity, coupling parameter bounds, etc.
+- [ ] Add reproducibility tests: same seed → same output (across SimulatedLoop, CrossLoop, ControlOptimization)
+- [ ] Target: 40-50% coverage by Week 7; 85% (Phase 9.5 target) deferred until after submission
+- [ ] Add coverage gate to `pyproject.toml`: `[tool.coverage.report]` fail_under = 40
+
+**Validation**: `pytest --cov=raf --cov-fail-under=40` passes.
+
+---
+
+### Phase 11.4: Reproducibility hardening (Week 7-8, ~8 hours)
+
+**Current state**: Phase 7.1 added seed plumbing; Phase 9.3 will pin deps. Need a one-command reproducibility validation.
+
+**Required changes**:
+
+- [ ] Pin all direct dependencies in `pyproject.toml` with `==` for the preprint snapshot (loosen to `>=` for ongoing development on a `dev` branch)
+- [ ] Commit a `uv.lock` snapshot under a `preprint/` git tag
+- [ ] Verify on a fresh container: `uv sync && python examples/empirical_validation.py --mode quick` reproduces published numbers byte-for-byte
+- [ ] Write `REPRODUCIBILITY.md` at repo root: exact commands, expected outputs, environment specs (OS, Python version, key dependency versions), seed values used, runtime expectations
+- [ ] Add a `make reproduce` target (or `uv` task equivalent) wrapping the canonical reproduction command
+- [ ] CI: add a GitHub Actions job that runs the reproduction on every push to `main`
+
+**Validation**: A new collaborator can clone, `uv sync`, run one command, and get identical numbers to those in the paper.
+
+---
+
+### Phase 11 — Definition of Done
+
+- [ ] Phase 11.1 complete: coupling exposed as `assumed_coupling_strength` config — **REQUIRED for JOSS** (core feature of reference implementation)
+- [ ] Phase 11.2 Path B complete: oracle-access mitigation renamed to `_simulated_idealized_mitigation` with honest docstring — **REQUIRED for JOSS** (Path A deferred to v0.3.0)
+- [ ] Phase 11.3 complete: test coverage ≥ 40%, `pytest --cov-fail-under=40` in CI — **REQUIRED for JOSS** (automated tests are a JOSS criterion)
+- [ ] Phase 11.4 complete: reproducibility validated, `REPRODUCIBILITY.md` present, deps pinned — **REQUIRED for JOSS** (reviewers run the software)
+- [ ] `docs/SCIENTIFIC_REVIEW.md` updated to reflect what changed and what remains as assumed
+- [ ] JOSS paper claim, with full honesty: "open-source Python reference implementation of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025) with explicit coupling parameters, multi-backend abstraction, and structural sensitivity studies"
+
+---
+
+## Resource Requirements
+
+### Accounts Needed (Choose One)
+
+- [x] **Qiskit Aer** (default): No account needed - local simulation with device-calibrated noise models ✓ USING THIS
+- [ ] **Azure Quantum**: $500 free credits, access to IonQ + Quantinuum (portal.azure.com) - deferred
+- [ ] **AWS Braket**: Free credits for new users, access to IonQ + Rigetti (aws.amazon.com/braket) - deferred
+- [ ] **IBM Quantum**: 10 min/month free tier (quantum.cloud.ibm.com) - login issues encountered
+
+> **Note**: Simulation with device-calibrated noise models is scientifically valid and commonly accepted in quantum computing literature. Real hardware validation deferred to future work.
+
+### Compute Resources
+
+- Local machine with GPU (for surrogate training)
+- ~10-20 hours of IBM Quantum credits (free tier provides ~10 min/month real hardware)
+
+### Fallback Strategy
+
+If real hardware access is limited:
+
+1. Use Qiskit Aer with `FakeBackendV2` (device-calibrated noise)
+2. Clearly state "simulated with realistic noise models" in paper
+3. Add "Future Work" section for full hardware validation
+
+---
+
+## Success Criteria
+
+### Minimum Viable (Must Have)
+
+- [x] Qiskit integration with noise simulation
+- [x] One complete Error Mitigation loop experiment
+- [x] Measured acceleration metrics (not just simulated)
+- [x] Fixed references in paper
+- [x] Validation roadmap section added
+
+### Target (Should Have)
+
+- [x] All three loops with simulation experiments
+- [x] Cross-loop coupling validation
+- [x] Validation with device-calibrated noise models (real hardware deferred)
+- [x] Publication-quality figures
+
+### Stretch (Nice to Have)
+
+- [x] PennyLane integration
+- [ ] Multiple hardware backends comparison (see Phase 8 above)
+- [ ] Interactive dashboard for experiments
+- [ ] Pre-trained surrogate models included
+
+---
+
+## Timeline Summary
+
+| Stage                      | Weeks | Dates                | Phase IDs                                             | Focus                                                                                                                   | Gate                                                                                                 |
+| -------------------------- | ----- | -------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **1. Codebase Completion** | 1-10  | May 17 – Jul 31 2026 | Phase 11 (.1, .2 Path B, .3, .4) + Phase 10.1 Stage A | Methodology fixes, test coverage, reproducibility, backend currency audit                                               | Fresh-container CI green; `--cov-fail-under=40` passes; examples run end-to-end                      |
+| **2. JOSS Meta-Prep**      | 11-13 | Aug 1 – Aug 21 2026  | Phase 10.1 Stage B                                    | License, version tag, ORCID, statement of need, install/example/test/CI verifications, CoC, issue templates, benchmarks | Repo meets every JOSS submission criterion (https://joss.readthedocs.io/en/latest/submitting.html)   |
+| **3. Paper Drafting**      | 13-14 | Aug 14 – Aug 28 2026 | Phase 10.2                                            | `paper.md` (250-1000 words) + `paper.bib`, YAML front matter, local compile via `inara`                                 | Paper renders cleanly; cites Singh/Shukla/Maes/Alexeev/Acampora + Qiskit/PennyLane/AlphaQubit/GP-QML |
+| **4. Submission**          | 15    | Aug 28 – Sep 4 2026  | Phase 10.3                                            | Submit via joss.theoj.org/papers/new; pre-review by `editorialbot`                                                      | Submission accepted into review queue; editor assigned                                               |
+| **5. Review Response**     | 16-23 | Sep – Oct 2026       | Phase 10.4                                            | Respond to reviewer issues in GitHub thread; iterate paper.md and code as needed                                        | Reviewers approve; JOSS assigns DOI `10.21105/joss.NNNNN`                                            |
+| **6. Post-Acceptance**     | 24+   | Oct 2026 onward      | Phase 10.5                                            | Announce; consider IEEE QCE 2027 / NeurIPS 2027 workshop expansion; v0.3.0 dev (Phase 11.2 Path A)                      | Optional, indefinite                                                                                 |
+
+**Stage 1 → Stage 2 transition is the critical gate**. If Stage 1 slips, every downstream stage slips by the same amount. Stage 1 is also where ambiguity is highest (Phase 11.2 Path A vs Path B decision, backend code audit findings, test-coverage actual ramp-up rate) — budget conservatively.
+
+**Stages 2 and 3 can compress** if Stage 1 produces clean output. Statement of Need (in Stage 2) can be sketched during Stage 1 since it's positioning-driven, not code-driven; the rest of paper.md (Stage 3) waits for working code.
+
+<!--
+HISTORICAL TIMELINES (preserved for traceability)
+=================================================
+
+== Revised Publication Timeline v1 (Post-WCCI, SUPERSEDED) ==
+Week 1 (May 15-22): Manuscript finalization — Draft + figures complete
+Week 2 (May 22-29): arXiv submission — Preprint online (arXiv ID obtained)
+Week 3 (May 29-Jun 5): Journal submission — Submitted to Nature MI + AAAI 2027
+Weeks 4-10 (Jun-Aug): Review phase — Community feedback on preprint
+Weeks 11-14 (Aug-Oct): Revision phase — Address reviewer comments
+Week 15+ (Oct-Dec 2026): Publication — Expected acceptance
+
+== Revised Publication Timeline v2 (NeurIPS 2026 Workshops, SUPERSEDED) ==
+Phase 11.1 (May 17-31): Cross-loop reframing — assumed_coupling_strength config
+Phase 11.2 (Jun 1 - Jul 15): Real CDR (or rename)
+Phase 11.3 (Jun 15 - Jul 31): Test coverage 40%+
+Phase 11.4 (Jul 15 - Jul 31): Reproducibility hardening
+Phase 10 v2 .1 (Jun - Aug): CFP monitoring — Target workshop confirmed by Sep 1, 2026
+Phase 10 v2 .2 (Aug - Sep): Manuscript drafting
+Phase 10 v2 .3 (Sep): Zenodo deposit — DOI as preprint substitute
+Phase 10 v2 .4 (Sep - Oct): Workshop submission via OpenReview
+Nov: Review decision
+Dec 2026: NeurIPS attendance (if accepted)
+
+== Revised Publication Timeline v3 (JOSS, parallel-track framing — SUPERSEDED by v4 linear sequencing above) ==
+Phase 11.1 (May 17-31): Coupling as core feature — JOSS prereq
+Phase 11.2 Path B (Jun 1-15): Honest rename — JOSS prereq (Path A deferred to v0.3.0)
+Phase 11.3 (Jun 1 - Jul 15): Test coverage 40%+ — JOSS prereq
+Phase 11.4 (Jul 1 - Jul 31): Reproducibility hardening — JOSS prereq
+Phase 10v3.1 (Jun 2026): Repo prep — ORCID, license, CoC, issue templates, CI green
+Phase 10v3.2 (Jul 2026): JOSS paper drafting
+Phase 10v3.3 (Late Jul - Aug 2026): JOSS submission
+Phase 10v3.4 (Aug - Sep 2026): Review response
+Sep - Oct 2026: Acceptance — JOSS DOI assigned
+Phase 10v3.5 (Oct 2026 onward): Post-acceptance, optional expansion
+Phase 11.2 Path A (Sep 2026 onward): Real CDR for v0.3.0
+
+== Timeline Summary v1 (arXiv + Multi-Venue Strategy, SUPERSEDED) ==
+Immediate Priority (Weeks 1-2): Finalize manuscript, submit to arXiv by June 1
+Secondary Priority (Week 3): Journal submission (Nature MI perspective), conference (AAAI 2027)
+Expected Publication (Q4 2026): arXiv preprint June 2026, decisions Oct-Dec 2026
+
+== Timeline Summary v2 (NeurIPS 2026 Workshops Strategy, SUPERSEDED) ==
+Immediate Priority (Weeks 1-10, May-Jul): Phase 11 methodology fixes
+Secondary Priority (Weeks 11-20, Aug-Sep): Workshop selection, manuscript drafting, Zenodo deposit
+Final Push (Weeks 21-22, Sep-Oct): Workshop submission via OpenReview
+Expected (Q4 2026 - Q1 2027): Workshop decision Nov, presentation Dec 2026
+
+== Timeline Summary v3 (JOSS, parallel-track framing — SUPERSEDED by v4 strict linear sequencing) ==
+Immediate Priority (Weeks 1-10): Phase 11.1, 11.2 Path B, 11.3, 11.4 — JOSS prereqs
+Secondary Priority (Weeks 10-12): Phase 10v3.1 repo prep + Phase 10v3.2 paper drafting
+Submission Push (Weeks 13-14): Phase 10v3.3 submit via JOSS portal
+Expected Outcome (Q3 - Q4 2026): Submission Aug, review 4-8 weeks, DOI Sep-Oct
+-->
+
+---
+
+## Critical Path Dependencies
 
 ```
+STAGE 1: CODEBASE
+─────────────────
+Phase 11.1  (coupling → assumed_coupling_strength)         ┐
+Phase 11.2 Path B  (oracle mitigation → honest rename)     │
+Phase 11.3  (test coverage 40%+)                            │  ← all parallelizable within Stage 1
+Phase 11.4  (reproducibility hardening, REPRODUCIBILITY.md) │
+Phase 10.1 Stage A  (raf/backends/* currency audit)        ┘
+    ↓
+    ↓ ━━━ GATE 1 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ↓   pytest --cov-fail-under=40 passes on fresh container
+    ↓   examples/empirical_validation.py --mode quick runs end-to-end
+    ↓   README device strings ↔ raf/backends/ accepted strings reconciled
+    ↓   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ↓
+STAGE 2: JOSS META-PREP
+───────────────────────
+Phase 10.1 Stage B  (license, version tag, ORCID, statement of need,
+                     install/example/API/test/CI verifications,
+                     CONTRIBUTING + CODE_OF_CONDUCT, issue templates,
+                     optional benchmark output)
+    ↓
+    ↓ ━━━ GATE 2 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ↓   Repo passes every JOSS submission criterion
+    ↓   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ↓
+STAGE 3: PAPER
+──────────────
+Phase 10.2  (paper.md + paper.bib drafted, local compile via inara)
+    ↓
+STAGE 4: SUBMIT  ← MILESTONE: ~Aug 28 2026
+─────────────────
+Phase 10.3  (submission via joss.theoj.org/papers/new)
+    ↓
+STAGE 5: REVIEW  (4-8 weeks in GitHub issue thread)
+───────────────
+Phase 10.4  (respond to reviewer issues, iterate paper.md and code)
+    ↓
+JOSS Acceptance + DOI 10.21105/joss.NNNNN  ← MILESTONE: ~Sep-Oct 2026 ✅
+    ↓
+STAGE 6: POST  (optional, indefinite)
+─────────────
+Phase 10.5  (workshop expansion, v0.3.0 with Phase 11.2 Path A real CDR)
+```
+
+**Slip rule**: a one-week delay in Stage 1 is a one-week delay in everything. Stage 1 is high-uncertainty (Phase 11.2 path choice, test-coverage ramp, backend audit findings); pad estimates accordingly.
+
+<!--
+HISTORICAL CRITICAL PATHS (preserved for traceability)
+======================================================
+
+== Critical Path v2 (NeurIPS Workshops, SUPERSEDED) ==
 Phase 11 (Methodology Fixes) — PREREQUISITE
     ↓
 Phase 10 v2 .1 (CFP Monitoring) — runs in parallel with Phase 11
@@ -1311,14 +1166,9 @@ Phase 10 v2 .4 (Workshop Submission) ← MILESTONE: ~Oct 10, 2026 (TBC by CFP)
     ↓
 Review (Oct-Nov 2026)
     ↓
-NeurIPS 2026 Workshop Presentation (Dec 2026) ✅
-```
+NeurIPS 2026 Workshop Presentation (Dec 2026)
 
----
-
-## Critical Path Dependencies (v3 — updated 2026-05-17, supersedes v2 above)
-
-```
+== Critical Path v3 (JOSS, parallel-track framing — SUPERSEDED by v4 strict linear sequencing) ==
 Phase 11.1 (coupling as core feature) ─┐
 Phase 11.2 Path B (honest rename)    ─┤
 Phase 11.3 (test coverage 40%+)      ─┤── all PREREQUISITES for JOSS
@@ -1332,42 +1182,52 @@ Phase 10 v3 .3 (JOSS submission) ← MILESTONE: ~Aug 1, 2026
     ↓
 Phase 10 v3 .4 (Review response) — 4-8 weeks
     ↓
-JOSS Acceptance + DOI assigned ← MILESTONE: Sep-Oct 2026 ✅
+JOSS Acceptance + DOI assigned ← MILESTONE: Sep-Oct 2026
     ↓
 [Optional, post-acceptance]
 Phase 10 v3 .5 (Expansion to IEEE QCE 2027 / NeurIPS 2027)
     ↓
 Phase 11.2 Path A (real CDR) for v0.3.0
-```
+-->
 
 ---
 
-## Notes (v2 additions — 2026-05-17)
+## Publication Notes
 
-- **No arXiv-first**: arXiv endorsement policy update of Jan 21, 2026 blocks submission without prior co-authored arXiv paper. Zenodo deposit substitutes for priority stamping.
-- **Methodology first, paper second**: The two hardcoded-coupling/oracle-mitigation issues are show-stoppers for any honest empirical claim. Phase 11 is non-negotiable.
-- **Prior art reckoning**: Maes 2025 and Shukla 2025 hold priority on the conceptual framing. RAF's claim must be operational instantiation + explicit coupling parameters + open-source code, not framework novelty.
-- **Workshop > journal for first publication**: Workshops accept smaller, well-scoped contributions. Nature MI/AAAI 2027 require a stronger work than RAF currently is.
-- **Non-archival workshops are still citable**: Some NeurIPS workshops use OpenReview only (non-archival); papers remain citable by OpenReview URL. Combined with a Zenodo DOI, the citation footprint is solid.
-
----
-
-## Notes (v3 additions — 2026-05-17)
-
-- **JOSS over workshop**: JOSS is a peer-reviewed academic venue with a real DOI and CrossRef indexing. It is a strictly stronger publication artifact than a non-archival workshop paper for an open-source software contribution. Workshop presentation can come later as expansion.
-- **Reference implementation framing eliminates the differentiation argument**: RAF no longer needs to argue it is different from Singh/Shukla/Maes — it implements them. This is a much more defensible claim.
-- **Singh demoted but cited**: Singh stays in citation block (DOI added: 10.63721/25JPAIR0118) but moves from "builds upon and extends" primary Related Work to "Concurrent and recent work" subsection. Singh's contribution is a _decision_ framework, orthogonal to RAF's _implementation_ of _dynamics_ frameworks.
+- **Code-first is non-negotiable**: Paper text describing what the code does is wasted effort if the code is going to change. Stage 3 (paper drafting) does not begin until Stage 1 (codebase) is complete. The only exception is the Statement of Need, which is positioning-driven (Singh/Shukla/Maes prior art, reference-implementation pitch) and can be sketched during Stage 1.
+- **JOSS over workshop**: JOSS is a peer-reviewed academic venue with a real DOI and CrossRef indexing — a strictly stronger publication artifact than a non-archival workshop paper for an open-source software contribution. Workshop presentation can come later as expansion.
+- **Reference implementation framing eliminates the differentiation argument**: RAF no longer needs to argue it is different from Singh/Shukla/Maes — it implements them. Much more defensible claim.
+- **Singh demoted but cited**: Singh stays in citation block (DOI 10.63721/25JPAIR0118) but is in "Concurrent and recent work," not primary Related Work. Singh's contribution is a _decision_ framework, orthogonal to RAF's _implementation_ of _dynamics_ frameworks.
 - **Phase 11.2 Path B is sufficient for JOSS**: Rename + honest docstring closes the methodology gap for JOSS purposes. Path A (real CDR) is post-JOSS work for v0.3.0.
 - **JOSS reviewers run the software**: Reproducibility (Phase 11.4) and tests (Phase 11.3) are checked by reviewers in practice, not just declared. Tight CI gating prevents review-cycle delays.
 - **JOSS submission process is GitHub-native**: Reviews happen in GitHub issue threads on the openjournals/joss-reviews repo. No separate manuscript tracking system.
+- **Stage 1 is the budget-risk concentration**: Phase 11.2 path choice, backend audit findings, and test-coverage ramp-up rate all carry uncertainty. Pad estimates here, not in Stages 2-4.
+- **Zenodo deposit not in active plan**: JOSS provides its own DOI (`10.21105/joss.NNNNN`) which is the canonical citable artifact. Zenodo remains an option for archival redundancy if desired post-acceptance (one-line item in Phase 10.5).
+- **README ↔ raf/backends/ reconciliation is part of Stage 1**: The README device strings (`ionq_forte`, `quantinuum.qpu.h2-1`, `garnet`, `emerald`, Heron/Nighthawk names) reflect May 2026 reality but may not yet match what `raf/backends/` accepts. Reconciliation in either direction (update code, or update README) is fine; agreement between them is the gate.
+- **Simulation is valid**: Device-calibrated noise accepted at top venues; real hardware as future work.
 
----
+<!--
+HISTORICAL NOTES (preserved for traceability)
+=============================================
 
-## Notes (v1 — preserved verbatim)
+== Notes v1 (original plan, preserved verbatim) ==
+- arXiv first: Stamps priority, allows parallel submissions
+- Parallel venues: Nature MI (primary) + AAAI 2027 (conference backup) maximizes coverage
+- Simulation is valid: Device-calibrated noise accepted at top venues; real hardware as future work
+- Test coverage critical: Ensure 85%+ before final submission
+- Community feedback: Use arXiv comments to improve before journal review
+- Documentation: Phase 10.5 includes code improvements during review phase
 
-- **arXiv first**: Stamps priority, allows parallel submissions
-- **Parallel venues**: Nature MI (primary) + AAAI 2027 (conference backup) maximizes coverage
-- **Simulation is valid**: Device-calibrated noise accepted at top venues; real hardware as future work
-- **Test coverage critical**: Ensure 85%+ before final submission
-- **Community feedback**: Use arXiv comments to improve before journal review
-- **Documentation**: Phase 10.5 includes code improvements during review phase
+== Notes v2 (2026-05-17 AM, SUPERSEDED) ==
+- No arXiv-first: arXiv endorsement policy update of Jan 21, 2026 blocks submission without prior co-authored arXiv paper. Zenodo deposit substitutes for priority stamping.
+- Methodology first, paper second: The two hardcoded-coupling/oracle-mitigation issues are show-stoppers for any honest empirical claim. Phase 11 is non-negotiable.
+- Prior art reckoning: Maes 2025 and Shukla 2025 hold priority on the conceptual framing. RAF's claim must be operational instantiation + explicit coupling parameters + open-source code, not framework novelty.
+- Workshop > journal for first publication: Workshops accept smaller, well-scoped contributions. Nature MI/AAAI 2027 require a stronger work than RAF currently is.
+- Non-archival workshops are still citable: Some NeurIPS workshops use OpenReview only (non-archival); papers remain citable by OpenReview URL. Combined with a Zenodo DOI, the citation footprint is solid.
+
+== Notes v3 (2026-05-17 PM, JOSS pivot — superseded by v4 consolidation) ==
+- JOSS over workshop, Reference implementation framing, Singh demoted, Phase 11.2 Path B sufficient, JOSS reviewers run software, JOSS submission GitHub-native — all carried forward into current Notes above.
+
+== Notes v4 (2026-05-17 PM, sequencing — superseded by v4 consolidation) ==
+- Code-first non-negotiable, parallel-track framing was incoherent, Zenodo removed, Stage 1 is budget-risk concentration, README↔backends reconciliation — all carried forward into current Notes above.
+-->

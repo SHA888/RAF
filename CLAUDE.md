@@ -6,8 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This project has pivoted significantly. **`README.md` and `TODO.md` are the living source of truth — consult them before acting; this file only captures what is stable across the pivot.**
 
-- **`README.md`** — current, accurate project description. The HTML comment block at the top is an intentional version changelog (v2/v3/v4); keep it, don't delete it. README v4 is the corrected backend reality (May 2026).
-- **`TODO.md`** — the active plan. Read the latest `Status` block (currently **v4**) and the **`Phase 10 v3`** (active) and **`Phase 11`** sections. Superseded sections (Goal v0, Phase 10 v1/v2) are kept verbatim for traceability — do not act on them, and do not delete them.
+Both files follow a **"latest decision visible, verbatim history in HTML comments"** convention (per user instruction, 2026-05-17): only the active version renders; every superseded tagline/section/plan is preserved verbatim inside `<!-- ... -->` blocks co-located with what replaced it. Do not act on commented-out history, and do not delete it.
+
+- **`README.md`** — current, accurate project description. Top `<!-- CHANGELOG -->` block tracks v1→v4; inline HTML comments hold the superseded tagline, Overview opening, backend table, code examples, and Related Work list. README v4 is the corrected backend reality (May 2026).
+- **`TODO.md`** — the active plan. Top `<!-- CHANGELOG -->` block tracks v0→v4. Active sections: `## Active Goal & Timeline`, `## Status`, `## Execution Order` (the binding plan), and the `Phase 10.x` / `Phase 11.x` task lists. Superseded plans (Goal v0, Phase 10 v1/v2, old Status/timeline blocks) now live in HTML comments.
+- **Execution is strictly linear and code-first** (`## Execution Order`): **Stage 1 — codebase completion** (Phase 11.1–11.4 + Phase 10.1 Stage A backend audit) must finish and pass a fresh-container GATE before **Stage 2 — JOSS meta-prep** (Phase 10.1 Stage B), which gates **Stage 3 — paper drafting** (Phase 10.2 `paper.md`), then submission/review/post-acceptance. Do not draft paper text describing code that is still changing; only the positioning-driven Statement of Need may be sketched during Stage 1.
 
 ## What this is (post-pivot framing — v3/v4)
 
@@ -58,7 +61,7 @@ Flow: `ReciprocalAccelerationFramework()` → `add_loop(...)` (default couplings
 ## Project-specific gotchas
 
 - **Backend extras are NOT all in `pyproject.toml`.** Defined extras: only `quantum`, `braket`, `azure`, `dev`, `docs`, `all` (= quantum+braket+azure+dev+docs). README's `uv sync --extra ibm|iqm|pennylane` / `raf[all-backends]` will fail — those backends have hard dependency conflicts (`ibm-platform-services` build failure; IQM needs `qiskit<1.3` vs. repo's `qiskit>=2.0`) and **must be installed in separate venvs**.
-- **README ↔ backend-code drift is a known, tracked issue.** README v4 corrected device strings (Brisbane/Kyoto/Osaka retired; OQC removed from Braket; `ionq_harmony`→`ionq_forte`; etc.), but `raf/backends/*.py` has *not* yet been reconciled (Phase 10 v3 .1 "Backend currency audit"). If you touch backends, expect stale device strings and align code to README v4, not the reverse.
+- **README ↔ backend-code drift is a known, tracked issue.** README v4 corrected device strings (Brisbane/Kyoto/Osaka retired; OQC removed from Braket; `ionq_harmony`→`ionq_forte`; etc.), but `raf/backends/*.py` has *not* yet been reconciled — this is **Phase 10.1 Stage A "Backend currency audit"**, a Stage 1 (codebase-completion) item. If you touch backends, expect stale device strings. Per TODO `## Execution Order`, README and code must *agree*; reconciliation in either direction is acceptable (update code to README v4, or update README to what the code accepts) — agreement, not direction, is the gate.
 - **`uv run pytest` always runs coverage.** `addopts` forces `--cov=raf --cov-report=term-missing`; expect coverage output even on a single-test run.
 - **`raf` console script is broken.** `pyproject.toml` declares `raf = "raf.cli:main"` but `raf/cli.py` does not exist. Use example scripts, not a `raf` CLI, unless you're adding that module.
 - **Tooling target-version mismatch.** `requires-python` is `>=3.12`, but black/ruff/mypy are configured for `py39` while pre-commit's black pins `python3.12`. CONTRIBUTING mandates 3.12+ syntax (`dict[K,V]`, `T | None`). Match existing code; don't downgrade syntax to satisfy the stale `py39` config.
