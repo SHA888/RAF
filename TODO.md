@@ -62,6 +62,24 @@ See `Status (v3)` block below for full rationale, and `Phase 10 v3` for the acti
 
 ---
 
+## Status (v4 — 2026-05-17, factual-correction addendum to v3)
+
+**Backend availability audit performed**: README "Supported Quantum Backends" section was verified against May 2026 cloud provider reality. Five concrete factual errors discovered and corrected in README v4 (see README v4 changelog comment for full diff):
+
+- IBM Quantum row listed Brisbane, Kyoto, Osaka — all three are retired (Aug 2024, Aug 2024, Nov 2025). Current fleet is Heron r1/r2/r3 (e.g., `ibm_aachen`, `ibm_boston`, `ibm_torino`) and Nighthawk (`ibm_miami`).
+- AWS Braket row listed OQC — OQC's Lucy access via Braket ended June 2024. Current Braket QPU providers are AQT, IonQ, IQM, QuEra, Rigetti.
+- Azure Quantum row was missing Atom Computing.
+- IQM row understated capability — Emerald (54-qubit, July 2025) joins Garnet (20-qubit).
+- Three code examples used retired/invalid device strings: `ionq_harmony` (retired 2024), `quantinuum.qpu.h1-1` (H1 retirement notice July 2025), `IQMBackend("resonance")` ("Resonance" is the cloud platform name, not a device).
+
+**Implication for Phase 10 v3**: The README is now accurate, but the `raf/backends/` code modules have not yet been verified against the corrected device strings. JOSS reviewers run the software — if `BraketBackend("ionq_forte")` raises a NameError because the code still expects `"ionq_harmony"`, review will stall. New checklist items added to **Phase 10 v3 .1** ("Backend currency audit") to track the parallel code-side work. These items become JOSS-submission prerequisites.
+
+**Open decision** flagged for `docs/SCIENTIFIC_REVIEW.md`: keep `ionq` noise profile as "IonQ Harmony-like" (well-characterized historical baseline) or update to Forte-1-like (current generation, ~36 #AQ). Either is defensible; document the choice.
+
+**No strategic pivot**: v4 is factual correction only. Active goal (JOSS submission), positioning (reference implementation), and Phase 11 priorities are unchanged from v3.
+
+---
+
 ## Phase 1: Infrastructure & Integration (Days 1-3)
 
 ### 1.1 Qiskit Integration
@@ -557,6 +575,15 @@ JOSS submission criteria reference: https://joss.readthedocs.io/en/latest/submit
 - [ ] **Community guidelines**: `CONTRIBUTING.md` (already exists) and `CODE_OF_CONDUCT.md` (verify present; add if missing — JOSS requires this)
 - [ ] **Issue templates**: Bug report and feature request templates in `.github/ISSUE_TEMPLATE/`
 - [ ] **Performance/benchmarks** (optional, strengthens submission): One reproducible benchmark output committed to `benchmarks/` showing example sensitivity-study results
+- [ ] **Backend currency audit** (added v4, 2026-05-17 — see README v4 changelog for the data behind these items):
+  - [ ] `raf/backends/ibm.py`: device-name strings reflect May 2026 IBM fleet. Brisbane/Kyoto/Osaka are retired (Aug 2024 / Aug 2024 / Nov 2025); active fleet is Heron r1/r2/r3 (e.g., `ibm_aachen`, `ibm_boston`, `ibm_torino`) and Nighthawk (`ibm_miami`). Remove or alias retired-device references; add Heron/Nighthawk handling.
+  - [ ] `raf/backends/braket.py`: remove OQC support (access ended June 2024); add IQM and AQT (current Braket providers as of May 2026). Verify IonQ device strings: `ionq_forte`, `ionq_forte_enterprise`, `ionq_aria_1`, `ionq_aria_2` (Harmony retired). Update ARN mapping table accordingly.
+  - [ ] `raf/backends/azure_quantum.py`: add Atom Computing partner. Default Quantinuum target should be `quantinuum.qpu.h2-1` not `h1-1` (H1 retirement notice issued July 2025; H2 currently 56 qubits).
+  - [ ] `raf/backends/iqm.py`: accept `garnet` (20-qubit Crystal 20) and `emerald` (54-qubit Crystal 54, July 2025) as device strings. "Resonance" is the IQM cloud platform name, NOT a device — should not be a valid `IQMBackend(...)` argument.
+  - [ ] Reconcile README v4 examples against actual `raf.backends` accepted strings. Either align README examples to existing code, or update code to accept README v4 strings. The README v4 strings are illustrative of what users would _expect_ to pass given current device names.
+  - [ ] **Decide (open question)**: `Supported Noise Profiles` table in README currently lists `ionq` profile as "IonQ Harmony-like" (11 qubits). Harmony being retired doesn't invalidate the simulation profile (it's a calibrated approximation of a documented device), but a Forte-1-like profile (~36 #AQ) would track current generation. Keep Harmony as historical baseline, or update to Forte? Document the decision in `docs/SCIENTIFIC_REVIEW.md`.
+  - [ ] Add a regression test: instantiating each backend with a "known good" device string should succeed; instantiating with a retired device string should raise a clear error pointing to the current alternative (e.g., `BraketBackend("ionq_harmony")` → `DeviceRetiredError("ionq_harmony retired 2024; use ionq_forte or ionq_aria_1")`).
+  - [ ] Add a CI job (monthly or on-demand) that fetches each cloud provider's current device list and flags drift against `raf/backends/`. Optional but valuable for long-term maintenance.
 
 ---
 

@@ -1,4 +1,14 @@
 <!--
+v4 (2026-05-17): Quantum backend availability corrected against May 2026 reality.
+                  IBM row: Brisbane/Kyoto/Osaka all retired (Aug 2024, Aug 2024, Nov 2025);
+                    replaced with Heron r1/r2/r3 (Aachen/Boston/Torino) and Nighthawk (Miami).
+                  Braket row: OQC removed (access ended June 2024); IQM and AQT added (current providers).
+                  Azure row: Atom Computing added.
+                  IQM row: Emerald (54q, July 2025) added alongside Garnet; noted IQM Resonance cloud.
+                  Code examples updated: ionq_harmony (retired) → ionq_forte; quantinuum.qpu.h1-1
+                    (H1 retirement announced July 2025) → quantinuum.qpu.h2-1; IQMBackend("resonance")
+                    (platform name, not device) → IQMBackend("garnet"). Device names in code examples
+                    are illustrative; verify against your raf.backends module's actual accepted strings.
 v3 (2026-05-17): Positioning pivot — RAF reframed as open-source reference implementation
                   of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025), not a
                   competing framework. Tagline rewritten. Overview opening rewritten. New
@@ -122,14 +132,14 @@ python examples/empirical_validation.py --mode quick
 
 RAF supports multiple quantum hardware vendors through a unified interface:
 
-| Backend               | Provider      | Install                     | Devices                           |
-| --------------------- | ------------- | --------------------------- | --------------------------------- |
-| `AerBackend`          | Local         | `uv sync --extra quantum`   | Simulators with realistic noise   |
-| `IBMQuantumBackend`   | IBM Quantum   | `uv sync --extra ibm`       | Brisbane, Kyoto, Osaka, etc.      |
-| `BraketBackend`       | AWS Braket    | `uv sync --extra braket`    | IonQ, Rigetti, OQC, QuEra         |
-| `AzureQuantumBackend` | Azure Quantum | `uv sync --extra azure`     | IonQ, Quantinuum, Rigetti, PASQAL |
-| `IQMBackend`          | IQM           | `uv sync --extra iqm`       | Garnet (European)                 |
-| `PennyLaneBackend`    | PennyLane     | `uv sync --extra pennylane` | Gradient-based VQA optimization   |
+| Backend               | Provider      | Install                     | Devices                                                    |
+| --------------------- | ------------- | --------------------------- | ---------------------------------------------------------- |
+| `AerBackend`          | Local         | `uv sync --extra quantum`   | Simulators with realistic noise                            |
+| `IBMQuantumBackend`   | IBM Quantum   | `uv sync --extra ibm`       | Heron r1/r2/r3 (Aachen, Boston, Torino), Nighthawk (Miami) |
+| `BraketBackend`       | AWS Braket    | `uv sync --extra braket`    | IonQ, Rigetti, QuEra, IQM, AQT                             |
+| `AzureQuantumBackend` | Azure Quantum | `uv sync --extra azure`     | IonQ, Quantinuum, Rigetti, PASQAL, Atom Computing          |
+| `IQMBackend`          | IQM           | `uv sync --extra iqm`       | Garnet (20q), Emerald (54q) via IQM Resonance              |
+| `PennyLaneBackend`    | PennyLane     | `uv sync --extra pennylane` | Gradient-based VQA optimization                            |
 
 Install all backends: `uv sync --all-extras`
 
@@ -149,15 +159,15 @@ backend = create_backend("manila")  # IBM Manila-like noise
 
 # AWS Braket (IonQ trapped ion)
 from raf.backends import BraketBackend
-backend = BraketBackend("ionq_harmony")
+backend = BraketBackend("ionq_forte")  # Forte-1; also "ionq_aria_1", "ionq_aria_2", "ionq_forte_enterprise"
 
 # Azure Quantum (Quantinuum)
 from raf.backends import AzureQuantumBackend
-backend = AzureQuantumBackend("quantinuum.qpu.h1-1")
+backend = AzureQuantumBackend("quantinuum.qpu.h2-1")  # 56-qubit H2; H1 retirement announced July 2025
 
-# IQM European hardware
+# IQM European hardware (via IQM Resonance cloud)
 from raf.backends import IQMBackend
-backend = IQMBackend("resonance")
+backend = IQMBackend("garnet")  # 20-qubit Crystal 20; or "emerald" for 54-qubit Crystal 54
 
 # PennyLane for gradient-based optimization
 from raf.backends import PennyLaneBackend
