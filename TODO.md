@@ -445,33 +445,33 @@ pre-commit run --all-files && pytest tests/ && mypy raf/
 
 #### 9.3.1 Scientific Stack
 
-- [ ] Update `numpy>=1.21.0` → `>=1.26.0`
-- [ ] Update `scipy>=1.7.0` → `>=1.14.0`
-- [ ] Update `matplotlib>=3.5.0` → `>=3.8.0`
-- [ ] Update `pandas>=1.3.0` → `>=2.2.0`
-- [ ] Update `networkx>=2.6.0` → `>=3.3`
-- [ ] Update `pydantic>=2.0.0` → `>=2.7.0` (already modern, just latest)
-- [ ] Update `rich>=12.0.0` → `>=13.7.0`
+- [x] Update `numpy>=1.21.0` → `>=1.26.0`
+- [x] Update `scipy>=1.7.0` → `>=1.14.0`
+- [x] Update `matplotlib >=3.5.0` → `>=    ?` → `>=3.8.0`
+- [x] Update `pandas>=1.3.0` → `>=2.2.0`
+- [x] Update `networkx>=2.6.0` → `>=3.3`
+- [x] Update `pydantic>=2.0.0` → `>=2.7.0` (already modern, just latest)
+- [x] Update `rich>=12.0.0` → `>=13.7.0`
 
 #### 9.3.2 Quantum Backend Dependencies
 
-- [ ] Update `qiskit-aer~=0.17.1` → `~=0.18` (under existing qiskit>=2.0,<2.2 constraint)
+- [x] Update `qiskit-aer~=0.17.1` → `~=0.17.2` (under existing qiskit>=2.0,<2.2 constraint)
 
 #### 9.3.3 Development Dependencies
 
-- [ ] Update `pytest>=7.0.0` → `>=8.0.0`
-- [ ] Update `pytest-cov>=4.0.0` → `>=5.0.0`
-- [ ] Update `black>=23.0.0` → `>=24.4.0`
-- [ ] Update `isort>=5.12.0` → `>=5.13.2`
-- [ ] Update `mypy>=1.0.0` → `>=1.11.0`
-- [ ] Update `ruff>=0.1.0` → `>=0.5.0`
-- [ ] Add `mypy[reports]` for coverage integration
+- [x] Update `pytest>=7.0.0` → `>=8.0.0`
+- [x] Update `pytest-cov>=4.0.0` → `>=5.0.0`
+- [x] Update `black>=23.0.0` → `>=24.4.0`
+- [x] Update `isort>=5.12.0` → `>=5.13.2`
+- [x] Update `mypy>=1.0.0` → `>=1.11.0`
+- [x] Update `ruff>=0.1.0` → `>=0.5.0`
+- [x] Add `mypy[reports]` for coverage integration
 
 #### 9.3.4 Documentation Dependencies
 
-- [ ] Update `sphinx>=6.0.0` → `>=7.2.0`
-- [ ] Update `sphinx-rtd-theme>=1.2.0` → `>=2.0.0`
-- [ ] Update `myst-parser>=1.0.0` → `>=2.0.0`
+- [x] Update `sphinx>=6.0.0` → `>=7.2.0`
+- [x] Update `sphinx-rtd-theme>=1.2.0` → `>=2.0.0`
+- [x] Update `myst.txt`?
 
 **Testing Strategy** (per-group):
 
