@@ -231,7 +231,7 @@ class CrossLoopAnalyzer:
                                     }
                                 )
 
-            predictions[source_loop] = sorted(cascade, key=lambda c: c["cumulative"], reverse=True)
+            predictions[source_loop] = sorted(cascade, key=lambda c: float(c["cumulative"]), reverse=True)
 
         return predictions
 
