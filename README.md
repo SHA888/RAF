@@ -1,14 +1,27 @@
+<!--
+v3 (2026-05-17): Positioning pivot — RAF reframed as open-source reference implementation
+                  of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025), not a
+                  competing framework. Tagline rewritten. Overview opening rewritten. New
+                  "Positioning" section added between Overview and Installation. Singh demoted
+                  from primary Related Work list to Concurrent and recent work subsection. DOI
+                  added to Singh bibtex (10.63721/25JPAIR0118). raf2026 bibtex venue updated from
+                  NeurIPS Workshops to Journal of Open Source Software (JOSS).
+v2 (2026-05-17): Related Work expanded with concurrent/prior work (Acampora 2025, Maes 2025,
+                  Alexeev 2025, Shukla 2025); raf2026 bibtex venue updated from IEEE WCCI to
+                  NeurIPS 2026 Workshops (target). All other sections preserved verbatim.
+-->
+
 # Reciprocal Acceleration Framework (RAF)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.12-3.13](https://img.shields.io/badge/python-3.12%E2%80%933.13-blue.svg)](https://www.python.org/downloads/)
 [![Open Science](https://img.shields.io/badge/Open-Science-green.svg)](https://opensource.org/)
 
-A systematic framework for understanding and accelerating co-evolutionary dynamics between Quantum Computing (QC) and Machine Learning (ML).
+Open-source Python reference implementation of QC-ML co-evolutionary frameworks (Singh 2025, Shukla 2025, Maes 2025).
 
 ## Overview
 
-The Reciprocal Acceleration Framework formalizes the bidirectional synergy between quantum computing and machine learning, identifying three primary acceleration loops:
+The Reciprocal Acceleration Framework provides an open-source Python reference implementation of QC-ML co-evolutionary frameworks described in Singh (2025), Shukla (2025), Maes (2025), and related work. It operationalizes their feedback-loop dynamics through three task-based acceleration loops:
 
 1. **Error Mitigation Loop** - Operating at the output/application level
 2. **Ansatz Design Loop** - Operating at the algorithm/circuit level
@@ -20,6 +33,25 @@ This implementation provides tools for:
 - Identifying rate-limiting bottlenecks
 - Guiding research prioritization
 - Visualizing co-evolutionary progress
+
+## Positioning
+
+The QC-ML feedback-loop concept has been articulated across multiple recent works:
+
+- Singh (2025) — decision framework for assessing quantum advantage
+- Shukla (2025) — three-layer co-evolutionary co-design framework
+- Maes (2025) — adaptive co-design of QML and QEC via reinforcement learning
+- Alexeev et al. (2025) — comprehensive review of AI for quantum computing
+- Acampora et al. (2025) — Quantum Community Network white paper on QC-AI
+
+These works describe the _what_ and _why_ of QC-ML co-evolution at the conceptual level. RAF complements them by providing the _how_ — a runnable Python implementation that lets researchers:
+
+- Run sensitivity studies over the coupling parameters that the conceptual frameworks discuss qualitatively
+- Compare alternative coupling assumptions across formulations
+- Build empirical methods on top of a tested, multi-backend substrate
+- Reproduce framework behavior from a single `uv sync` command
+
+RAF makes no novel framework claim. It exists to make the existing frameworks testable.
 
 ## Installation
 
@@ -272,24 +304,37 @@ If you use this framework in your research, please cite:
   volume={1},
   number={4},
   pages={1--28},
-  year={2025}
+  year={2025},
+  doi={10.63721/25JPAIR0118}
 }
 
-@inproceedings{raf2026,
-  title={Reciprocal Acceleration: Formalizing Co-Evolutionary Dynamics in Quantum-Classical Machine Learning},
+@article{raf2026,
+  title={RAF: A Python Reference Implementation of QC-ML Co-Evolutionary Frameworks},
   author={[Authors]},
-  booktitle={IEEE World Congress on Computational Intelligence (WCCI)},
-  year={2026}
+  journal={Journal of Open Source Software},
+  year={2026},
+  note={Submission in preparation}
 }
 ```
 
 ## Related Work
 
-This framework builds upon and extends:
+This framework implements concepts from and builds upon:
 
-- Singh (2025) - Quantum-AI Synergy evaluation framework
 - AlphaQubit (DeepMind) - Neural network quantum error decoding
 - GP-QML (Los Alamos) - Gaussian processes for quantum ML
+
+### Concurrent and recent work (added v2, 2026-05-17; updated v3)
+
+The bidirectional AI–QC relationship has attracted substantial recent attention. RAF positions itself as an operational, task-decomposed reference implementation that complements the following:
+
+- **Singh (2025)** — _Quantum-AI Synergy and the Framework for Assessing Quantum Advantage_ (DOI 10.63721/25JPAIR0118). Decision framework for assessing whether a given problem is suitable for quantum acceleration, with four-dimensional evaluation criteria (problem sizing, resource estimation, advantage assessment, paradigm selection). Singh's contribution is a _decision_ framework (whether to use quantum); RAF implements _dynamics_ frameworks (how feedback loops compose). The two are orthogonal and complementary.
+- **Acampora et al. (2025)** — _Quantum computing and artificial intelligence: status and perspectives_ (arXiv:2505.23860). 38-author Quantum Community Network white paper establishing the long-term research agenda for "Quantum for AI" and "AI for Quantum."
+- **Maes (2025)** — _Adaptive Co-Design of Quantum Machine Learning Algorithms and Error Correction Protocols using Reinforcement Learning_ (Zenodo, DOI 10.5281/zenodo.15428357). Proposes a closed feedback loop between QML ansatz and QEC strategy via a single RL agent.
+- **Alexeev et al. (2025)** — _Artificial intelligence for quantum computing_, Nature Communications **16**:10829 (DOI 10.1038/s41467-025-65836-3). Comprehensive 28-author review of AI applications across the QC stack (device design, preprocessing, control, QEC, postprocessing).
+- **Shukla (2025)** — _AI and Quantum Computing: A Co-Evolutionary Co-Design Framework and Systematic Review of Synergistic Benefits_ (TechRxiv, DOI 10.36227/techrxiv.176704915.54945198/v1). Conceptual three-layer (hardware/algorithmic/application) co-evolutionary framework, intended as analytical taxonomy.
+
+RAF complements these contributions in three respects: (1) functional task-based decomposition into Error Mitigation × Ansatz Design × Calibration-Control loops, implementable from the conceptual layered descriptions; (2) explicit coupling parameters exposed as configuration, enabling sensitivity studies across formulations; (3) open-source Python implementation with multi-backend abstraction (Aer, IBM Quantum, AWS Braket, Azure Quantum, IQM, PennyLane).
 
 ## Contributing
 
