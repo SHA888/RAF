@@ -140,7 +140,7 @@ class BottleneckAnalyzer:
         for constraint_type, group in type_groups.items():
             if len(group) >= 1:
                 affected_loops = list(set(b.loop_name for b in group))
-                aggregate_severity = np.mean([b.severity_score for b in group])
+                aggregate_severity: float = float(np.mean([b.severity_score for b in group]))
 
                 # Determine category
                 category = "other"
@@ -263,7 +263,7 @@ class BottleneckAnalyzer:
 
     def _group_by_type(self, bottlenecks: List[BottleneckIndicator]) -> Dict[str, int]:
         """Count bottlenecks by type."""
-        counts = defaultdict(int)
+        counts: defaultdict[str, int] = defaultdict(int)
         for b in bottlenecks:
             counts[b.constraint_type] += 1
         return dict(counts)
