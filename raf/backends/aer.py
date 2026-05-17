@@ -3,7 +3,7 @@ Qiskit Aer backend for noisy quantum simulation.
 """
 
 import time
-from typing import Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 from .noise_models import DeviceNoiseProfile, NoiseModelBuilder
@@ -85,6 +85,7 @@ class AerBackend(QuantumBackend):
         transpiled = transpile(circuit, self._backend)
 
         # Run the circuit
+        assert self._backend is not None
         job = self._backend.run(transpiled, shots=shots, **kwargs)
         result = job.result()
 
@@ -143,6 +144,7 @@ class AerBackend(QuantumBackend):
         transpiled = transpile(circuits, self._backend)
 
         # Run batch
+        assert self._backend is not None
         job = self._backend.run(transpiled, shots=shots, **kwargs)
         result = job.result()
 

@@ -18,7 +18,7 @@ Setup:
 """
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -167,6 +167,7 @@ class BraketBackend(QuantumBackend):
             braket_circuit = circuit
 
         # Run on device
+        assert self._device is not None
         task = self._device.run(
             braket_circuit,
             s3_destination_folder=self._s3_location,

@@ -23,7 +23,7 @@ Setup:
 
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from .base import BackendType, ExecutionResult, QuantumBackend
 
@@ -125,6 +125,8 @@ class AzureQuantumBackend(QuantumBackend):
         """Execute circuit on Azure Quantum target."""
         self._initialize()
 
+        assert self._backend is not None
+
         from qiskit import transpile
 
         start_time = time.time()
@@ -171,6 +173,8 @@ class AzureQuantumBackend(QuantumBackend):
     def get_cost_estimate(self, circuit: Any, shots: int = 1024) -> Dict[str, Any]:
         """Estimate cost for running a circuit."""
         self._initialize()
+
+        assert self._backend is not None
 
         try:
             # Some Azure targets support cost estimation
