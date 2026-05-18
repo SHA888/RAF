@@ -20,11 +20,11 @@ install:
 
 reproduce:
 	uv sync --all-extras
-	python examples/empirical_validation.py --mode quick
+	uv run python examples/empirical_validation.py --mode quick
 
 reproduce-full:
 	uv sync --all-extras
-	python examples/empirical_validation.py --mode full
+	uv run python examples/empirical_validation.py --mode full
 
 test:
 	uv run pytest tests/ -v --cov=raf --cov-report=term-missing --cov-fail-under=40
