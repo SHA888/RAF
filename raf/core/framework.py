@@ -12,6 +12,7 @@ from typing import Any
 
 from raf.core.loop import AccelerationLoop, LoopState
 from raf.core.metrics import CrossLoopCoupling, MetricsAggregator
+from raf.utils.config import RAFConfig
 
 
 @dataclass
@@ -66,6 +67,11 @@ class ReciprocalAccelerationFramework:
     3. Cross-loop coupling - How loops affect each other
     4. Research prioritization - Where to invest for maximum impact
 
+    Coupling strengths are ASSUMED values drawn from prior literature
+    (Maes 2025, Shukla 2025) that drive sensitivity studies. They are not
+    empirical measurements but rather theoretical assumptions about loop
+    interactions. Use RAFConfig.coupling_assumptions to override defaults.
+
     Example:
         >>> from raf import ReciprocalAccelerationFramework
         >>> from raf.loops import ErrorMitigationLoop, AnsatzDesignLoop
@@ -76,9 +82,16 @@ class ReciprocalAccelerationFramework:
         >>>
         >>> analysis = raf.analyze()
         >>> print(analysis.recommendations)
+
+    To use custom coupling assumptions:
+        >>> from raf.utils.config import RAFConfig, CouplingAssumptionsConfig
+        >>> config = RAFConfig()
+        >>> config.coupling_assumptions.calibration_to_error_mitigation = 0.9
+        >>> raf = ReciprocalAccelerationFramework(config=config)
     """
 
-    # Default cross-loop couplings based on RAF paper analysis
+    # Deprecated: Coupling strengths now loaded from RAFConfig.coupling_assumptions
+    # Kept for reference/backwards compatibility
     DEFAULT_COUPLINGS = [
         {
             "source": "calibration_control",
@@ -160,25 +173,88 @@ class ReciprocalAccelerationFramework:
         },
     ]
 
-    def __init__(self, name: str = "RAF"):
+    def __init__(self, name: str = "RAF", config: RAFConfig | None = None) -> None:
         """
         Initialize the Reciprocal Acceleration Framework.
 
         Args:
             name: Identifier for this framework instance
+            config: Optional RAFConfig. If provided, coupling assumptions from
+                   config.coupling_assumptions will be used. If not provided,
+                   a default RAFConfig with standard assumptions will be created.
+
+        Note:
+            Coupling strengths are ASSUMED values drawn from prior literature
+            (Maes 2025, Shukla 2025) representing theoretical loop interactions,
+            not empirical measurements.
         """
         self.name = name
+        self.config = config or RAFConfig(name=name)
         self.loops: dict[str, AccelerationLoop] = {}
         self.metrics = MetricsAggregator()
         self.couplings: list[CrossLoopCoupling] = []
         self.analysis_history: list[FrameworkAnalysis] = []
 
-        # Initialize default couplings
+        # Initialize couplings from config assumptions
         self._init_default_couplings()
 
     def _init_default_couplings(self) -> None:
-        """Initialize default cross-loop couplings."""
-        for coupling_def in self.DEFAULT_COUPLINGS:
+        """
+        Initialize default cross-loop couplings from config assumptions.
+
+        Coupling strengths are built from config.coupling_assumptions, which
+        contain ASSUMED values from literature (Maes 2025, Shukla 2025).
+        These represent theoretical loop interactions for sensitivity studies,
+        not empirical measurements.
+        """
+        assumptions = self.config.coupling_assumptions
+
+        coupling_defs = [
+            {
+                "source": "calibration_control",
+                "target": "error_mitigation",
+                "strength": assumptions.calibration_to_error_mitigation,
+                "type": "direct",
+                "description": "Lower base error rates reduce mitigation requirements",
+            },
+            {
+                "source": "calibration_control",
+                "target": "ansatz_design",
+                "strength": assumptions.calibration_to_ansatz_design,
+                "type": "enabling",
+                "description": "Lower error rates enable larger feasible circuit depths",
+            },
+            {
+                "source": "ansatz_design",
+                "target": "error_mitigation",
+                "strength": assumptions.ansatz_design_to_error_mitigation,
+                "type": "indirect",
+                "description": "Better ansätze can be more noise-resilient",
+            },
+            {
+                "source": "ansatz_design",
+                "target": "calibration_control",
+                "strength": assumptions.ansatz_design_to_calibration,
+                "type": "indirect",
+                "description": "Optimized circuits can probe specific noise mechanisms",
+            },
+            {
+                "source": "error_mitigation",
+                "target": "ansatz_design",
+                "strength": assumptions.error_mitigation_to_ansatz_design,
+                "type": "enabling",
+                "description": "Better mitigation enables evaluation of deeper circuits",
+            },
+            {
+                "source": "error_mitigation",
+                "target": "calibration_control",
+                "strength": assumptions.error_mitigation_to_calibration,
+                "type": "indirect",
+                "description": "Mitigation insights inform noise characterization",
+            },
+        ]
+
+        for coupling_def in coupling_defs:
             coupling = CrossLoopCoupling(
                 source_loop=str(coupling_def["source"]),
                 target_loop=str(coupling_def["target"]),

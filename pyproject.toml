@@ -127,6 +127,10 @@ ignore_missing_imports = true
 module = "tests.conftest"
 disable_error_code = ["untyped-decorator"]
 
+[tool.coverage.run]
+branch = true
+source = ["raf"]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]

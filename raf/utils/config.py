@@ -69,6 +69,60 @@ class CrossLoopValidationConfig:
 
 
 @dataclass(slots=True)
+class CouplingAssumptionsConfig:
+    """
+    Coupling strength assumptions for cross-loop interactions.
+
+    These coupling strengths represent ASSUMED values drawn from prior literature
+    (Maes 2025, Shukla 2025) that describe how improvements in one acceleration loop
+    affect other loops. They are NOT measured empirical values but rather theoretical
+    assumptions used for sensitivity studies and structural analysis.
+
+    Coupling strengths are in [0, 1] where:
+    - 0.0 = no interaction
+    - 1.0 = complete coupling (full propagation of improvement)
+
+    Strengths are directional: calibration_to_error_mitigation is different from
+    error_mitigation_to_calibration.
+    """
+
+    # Calibration → Error Mitigation
+    # Lower base error rates reduce mitigation requirements
+    calibration_to_error_mitigation: float = 0.8
+
+    # Calibration → Ansatz Design
+    # Lower error rates enable larger feasible circuit depths
+    calibration_to_ansatz_design: float = 0.7
+
+    # Ansatz Design → Error Mitigation
+    # Better ansätze can be more noise-resilient
+    ansatz_design_to_error_mitigation: float = 0.6
+
+    # Ansatz Design → Calibration
+    # Optimized circuits can probe specific noise mechanisms
+    ansatz_design_to_calibration: float = 0.5
+
+    # Error Mitigation → Ansatz Design
+    # Better mitigation enables evaluation of deeper circuits
+    error_mitigation_to_ansatz_design: float = 0.6
+
+    # Error Mitigation → Calibration
+    # Mitigation insights inform noise characterization
+    error_mitigation_to_calibration: float = 0.4
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CouplingAssumptionsConfig":
+        """Create from dictionary, filtering to known fields."""
+        fields_set = {f.name for f in cls.__dataclass_fields__.values()}
+        filtered = {k: v for k, v in data.items() if k in fields_set}
+        return cls(**filtered)
+
+
+@dataclass(slots=True)
 class RAFConfig:
     """
     Configuration for the Reciprocal Acceleration Framework.
@@ -76,6 +130,7 @@ class RAFConfig:
     Attributes:
         name: Framework instance name
         loops: Configuration for each loop
+        coupling_assumptions: Assumed coupling strengths between loops
         couplings: Custom coupling definitions
         analysis_settings: Settings for analysis tools
         visualization_settings: Settings for visualization
@@ -83,6 +138,9 @@ class RAFConfig:
 
     name: str = "RAF"
     loops: dict[str, LoopConfig] = field(default_factory=dict)
+    coupling_assumptions: CouplingAssumptionsConfig = field(
+        default_factory=CouplingAssumptionsConfig
+    )
     couplings: list[dict[str, Any]] = field(default_factory=list)
     analysis_settings: dict[str, Any] = field(
         default_factory=lambda: {
@@ -104,6 +162,7 @@ class RAFConfig:
         return {
             "name": self.name,
             "loops": {name: asdict(config) for name, config in self.loops.items()},
+            "coupling_assumptions": asdict(self.coupling_assumptions),
             "couplings": self.couplings,
             "analysis_settings": self.analysis_settings,
             "visualization_settings": self.visualization_settings,
@@ -116,9 +175,13 @@ class RAFConfig:
         for name, config in data.get("loops", {}).items():
             loops[name] = LoopConfig(**config)
 
+        coupling_assumptions_data = data.get("coupling_assumptions", {})
+        coupling_assumptions = CouplingAssumptionsConfig.from_dict(coupling_assumptions_data)
+
         return cls(
             name=data.get("name", "RAF"),
             loops=loops,
+            coupling_assumptions=coupling_assumptions,
             couplings=data.get("couplings", []),
             analysis_settings=data.get("analysis_settings", {}),
             visualization_settings=data.get("visualization_settings", {}),

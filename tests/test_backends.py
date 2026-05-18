@@ -46,7 +46,7 @@ class TestDeviceNoiseProfile:
 class TestNoiseModelBuilder:
     """Tests for NoiseModelBuilder."""
 
-    @pytest.mark.skipif(  # type: ignore[misc]
+    @pytest.mark.skipif(  # type: ignore[untyped-decorator]
         not pytest.importorskip("qiskit_aer", reason="qiskit-aer not installed"),
         reason="qiskit-aer not installed",
     )
@@ -62,7 +62,7 @@ class TestNoiseModelBuilder:
         # Check that noise model has quantum errors
         assert len(noise_model.noise_instructions) > 0
 
-    @pytest.mark.skipif(  # type: ignore[misc]
+    @pytest.mark.skipif(  # type: ignore[untyped-decorator]
         not pytest.importorskip("qiskit_aer", reason="qiskit-aer not installed"),
         reason="qiskit-aer not installed",
     )
@@ -206,7 +206,7 @@ class TestExecutionResult:
 class TestCircuitMetrics:
     """Tests for CircuitMetrics."""
 
-    @pytest.mark.skipif(  # type: ignore[misc]
+    @pytest.mark.skipif(  # type: ignore[untyped-decorator]
         not pytest.importorskip("qiskit", reason="qiskit not installed"),
         reason="qiskit not installed",
     )
