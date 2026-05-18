@@ -28,7 +28,7 @@ repos:
       - id: ruff-format
         args: ['--quiet']
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.0
+    rev: v2.1.0
     hooks:
       - id: mypy
         additional_dependencies: []
