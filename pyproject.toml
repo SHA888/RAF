@@ -25,11 +25,14 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -79,10 +82,10 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/RAF"
-Documentation = "https://raf.readthedocs.io"
-Repository = "https://github.com/yourusername/RAF"
-Issues = "https://github.com/yourusername/RAF/issues"
+Homepage = "https://github.com/SHA888/RAF"
+Documentation = "https://github.com/SHA888/RAF#documentation"
+Repository = "https://github.com/SHA888/RAF"
+Issues = "https://github.com/SHA888/RAF/issues"
 
 [project.scripts]
 raf = "raf.cli:main"

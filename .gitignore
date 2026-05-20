@@ -147,3 +147,8 @@ Thumbs.db
 # But ignore temporary outputs
 /tmp_results/
 /resources/
+
+# Agents and memory
+.claude/
+.harness-mem/
+agents/

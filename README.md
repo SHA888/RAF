@@ -6,6 +6,13 @@ is preserved in HTML comments throughout this document, co-located with
 the active version. Per user instruction (2026-05-17): latest decision
 visible, verbatim history commented.
 ============================================================
+v5 (2026-05-21): Modernization 2026 — Python 3.12+ upgrade, dependency
+modernization, dev-tools update (black 24.4, isort 5.13, ruff 0.5+, mypy
+1.11), type-hints migration to PEP 604 syntax (dict[K,V], T | None),
+testing framework modernization (pytest 8.0+), coverage ≥40% CI gate,
+REPRODUCIBILITY.md for one-command validation, CLAUDE.md guidance for
+future instance onboarding, agents/ configuration for worker/reviewer/
+scaffolder roles. Repository URL updated to https://github.com/SHA888/RAF.
 v4 (2026-05-17): Quantum backend availability corrected against May 2026
 cloud-provider reality. IBM Brisbane/Kyoto/Osaka retired (Aug 2024,
 Aug 2024, Nov 2025) → Heron r1/r2/r3 + Nighthawk. Braket: OQC removed
@@ -97,7 +104,7 @@ RAF makes no novel framework claim. It exists to make the existing frameworks te
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/RAF.git
+git clone https://github.com/SHA888/RAF.git
 cd RAF
 
 # Install with uv (creates venv automatically)
@@ -108,7 +115,7 @@ uv sync
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/RAF.git
+git clone https://github.com/SHA888/RAF.git
 cd RAF
 
 # Create virtual environment
