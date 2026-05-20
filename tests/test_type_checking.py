@@ -42,7 +42,7 @@ def has_type_annotations(file_path: Path) -> bool:
 
 def test_example_files_exist() -> None:
     """Verify that example scripts exist."""
-    examples_dir = Path("/home/kresna/RAF/examples")
+    examples_dir = Path(__file__).parent.parent / "examples"
     assert examples_dir.exists(), "examples directory not found"
 
     example_files = get_python_files(examples_dir)
@@ -51,7 +51,7 @@ def test_example_files_exist() -> None:
 
 def test_example_files_have_type_hints() -> None:
     """Verify that example scripts include type hints."""
-    examples_dir = Path("/home/kresna/RAF/examples")
+    examples_dir = Path(__file__).parent.parent / "examples"
     example_files = get_python_files(examples_dir)
 
     for example_file in example_files:
@@ -63,7 +63,7 @@ def test_example_files_have_type_hints() -> None:
 
 def test_examples_are_syntactically_valid() -> None:
     """Verify all example scripts are syntactically valid Python."""
-    examples_dir = Path("/home/kresna/RAF/examples")
+    examples_dir = Path(__file__).parent.parent / "examples"
     example_files = get_python_files(examples_dir)
 
     for example_file in example_files:
@@ -79,7 +79,7 @@ def test_no_future_annotations_in_py312_files() -> None:
 
     Python 3.12+ supports native PEP 563 semantics for string annotations.
     """
-    examples_dir = Path("/home/kresna/RAF/examples")
+    examples_dir = Path(__file__).parent.parent / "examples"
     example_files = get_python_files(examples_dir)
 
     for example_file in example_files:
