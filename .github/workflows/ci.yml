@@ -83,6 +83,6 @@ jobs:
 
     - name: Verify example scripts
       run: |
-        python examples/basic_usage.py
-        python examples/simulation_study.py
+        uv run python examples/basic_usage.py
+        uv run python examples/simulation_study.py
       continue-on-error: true
